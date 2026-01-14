@@ -1,12 +1,24 @@
 package it.spindox.stagelab.magazzino.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "PRODOTTO_MAGAZZINO")
 public class ProdottoMagazzino {
 
     @Id
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "prodotto_magazzino_seq_gen"
+    )
+    @SequenceGenerator(
+            name = "prodotto_magazzino_seq_gen",
+            sequenceName = "PRODOTTO_MAGAZZINO_SEQ",
+            allocationSize = 1
+    )
+
     @Column(name = "ID")
     private Long id;
 
@@ -20,37 +32,6 @@ public class ProdottoMagazzino {
 
     @Column(name = "QUANTITA", nullable = false)
     private Integer quantita;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Prodotto getProdotto() {
-        return prodotto;
-    }
-
-    public void setProdotto(Prodotto prodotto) {
-        this.prodotto = prodotto;
-    }
-
-    public Magazzino getMagazzino() {
-        return magazzino;
-    }
-
-    public void setMagazzino(Magazzino magazzino) {
-        this.magazzino = magazzino;
-    }
-
-    public Integer getQuantita() {
-        return quantita;
-    }
-
-    public void setQuantita(Integer quantita) {
-        this.quantita = quantita;
-    }
 }
+
 

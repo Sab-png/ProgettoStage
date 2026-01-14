@@ -1,56 +1,39 @@
 package it.spindox.stagelab.magazzino.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import java.util.List;
 
-import java.math.BigDecimal;
-
+@Data
 @Entity
 @Table(name = "PRODOTTO")
 public class Prodotto {
 
     @Id
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "prodotto_seq_gen"
+    )
+    @SequenceGenerator(
+            name = "prodotto_seq_gen",
+            sequenceName = "PRODOTTO_SEQ",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "NOME", nullable = false)
+    @Column(name = "NOME")
     private String nome;
 
     @Column(name = "DESCRIZIONE")
     private String descrizione;
 
-    @Column(name = "PREZZO", nullable = false)
-    private BigDecimal prezzo;
+    @Column(name = "PREZZO")
+    private Double prezzo;
 
+    @OneToOne(mappedBy = "prodotto")
+    private Fattura fattura;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getDescrizione() {
-        return descrizione;
-    }
-
-    public void setDescrizione(String descrizione) {
-        this.descrizione = descrizione;
-    }
-
-    public BigDecimal getPrezzo() {
-        return prezzo;
-    }
-
-    public void setPrezzo(BigDecimal prezzo) {
-        this.prezzo = prezzo;
-    }
+    @OneToMany(mappedBy = "prodotto")
+    private List<ProdottoMagazzino> prodottoMagazzino;
 }

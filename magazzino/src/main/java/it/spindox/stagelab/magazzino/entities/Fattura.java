@@ -1,57 +1,34 @@
 package it.spindox.stagelab.magazzino.entities;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+import lombok.Data;
 import java.time.LocalDate;
 
+@Data
 @Entity
 @Table(name = "FATTURA")
 public class Fattura {
 
     @Id
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "fattura_seq_gen"
+    )
+    @SequenceGenerator(
+            name = "fattura_seq_gen",
+            sequenceName = "FATTURA_SEQ",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "DATA_FATTURA", nullable = false)
+    @Column(name = "DATA_FATTURA")
     private LocalDate dataFattura;
 
-    @Column(name = "IMPORTO", nullable = false)
-    private BigDecimal importo;
+    @Column(name = "IMPORTO")
+    private Double importo;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_PRODOTTO", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "ID_PRODOTTO", referencedColumnName = "ID")
     private Prodotto prodotto;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDate getDataFattura() {
-        return dataFattura;
-    }
-
-    public void setDataFattura(LocalDate dataFattura) {
-        this.dataFattura = dataFattura;
-    }
-
-    public BigDecimal getImporto() {
-        return importo;
-    }
-
-    public void setImporto(BigDecimal importo) {
-        this.importo = importo;
-    }
-
-    public Prodotto getProdotto() {
-        return prodotto;
-    }
-
-    public void setProdotto(Prodotto prodotto) {
-        this.prodotto = prodotto;
-    }
 }
-
