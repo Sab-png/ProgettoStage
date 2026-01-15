@@ -1,7 +1,11 @@
 package it.spindox.stagelab.magazzino.controllers;
 
-import it.spindox.stagelab.magazzino.entities.Fattura;
-import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
+import it.spindox.stagelab.magazzino.dto.request.FatturaRequest;
+import it.spindox.stagelab.magazzino.dto.request.FatturaSearchRequest;
+import it.spindox.stagelab.magazzino.dto.response.FatturaResponse;
+import it.spindox.stagelab.magazzino.services.FatturaService;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,51 +15,44 @@ import java.util.List;
 @RequestMapping("/api/fatture")
 public class FatturaController {
 
-    private final FatturaRepository fatturaRepository;
+    private final FatturaService service;
 
-    public FatturaController(FatturaRepository fatturaRepository) {
-        this.fatturaRepository = fatturaRepository;
+    public FatturaController(FatturaService service) {
+        this.service = service;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Fattura>> getAllFatture() {
-        return ResponseEntity.ok(fatturaRepository.findAll());
-    }
-
+    // GET getFattura
     @GetMapping("/{id}")
-    public ResponseEntity<Fattura> getFatturaById(@PathVariable Long id) {
-        return fatturaRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getFattura(id));
     }
 
+    // GET getFattureByProdotto
+    @GetMapping("/prodotto/{prodottoId}")
+    public ResponseEntity<List<FatturaResponse>> getFattureByProdotto(
+            @PathVariable Long prodottoId) {
+        return ResponseEntity.ok(service.getFattureByProdotto(prodottoId));
+    }
+
+    // POST saveFattura
     @PostMapping
-    public ResponseEntity<Fattura> createFattura(@RequestBody Fattura fattura) {
-        Fattura savedFattura = fatturaRepository.save(fattura);
-        return ResponseEntity.ok(savedFattura);
+    public ResponseEntity<FatturaResponse> saveFattura(
+            @Valid @RequestBody FatturaRequest request) {
+        return ResponseEntity.ok(service.saveFattura(request));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Fattura> updateFattura(
+    // PATCH editFattura
+    @PatchMapping("/{id}")
+    public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
-            @RequestBody Fattura fattura) {
-
-        return fatturaRepository.findById(id)
-                .map(existingFattura -> {
-                    existingFattura.setDataFattura(fattura.getDataFattura());
-                    existingFattura.setImporto(fattura.getImporto());
-                    existingFattura.setProdotto(fattura.getProdotto());
-                    return ResponseEntity.ok(fatturaRepository.save(existingFattura));
-                })
-                .orElse(ResponseEntity.notFound().build());
+            @RequestBody FatturaRequest request) {
+        return ResponseEntity.ok(service.editFattura(id, request));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {
-        if (!fatturaRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        fatturaRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    // POST searchFattura
+    @PostMapping("/search")
+    public ResponseEntity<Page<FatturaResponse>> searchFattura(
+            @Valid @RequestBody FatturaSearchRequest request) {
+        return ResponseEntity.ok(service.searchFattura(request));
     }
 }

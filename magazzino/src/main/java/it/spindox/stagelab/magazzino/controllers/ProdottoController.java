@@ -1,63 +1,49 @@
 package it.spindox.stagelab.magazzino.controllers;
 
-import it.spindox.stagelab.magazzino.entities.Prodotto;
-import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
+import it.spindox.stagelab.magazzino.dto.request.ProdottoRequest;
+import it.spindox.stagelab.magazzino.dto.request.ProdottoSearchRequest;
+import it.spindox.stagelab.magazzino.dto.response.ProdottoResponse;
+import it.spindox.stagelab.magazzino.services.ProdottoService;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/prodotti")
 public class ProdottoController {
 
-    private final ProdottoRepository prodottoRepository;
+    private final ProdottoService service;
 
-    public ProdottoController(ProdottoRepository prodottoRepository) {
-        this.prodottoRepository = prodottoRepository;
+    public ProdottoController(ProdottoService service) {
+        this.service = service;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Prodotto>> getAllProdotti() {
-        return ResponseEntity.ok(prodottoRepository.findAll());
-    }
-
+    // GET getProdotto
     @GetMapping("/{id}")
-    public ResponseEntity<Prodotto> getProdottoById(@PathVariable Long id) {
-        return prodottoRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProdottoResponse> getProdotto(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getProdotto(id));
     }
 
+    // POST saveProdotto
     @PostMapping
-    public ResponseEntity<Prodotto> createProdotto(@RequestBody Prodotto prodotto) {
-        Prodotto savedProdotto = prodottoRepository.save(prodotto);
-        return ResponseEntity.ok(savedProdotto);
+    public ResponseEntity<ProdottoResponse> saveProdotto(
+            @Valid @RequestBody ProdottoRequest request) {
+        return ResponseEntity.ok(service.saveProdotto(request));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Prodotto> updateProdotto(
+    // PATCH editProdotto
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProdottoResponse> editProdotto(
             @PathVariable Long id,
-            @RequestBody Prodotto prodotto) {
-
-        return prodottoRepository.findById(id)
-                .map(existingProdotto -> {
-                    existingProdotto.setNome(prodotto.getNome());
-                    existingProdotto.setDescrizione(prodotto.getDescrizione());
-                    existingProdotto.setPrezzo(prodotto.getPrezzo());
-                    existingProdotto.setFattura(prodotto.getFattura());
-                    existingProdotto.setProdottoMagazzino(prodotto.getProdottoMagazzino());
-                    return ResponseEntity.ok(prodottoRepository.save(existingProdotto));
-                })
-                .orElse(ResponseEntity.notFound().build());
+            @RequestBody ProdottoRequest request) {
+        return ResponseEntity.ok(service.editProdotto(id, request));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProdotto(@PathVariable Long id) {
-        if (!prodottoRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        prodottoRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    // POST searchProdotto
+    @PostMapping("/search")
+    public ResponseEntity<Page<ProdottoResponse>> searchProdotto(
+            @Valid @RequestBody ProdottoSearchRequest request) {
+        return ResponseEntity.ok(service.searchProdotto(request));
     }
 }
