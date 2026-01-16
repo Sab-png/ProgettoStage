@@ -4,7 +4,6 @@ import it.spindox.stagelab.magazzino.dto.fattura.*;
 import it.spindox.stagelab.magazzino.services.FatturaService;
 import jakarta.validation.Valid; // Controlla automaticamente i dati in ingresso
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 // Spring usa queste annotation per collegare
@@ -34,10 +33,10 @@ public class FatturaController {
 
     /**
      * Recupera le fatture associate a un prodotto
-     * in modo paginato.
+     *
      */
     @GetMapping("/prodotto/{idProdotto}")
-    public ResponseEntity<Page<FatturaResponse>> getFattureByProdotto(
+    public ResponseEntity getFattureByProdotto(
             @PathVariable Long idProdotto,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -60,7 +59,7 @@ public class FatturaController {
 
     /**
      * Modifica una fattura esistente dato il suo ID.
-     * PATCH: vengono aggiornati solo i campi non null.
+     * con il comando PATCH: vengono aggiornati solo i campi non null.
      */
     @PatchMapping("/{id}")
     public ResponseEntity<Void> editFattura(
@@ -75,7 +74,7 @@ public class FatturaController {
      * Ricerca paginata di fatture applicando filtri.
      */
     @PostMapping("/search")
-    public ResponseEntity<Page<FatturaResponse>> searchFattura(
+    public ResponseEntity searchFattura(
             @Valid @RequestBody FatturaSearchRequest searchRequest
     ) {
         return ResponseEntity.ok(fatturaService.search(searchRequest));
