@@ -15,6 +15,7 @@ import java.util.List;
 @RequestMapping("/api/fatture")
 public class FatturaController {
 
+    
     private final FatturaService service;
 
     public FatturaController(FatturaService service) {
