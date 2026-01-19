@@ -21,5 +21,6 @@ public class MagazzinoCreateRequest {
     private Integer capacita;
 
     public <__TMP__> __TMP__ getCapienza() {
+        return null;
     }
 }
