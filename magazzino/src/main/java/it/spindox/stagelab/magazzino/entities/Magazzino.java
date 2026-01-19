@@ -30,4 +30,10 @@ public class Magazzino {
     // Relazione 1:N con ProdottoMagazzino (un magazzino contiene più prodotti)
     @OneToMany(mappedBy = "magazzino")
     private List<ProdottoMagazzino> prodottoMagazzino;
+
+    public <__TMP__> __TMP__ getCapienza() {
+    }
+
+    public <__TMP__> __TMP__ getCapienza() {
+    }
 }

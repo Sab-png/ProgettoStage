@@ -19,4 +19,7 @@ public class MagazzinoCreateRequest {
     @NotNull(message = "La capacità è obbligatoria")
     @Positive(message = "La capacità deve essere maggiore di zero")
     private Integer capacita;
+
+    public <__TMP__> __TMP__ getCapienza() {
+    }
 }

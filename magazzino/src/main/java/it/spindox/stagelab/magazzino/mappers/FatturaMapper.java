@@ -1,21 +1,29 @@
 
 package it.spindox.stagelab.magazzino.mappers;
 
-import it.spindox.stagelab.magazzino.dto.fattura.*;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaCreateRequest;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaUpdateRequest;
 import it.spindox.stagelab.magazzino.entities.Fattura;
-import org.mapstruct.Mapper;
 
 /**
- * Mapper MapStruct per convertire tra entità Fattura e DTO.
+ * Mapper per la conversione tra entità Fattura e DTO
  */
-@Mapper(componentModel = "spring")
 public interface FatturaMapper {
 
-    /** Converte un DTO di creazione in una nuova entità Fattura */
+    /**
+     * Converte un DTO di creazione in una nuova entità Fattura
+     */
     Fattura toEntity(FatturaCreateRequest request);
 
-    /** Converte un'entità Fattura in un DTO di risposta */
-    <FatturaResponse> FatturaResponse toResponse(Fattura entity);
+    /**
+     * Converte un'entità Fattura in un DTO di risposta
+     */
+    FatturaResponse toResponse(Fattura entity);
 
+    /**
+     * Aggiorna un'entità Fattura esistente
+     * utilizzando i dati del DTO di update
+     */
     void updateEntity(Fattura fattura, FatturaUpdateRequest request);
 }
