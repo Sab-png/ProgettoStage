@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 // Spring usa queste annotation per collegare
-// una richiesta HTTP ai parametri dei metodi del controller
+// una richiesta HTTP ai parametri/dati dei metodi del controller
 // es: @PathVariable, @RequestBody
 
 /**
@@ -28,7 +28,7 @@ public class FatturaController {
     public ResponseEntity<FatturaResponse> getFattura(
             @PathVariable Long id
     ) {
-        return ResponseEntity.ok((FatturaResponse) fatturaService.getById(id));
+        return ResponseEntity.ok(fatturaService.getById(id));
     }
 
     /**
@@ -73,6 +73,7 @@ public class FatturaController {
     /**
      * Ricerca paginata di fatture applicando filtri.
      */
+    @SuppressWarnings("rawtypes")
     @PostMapping("/search")
     public ResponseEntity searchFattura(
             @Valid @RequestBody FatturaSearchRequest searchRequest
