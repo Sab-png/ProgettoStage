@@ -1,17 +1,16 @@
 
 package it.spindox.stagelab.magazzino.services;
 
-import it.spindox.stagelab.magazzino.controllers.MagazzinoUpdateRequest;import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoCreateRequest;
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoCreateRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoSearchRequest;
+import it.spindox.stagelab.magazzino.dto.magazzino.*;
 
-import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoUpdateRequest;
 
 import it.spindox.stagelab.magazzino.entities.Magazzino;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
-import it.spindox.stagelab.magazzino.services.MagazzinoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;

@@ -31,6 +31,12 @@ public class Magazzino {
     @OneToMany(mappedBy = "magazzino")
     private List<ProdottoMagazzino> prodottoMagazzino;
 
+    public <__TMP__> __TMP__ getDescrizione() {
+        return null;
     }
+
+    public void setDescrizione(String descrizione) {
+    }
+}
 
 

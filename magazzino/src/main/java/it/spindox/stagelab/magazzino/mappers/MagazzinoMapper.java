@@ -1,8 +1,8 @@
 
 package it.spindox.stagelab.magazzino.mappers;
 
-import it.spindox.stagelab.magazzino.controllers.MagazzinoUpdateRequest;import it.spindox.stagelab.magazzino.dto.magazzino.*;
-import it.spindox.stagelab.magazzino.entities.Magazzino;import org.springframework.stereotype.Component;
+import it.spindox.stagelab.magazzino.dto.magazzino.*;
+import it.spindox.stagelab.magazzino.entities.Magazzino;
 
 
 /**

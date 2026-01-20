@@ -1,6 +1,6 @@
 
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.controllers.MagazzinoUpdateRequest;import it.spindox.stagelab.magazzino.dto.magazzino.*;
+import it.spindox.stagelab.magazzino.dto.magazzino.*;
 import jakarta.validation.Valid;import org.springframework.data.domain.Page;
 
 public interface MagazzinoService {
