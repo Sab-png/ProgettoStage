@@ -7,10 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-/**
- * Page è un’interfaccia di Spring Data
- * serve a restituire dati “a pagine” specifici,  invece che tutti insieme, includendo automaticamente informazioni sulla paginazione(anche per i metadati)
- */
 
 /**
  * Controller REST per la gestione del Magazzino.
@@ -23,8 +19,7 @@ public class MagazzinoController {
     private final MagazzinoService magazzinoService;
 
     /**
-     * Recupera un elemento di magazzino dato il suo ID.
-     * Restituisce 404 se il magazzino non esiste.
+     * READ - Recupera un elemento di magazzino dato il suo ID.
      */
     @GetMapping("/{id}")
     public ResponseEntity<MagazzinoResponse> getMagazzino(
@@ -34,18 +29,42 @@ public class MagazzinoController {
     }
 
     /**
-     * Salva un nuovo elemento di magazzino.
+     * CREATE - Salva un nuovo elemento di magazzino.
      */
     @PostMapping
     public ResponseEntity<Void> saveMagazzino(
             @Valid @RequestBody MagazzinoCreateRequest request
     ) {
         magazzinoService.create(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(201).build(); // CREATED
     }
 
     /**
-     * Ricerca paginata di elementi di magazzino applicando filtri.
+     * UPDATE - Aggiornamento parziale (PATCH).
+     * Vengono aggiornati solo i campi non null.
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateMagazzino(
+            @PathVariable Long id,
+            @Valid @RequestBody MagazzinoUpdateRequest request
+    ) {
+        magazzinoService.update(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * DELETE - Elimina un elemento di magazzino.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMagazzino(
+            @PathVariable Long id
+    ) {
+        magazzinoService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * READ (SEARCH) - Ricerca paginata con filtri.
      */
     @PostMapping("/search")
     public ResponseEntity<Page<MagazzinoResponse>> searchMagazzino(

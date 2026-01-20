@@ -1,14 +1,19 @@
 
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.fattura.*;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaCreateRequest;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaUpdateRequest;
 import it.spindox.stagelab.magazzino.services.FatturaService;
-import jakarta.validation.Valid; // Controlla automaticamente i dati in ingresso
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-// Spring usa queste annotation per collegare
-// una richiesta HTTP ai parametri/dati dei metodi del controller
-// es: @PathVariable, @RequestBody
+import org.springframework.web.util.UriComponentsBuilder;
+import java.net.URI;
 
 /**
  * Controller REST per la gestione delle Fatture.
@@ -16,68 +21,80 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/fatture")
 @RequiredArgsConstructor
+@Validated
 public class FatturaController {
 
     private final FatturaService fatturaService;
 
     /**
      * Recupera una fattura dato il suo ID.
-     * Restituisce 404 se la fattura non esiste.
+     * Restituisce 404 se la fattura non esiste (gestito dal service/exception handler).
      */
     @GetMapping("/{id}")
-    public ResponseEntity<FatturaResponse> getFattura(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) {
         return ResponseEntity.ok(fatturaService.getById(id));
     }
 
     /**
-     * Recupera le fatture associate a un prodotto
-     *
+     * Recupera le fatture associate a un prodotto (paginato).
      */
     @GetMapping("/prodotto/{idProdotto}")
-    public ResponseEntity getFattureByProdotto(
+    public ResponseEntity<Page<FatturaResponse>> getFattureByProdotto(
             @PathVariable Long idProdotto,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
-        return ResponseEntity.ok(
-                fatturaService.getByProdotto(idProdotto, page, size)
-        );
+        Page<FatturaResponse> result = fatturaService.getByProdotto(idProdotto, page, size);
+        return ResponseEntity.ok(result);
     }
 
     /**
-     * Salva una nuova fattura associata a un prodotto.
+     * Crea una nuova fattura.
+     * Ritorna 201 Created con Location e body (DTO creato).
      */
     @PostMapping
-    public ResponseEntity<Void> saveFattura(
-            @Valid @RequestBody FatturaCreateRequest request
+    public ResponseEntity<FatturaResponse> saveFattura(
+            @Valid @RequestBody FatturaCreateRequest request,
+            UriComponentsBuilder uriBuilder
     ) {
-        fatturaService.create(request);
-        return ResponseEntity.ok().build();
+        FatturaResponse created = fatturaService.create(request);
+        URI location = uriBuilder.path("/fatture/{id}")
+                .buildAndExpand(created.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(created);
     }
 
     /**
-     * Modifica una fattura esistente dato il suo ID.
-     * con il comando PATCH: vengono aggiornati solo i campi non null.
+     * Aggiorna parzialmente una fattura (PATCH = campi non null).
+     * Ritorna il DTO aggiornato (oppure 204 No Content se preferisci).
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> editFattura(
+    public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
             @Valid @RequestBody FatturaUpdateRequest request
     ) {
-        fatturaService.update(id, request);
-        return ResponseEntity.noContent().build();
+        FatturaResponse updated = fatturaService.update(id, request);
+        return ResponseEntity.ok(updated);
+        // Se preferisci 204 senza body: return ResponseEntity.noContent().build();
     }
 
     /**
      * Ricerca paginata di fatture applicando filtri.
      */
-    @SuppressWarnings("rawtypes")
     @PostMapping("/search")
-    public ResponseEntity searchFattura(
+    public ResponseEntity<Page<FatturaResponse>> searchFattura(
             @Valid @RequestBody FatturaSearchRequest searchRequest
     ) {
-        return ResponseEntity.ok(fatturaService.search(searchRequest));
+        Page<FatturaResponse> page = fatturaService.search(searchRequest);
+        return ResponseEntity.ok(page);
+    }
+
+    /**
+     * Cancella una fattura.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {
+        fatturaService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

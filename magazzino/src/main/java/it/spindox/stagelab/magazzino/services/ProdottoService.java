@@ -12,4 +12,4 @@ public interface ProdottoService {
     void update(Long id, ProdottoUpdateRequest request);
 
     Page<ProdottoResponse> search(ProdottoSearchRequest request);
-}
+void delete(Long id);}
