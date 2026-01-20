@@ -28,7 +28,7 @@ public class FatturaRequest {
      * Data di emissione della fattura.
      * - CREATE: obbligatoria (validazione nel service)
      * - UPDATE: opzionale
-     * - SEARCH: possibile filtro (oppure usare dataDa/dataA)
+     * - SEARCH: possibile filtro
      */
     private LocalDate data;
 
@@ -58,9 +58,8 @@ public class FatturaRequest {
     @Positive(message = "L'importo deve essere maggiore di zero")
     private BigDecimal importo;
 
-    // ==========================
+
     // Campi specifici di SEARCH (tutti opzionali)
-    // ==========================
 
     /**
      * Filtro: data minima (inclusa).

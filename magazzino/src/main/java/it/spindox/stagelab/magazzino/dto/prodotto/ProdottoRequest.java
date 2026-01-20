@@ -7,7 +7,7 @@ import lombok.Data;
 /**
  * DTO unico per le operazioni su Prodotto:
  * - CREATE: creazione di un nuovo prodotto
- * - UPDATE: aggiornamento (totale o parziale) di un prodotto esistente
+ * - UPDATE: aggiornamento  di un prodotto esistente
  * - SEARCH: ricerca e paginazione dei prodotti
  */
 

@@ -23,7 +23,7 @@ public interface ProdottoMapper {
 
     /**
      * Aggiorna un'entità Prodotto esistente
-     * copiando solo i campi non null dal DTO.
+     * copia solo i campi non null dal DTO.
      * Usato in UPDATE.
      */
     void updateEntity(Prodotto prodotto, ProdottoRequest request);

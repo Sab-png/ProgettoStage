@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 /**
  * DTO utilizzato come risposta per le API relative alla Fattura.
- * <p>
  * Contiene i dati restituiti al client e non espone mai
  * direttamente l'entità JPA.
  */

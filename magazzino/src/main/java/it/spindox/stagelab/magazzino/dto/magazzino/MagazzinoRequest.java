@@ -7,7 +7,7 @@ import lombok.Data;
 /**
  * DTO unico per le operazioni su Magazzino:
  * - CREATE: creazione di un nuovo magazzino
- * - UPDATE: aggiornamento (totale o parziale) di un magazzino esistente
+ * - UPDATE: aggiornamento di un magazzino esistente
  * - SEARCH: ricerca e paginazione dei magazzini
  */
 

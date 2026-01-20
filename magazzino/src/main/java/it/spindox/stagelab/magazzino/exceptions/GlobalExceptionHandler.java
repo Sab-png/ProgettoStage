@@ -18,7 +18,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Gestisce l'eccezione ResourceNotFoundException.
-     * <p>
      * Viene sollevata dal Service quando una risorsa
      * richiesta non è presente a database.
      *

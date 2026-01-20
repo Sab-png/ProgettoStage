@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 /**
- * Implementazione manuale del FatturaMapper.
+ * Implementazione FatturaMapper.
  */
 @Component
 public class FatturaMapperImpl implements FatturaMapper {

@@ -7,7 +7,7 @@ import it.spindox.stagelab.magazzino.entities.Prodotto;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementazione manuale del mapper Prodotto.
+ * Implementazione  mapper Prodotto.
  */
 @Component
 public class ProdottoMapperImpl implements ProdottoMapper {
