@@ -1,5 +1,12 @@
+
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.dto.magazzino.*;
+
+import it.spindox.stagelab.magazzino.controllers.MagazzinoUpdateRequest;import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoCreateRequest;
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoSearchRequest;
+
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoUpdateRequest;
+
 import it.spindox.stagelab.magazzino.entities.Magazzino;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
@@ -9,9 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-/**
- * Implementazione del service Magazzino.
- */
 @Service
 @RequiredArgsConstructor
 public class MagazzinoServiceImpl implements MagazzinoService {
@@ -32,13 +36,24 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
     @Override
-    public Page<MagazzinoResponse> search(MagazzinoSearchRequest request) {
-        return null; // da implementare
-    }@Override
     public void update(Long id, MagazzinoUpdateRequest request) {
+        Magazzino magazzino = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
 
-    }@Override
+        mapper.updateEntity(magazzino, request);
+        repository.save(magazzino);
+    }
+
+    @Override
+    public Page<MagazzinoResponse> search(MagazzinoSearchRequest request) {
+        return Page.empty();
+    }
+
+    @Override
     public void delete(Long id) {
-
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Magazzino non trovato");
+        }
+        repository.deleteById(id);
     }
 }
