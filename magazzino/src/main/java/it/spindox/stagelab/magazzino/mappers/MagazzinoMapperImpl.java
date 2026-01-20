@@ -1,7 +1,7 @@
 
 package it.spindox.stagelab.magazzino.mappers;
 import org.springframework.stereotype.Component;
-import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoCreateRequest;
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoUpdateRequest;
 import it.spindox.stagelab.magazzino.entities.Magazzino;
@@ -10,7 +10,7 @@ import it.spindox.stagelab.magazzino.entities.Magazzino;
 public class MagazzinoMapperImpl implements MagazzinoMapper {
 
     @Override
-    public Magazzino toEntity(MagazzinoCreateRequest request) {
+    public Magazzino toEntity(MagazzinoRequest request) {
         if (request == null) return null;
 
         Magazzino magazzino = new Magazzino();

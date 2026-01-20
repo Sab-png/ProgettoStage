@@ -14,7 +14,7 @@ public interface MagazzinoMapper {
     /**
      * Converte un DTO di creazione in una nuova entità Magazzino
      */
-    Magazzino toEntity(MagazzinoCreateRequest request);
+    Magazzino toEntity(MagazzinoRequest request);
 
     /**
      * Converte un'entità Magazzino in un DTO di risposta

@@ -33,7 +33,7 @@ public class MagazzinoController {
      */
     @PostMapping
     public ResponseEntity<Void> saveMagazzino(
-            @Valid @RequestBody MagazzinoCreateRequest request
+            @Valid @RequestBody MagazzinoRequest request
     ) {
         magazzinoService.create(request);
         return ResponseEntity.status(201).build(); // CREATED

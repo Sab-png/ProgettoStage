@@ -7,7 +7,7 @@ public interface MagazzinoService {
 
     MagazzinoResponse getById(Long id);
 
-    void create(MagazzinoCreateRequest request);
+    void create(MagazzinoRequest request);
 
     Page<MagazzinoResponse> search(MagazzinoSearchRequest request);
 void update(Long id, @Valid MagazzinoUpdateRequest request); void delete(Long id);}

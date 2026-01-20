@@ -33,7 +33,7 @@ public class ProdottoController {
      */
     @PostMapping
     public ResponseEntity<Void> saveProdotto(
-            @Valid @RequestBody ProdottoCreateRequest request
+            @Valid @RequestBody ProdottoRequest request
     ) {
         prodottoService.create(request);
         return ResponseEntity.status(201).build(); // CREATED

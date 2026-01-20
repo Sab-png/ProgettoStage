@@ -7,7 +7,7 @@ public interface ProdottoService {
 
     ProdottoResponse getById(Long id);
 
-    void create(ProdottoCreateRequest request);
+    void create(ProdottoRequest request);
 
     void update(Long id, ProdottoUpdateRequest request);
 

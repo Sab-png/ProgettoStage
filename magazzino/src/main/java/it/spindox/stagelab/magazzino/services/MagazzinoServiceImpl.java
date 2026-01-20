@@ -1,7 +1,7 @@
 
 package it.spindox.stagelab.magazzino.services;
 
-import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoCreateRequest;
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoSearchRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.*;
@@ -30,7 +30,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
     @Override
-    public void create(MagazzinoCreateRequest request) {
+    public void create(MagazzinoRequest request) {
         repository.save(mapper.toEntity(request));
     }
 

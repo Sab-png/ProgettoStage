@@ -5,7 +5,6 @@ import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.ProdottoMapper;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
-import it.spindox.stagelab.magazzino.services.ProdottoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class ProdottoServiceImpl implements ProdottoService {
     }
 
     @Override
-    public void create(ProdottoCreateRequest request) {
+    public void create(ProdottoRequest request) {
         repository.save(mapper.toEntity(request));
     }
 
