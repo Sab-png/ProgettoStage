@@ -1,7 +1,6 @@
 
 package it.spindox.stagelab.magazzino.exceptions;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,13 +23,11 @@ public class GlobalExceptionHandler {
      * richiesta non è presente a database.
      *
      * @param ex      eccezione lanciata
-     * @param request richiesta HTTP in corso
      * @return ResponseEntity con status 404 e messaggio di errore
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<String>  handleResourceNotFound(
-            ResourceNotFoundException ex,
-            HttpServletRequest request
+            ResourceNotFoundException ex
     ) {
         // Restituisce una risposta HTTP 404 (Not Found)
         // con il messaggio definito nell'eccezione

@@ -43,6 +43,9 @@ public class ProdottoServiceImpl implements ProdottoService {
     @Override
     public Page<ProdottoResponse> search(ProdottoSearchRequest request) {
         return null;
+    }@Override
+    public void delete(Long id) {
+
     }
 
 

@@ -1,10 +1,6 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -31,22 +27,6 @@ public class Fattura {
     @OneToOne
     @JoinColumn(name = "ID_PRODOTTO", referencedColumnName = "ID")
     private Prodotto prodotto;
-
-    public void setNumero(@NotBlank String numero) {
-    }
-
-    public void setData(@NotNull LocalDate data) {
-    }
-
-    public void setImporto(@NotNull @Positive BigDecimal importo) {
-    }
-
-    public void setIdProdotto(@NotNull Long idProdotto) {
-    }
-
-    public String getNumero() {
-        return "";
-    }
 
     public LocalDate getData() {
         return null;

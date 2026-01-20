@@ -34,5 +34,11 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     @Override
     public Page<MagazzinoResponse> search(MagazzinoSearchRequest request) {
         return null; // da implementare
+    }@Override
+    public void update(Long id, MagazzinoUpdateRequest request) {
+
+    }@Override
+    public void delete(Long id) {
+
     }
 }

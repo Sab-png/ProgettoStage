@@ -2,13 +2,13 @@
 package it.spindox.stagelab.magazzino.mappers;
 
 import it.spindox.stagelab.magazzino.dto.prodotto.*;
-import it.spindox.stagelab.magazzino.entities.Prodotto;
-import org.springframework.stereotype.Component;
+import it.spindox.stagelab.magazzino.entities.Prodotto;import org.springframework.stereotype.Component;
 
 
 /**
  * Mapper per la conversione tra entità Prodotto e DTO
  */
+
 public interface ProdottoMapper {
 
     /**

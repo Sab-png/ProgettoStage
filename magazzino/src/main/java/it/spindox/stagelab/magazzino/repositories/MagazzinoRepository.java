@@ -21,11 +21,9 @@ public interface MagazzinoRepository extends JpaRepository<Magazzino, Long>{
 
 /**
  * Recupera un elemento di Magazzino associato a un determinato prodotto.
- *
  * Spring Data JPA genera automaticamente l'implementazione
  * del metodo a partire dal nome:
  *   findByProdottoId
+ * a un prodotto &egrave; associato al massimo un record di Magazzino.
  *
- * a un prodotto è associato al massimo un record di Magazzino.
- *
-**/
+ **/

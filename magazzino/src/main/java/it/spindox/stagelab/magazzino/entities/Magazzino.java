@@ -31,9 +31,6 @@ public class Magazzino {
     @OneToMany(mappedBy = "magazzino")
     private List<ProdottoMagazzino> prodottoMagazzino;
 
-    public <__TMP__> __TMP__ getCapienza() {
-        return null;
     }
-}
 
 

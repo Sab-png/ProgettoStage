@@ -28,7 +28,7 @@ public class FatturaController {
 
     /**
      * Recupera una fattura dato il suo ID.
-     * Restituisce 404 se la fattura non esiste (gestito dal service/exception handler).
+     * Restituisce 404 se la fattura non esiste
      */
     @GetMapping("/{id}")
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) {
@@ -36,7 +36,7 @@ public class FatturaController {
     }
 
     /**
-     * Recupera le fatture associate a un prodotto (paginato).
+     * Recupera le fatture associate a un prodotto
      */
     @GetMapping("/prodotto/{idProdotto}")
     public ResponseEntity<Page<FatturaResponse>> getFattureByProdotto(
@@ -50,7 +50,7 @@ public class FatturaController {
 
     /**
      * Crea una nuova fattura.
-     * Ritorna 201 Created con Location e body (DTO creato).
+     * Ritorna 201 Created con Location e body -DTO creato.
      */
     @PostMapping
     public ResponseEntity<FatturaResponse> saveFattura(
@@ -66,7 +66,7 @@ public class FatturaController {
 
     /**
      * Aggiorna parzialmente una fattura (PATCH = campi non null).
-     * Ritorna il DTO aggiornato (oppure 204 No Content se preferisci).
+     * Ritorna il DTO aggiornato 
      */
     @PatchMapping("/{id}")
     public ResponseEntity<FatturaResponse> editFattura(

@@ -2,13 +2,13 @@
 package it.spindox.stagelab.magazzino.mappers;
 
 import it.spindox.stagelab.magazzino.dto.magazzino.*;
-import it.spindox.stagelab.magazzino.entities.Magazzino;
-import org.springframework.stereotype.Component;
+import it.spindox.stagelab.magazzino.entities.Magazzino;import org.springframework.stereotype.Component;
 
 
 /**
  * Mapper per la conversione tra entità Magazzino e DTO
  */
+
 public interface MagazzinoMapper {
 
     /**
@@ -21,9 +21,4 @@ public interface MagazzinoMapper {
      */
     MagazzinoResponse toResponse(Magazzino entity);
 
-    /**
-     * Aggiorna un'entità Magazzino esistente
-     * utilizzando i dati del DTO di update
-     */
-    <MagazzinoUpdateRequest> void updateEntity(Magazzino magazzino, MagazzinoUpdateRequest request);
-}
+    }
