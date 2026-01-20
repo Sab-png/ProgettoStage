@@ -1,9 +1,7 @@
 
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaCreateRequest;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaUpdateRequest;
 import it.spindox.stagelab.magazzino.services.FatturaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -54,7 +52,7 @@ public class FatturaController {
      */
     @PostMapping
     public ResponseEntity<FatturaResponse> saveFattura(
-            @Valid @RequestBody FatturaCreateRequest request,
+            @Valid @RequestBody FatturaRequest request,
             UriComponentsBuilder uriBuilder
     ) {
         FatturaResponse created = fatturaService.create(request);
@@ -71,7 +69,7 @@ public class FatturaController {
     @PatchMapping("/{id}")
     public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
-            @Valid @RequestBody FatturaUpdateRequest request
+            @Valid @RequestBody FatturaRequest request
     ) {
         FatturaResponse updated = fatturaService.update(id, request);
         return ResponseEntity.ok(updated);
@@ -83,7 +81,7 @@ public class FatturaController {
      */
     @PostMapping("/search")
     public ResponseEntity<Page<FatturaResponse>> searchFattura(
-            @Valid @RequestBody FatturaSearchRequest searchRequest
+            @Valid @RequestBody FatturaRequest searchRequest
     ) {
         Page<FatturaResponse> page = fatturaService.search(searchRequest);
         return ResponseEntity.ok(page);

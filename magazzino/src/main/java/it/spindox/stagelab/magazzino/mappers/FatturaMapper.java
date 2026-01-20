@@ -1,22 +1,29 @@
 
 package it.spindox.stagelab.magazzino.mappers;
 
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaCreateRequest;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaUpdateRequest;
 import it.spindox.stagelab.magazzino.entities.Fattura;
-import org.springframework.stereotype.Component;
 
 /**
- * Mapper per la conversione tra entità Fattura e DTO
- * L'implementazione concreta è FatturaMapperImpl.
+ * Mapper per la conversione tra DTO e Entity di Fattura.
  */
-
 public interface FatturaMapper {
 
-    Fattura toEntity(FatturaCreateRequest request);
+    /**
+     * Converte una request DTO in una nuova entity Fattura.
+     * Usato principalmente in CREATE.
+     */
+    Fattura toEntity(FatturaRequest request);
 
+    /**
+     * Converte una entity Fattura in response DTO.
+     */
     FatturaResponse toResponse(Fattura entity);
 
-    void updateEntity(Fattura target, FatturaUpdateRequest request);
+    /**
+     * Aggiorna una entity Fattura esistente usando i campi non null del DTO.
+     * Usato in UPDATE.
+     */
+    void updateEntity(Fattura target, FatturaRequest request);
 }

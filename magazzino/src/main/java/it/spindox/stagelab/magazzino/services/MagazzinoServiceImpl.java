@@ -3,14 +3,11 @@ package it.spindox.stagelab.magazzino.services;
 
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
-import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoSearchRequest;
-import it.spindox.stagelab.magazzino.dto.magazzino.*;
-
-
 import it.spindox.stagelab.magazzino.entities.Magazzino;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -35,7 +32,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
     @Override
-    public void update(Long id, MagazzinoUpdateRequest request) {
+    public void update(Long id, @Valid Magazzino request) {
         Magazzino magazzino = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
 
@@ -44,7 +41,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
     @Override
-    public Page<MagazzinoResponse> search(MagazzinoSearchRequest request) {
+    public Page<MagazzinoResponse> search(@Valid MagazzinoRequest request) {
         return Page.empty();
     }
 

@@ -15,4 +15,7 @@ public class MagazzinoResponse {
 
     // Capacità Max
     private Integer capacita;
+
+    public void setDescrizione(Object descrizione) {
+    }
 }

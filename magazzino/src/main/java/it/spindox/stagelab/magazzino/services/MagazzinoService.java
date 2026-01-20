@@ -1,6 +1,7 @@
 
 package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.magazzino.*;
+import it.spindox.stagelab.magazzino.entities.Magazzino;
 import jakarta.validation.Valid;import org.springframework.data.domain.Page;
 
 public interface MagazzinoService {
@@ -9,5 +10,5 @@ public interface MagazzinoService {
 
     void create(MagazzinoRequest request);
 
-    Page<MagazzinoResponse> search(MagazzinoSearchRequest request);
-void update(Long id, @Valid MagazzinoUpdateRequest request); void delete(Long id);}
+    Page<MagazzinoResponse> search(@Valid MagazzinoRequest request);
+void update(Long id, @Valid Magazzino request); void delete(Long id);}

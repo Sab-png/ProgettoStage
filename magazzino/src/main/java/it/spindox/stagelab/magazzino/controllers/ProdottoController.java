@@ -46,7 +46,7 @@ public class ProdottoController {
     @PatchMapping("/{id}")
     public ResponseEntity<Void> editProdotto(
             @PathVariable Long id,
-            @Valid @RequestBody ProdottoUpdateRequest request
+            @Valid @RequestBody ProdottoRequest request
     ) {
         prodottoService.update(id, request);
         return ResponseEntity.noContent().build();
@@ -68,7 +68,7 @@ public class ProdottoController {
      */
     @PostMapping("/search")
     public ResponseEntity<Page<ProdottoResponse>> searchProdotto(
-            @Valid @RequestBody ProdottoSearchRequest searchRequest
+            @Valid @RequestBody ProdottoRequest searchRequest
     ) {
         return ResponseEntity.ok(prodottoService.search(searchRequest));
     }

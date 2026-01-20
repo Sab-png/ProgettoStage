@@ -1,6 +1,9 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -30,6 +33,34 @@ public class Fattura {
 
     public LocalDate getData() {
         return null;
+    }
+
+    public <__TMP__> __TMP__ setNumero(String numero) {
+        return null;
+    }
+
+    public void setData(LocalDate data) {
+    }
+
+    public void setImporto(@Positive(message = "L'importo deve essere maggiore di zero") BigDecimal importo) {
+    }
+
+    public void setQuantita(@Positive(message = "La quantità deve essere maggiore di zero") Integer quantita) {
+    }
+
+    public void setIdProdotto(Long idProdotto) {
+    }
+
+    public String getNumero() {
+        return "";
+    }
+
+    public Integer getQuantita() {
+        return 0;
+    }
+
+    public Long getIdProdotto() {
+        return 0L;
     }
 }
 

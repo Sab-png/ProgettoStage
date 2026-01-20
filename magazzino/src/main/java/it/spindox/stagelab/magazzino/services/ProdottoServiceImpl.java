@@ -5,6 +5,7 @@ import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.ProdottoMapper;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class ProdottoServiceImpl implements ProdottoService {
     }
 
     @Override
-    public void update(Long id, ProdottoUpdateRequest request) {
+    public void update(Long id, @Valid ProdottoRequest request) {
         Prodotto prodotto = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
         mapper.updateEntity(prodotto, request);
@@ -40,7 +41,7 @@ public class ProdottoServiceImpl implements ProdottoService {
     }
 
     @Override
-    public Page<ProdottoResponse> search(ProdottoSearchRequest request) {
+    public Page<ProdottoResponse> search(@Valid ProdottoRequest request) {
         return null;
     }@Override
     public void delete(Long id) {

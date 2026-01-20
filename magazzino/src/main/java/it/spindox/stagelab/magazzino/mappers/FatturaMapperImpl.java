@@ -1,44 +1,84 @@
 
 package it.spindox.stagelab.magazzino.mappers;
-import org.springframework.stereotype.Component;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaCreateRequest;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaUpdateRequest;
 import it.spindox.stagelab.magazzino.entities.Fattura;
+import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
+/**
+ * Implementazione manuale del FatturaMapper.
+ */
 @Component
 public class FatturaMapperImpl implements FatturaMapper {
 
+    /**
+     * CREATE → DTO → ENTITY
+     */
     @Override
-    public Fattura toEntity(FatturaCreateRequest request) {
-        if (request == null) return null;
+    public Fattura toEntity(FatturaRequest request) {
+        if (request == null) {
+            return null;
+        }
 
-        Fattura f = new Fattura();
-        // es:
-        // f.setNumero(request.getNumero());
-        // f.setData(request.getData());
-        // f.setImporto(request.getImporto());
-        return f;
+        Fattura fattura = new Fattura();
+        fattura.setNumero(request.getNumero());
+        fattura.setData(request.getData());
+        fattura.setImporto(request.getImporto());
+        fattura.setQuantita(request.getQuantita());
+        fattura.setIdProdotto(request.getIdProdotto());
+
+        return fattura;
     }
 
+    /**
+     * ENTITY → RESPONSE DTO
+     */
     @Override
     public FatturaResponse toResponse(Fattura entity) {
-        if (entity == null) return null;
+        if (entity == null) {
+            return null;
+        }
 
-        FatturaResponse r = new FatturaResponse();
-        // es:
-        // r.setId(entity.getId());
-        // r.setNumero(entity.getNumero());
-        // r.setImporto(entity.getImporto());
-        return r;
+        FatturaResponse response = new FatturaResponse();
+        response.setId(entity.getId());
+        response.setNumero(entity.getNumero());
+        response.setData(entity.getData());
+        response.setImporto(BigDecimal.valueOf(entity.getImporto()));
+        response.setQuantita(entity.getQuantita());
+        response.setIdProdotto(entity.getIdProdotto());
+
+        return response;
     }
 
+    /**
+     * UPDATE → copia solo i campi non null dal DTO all'entity
+     */
     @Override
-    public void updateEntity(Fattura target, FatturaUpdateRequest request) {
-        if (target == null || request == null) return;
+    public void updateEntity(Fattura target, FatturaRequest request) {
+        if (target == null || request == null) {
+            return;
+        }
 
-        // es:
-        // if (request.getNumero() != null)
-        //     target.setNumero(request.getNumero());
+        if (request.getNumero() != null) {
+            target.setNumero(request.getNumero());
+        }
+
+        if (request.getData() != null) {
+            target.setData(request.getData());
+        }
+
+        if (request.getImporto() != null) {
+            target.setImporto(request.getImporto());
+        }
+
+        if (request.getQuantita() != null) {
+            target.setQuantita(request.getQuantita());
+        }
+
+        if (request.getIdProdotto() != null) {
+            target.setIdProdotto(request.getIdProdotto());
+        }
     }
 }

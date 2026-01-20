@@ -1,13 +1,12 @@
 
 package it.spindox.stagelab.magazzino.services;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.*;
 import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
 import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
-import it.spindox.stagelab.magazzino.services.FatturaService;
 import it.spindox.stagelab.magazzino.dto.fattura.*;
 import it.spindox.stagelab.magazzino.entities.Fattura;
 
@@ -32,20 +31,20 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
     @Override
-    public Page<FatturaResponse> search(FatturaSearchRequest request) {
+    public Page<FatturaResponse> search(@Valid FatturaRequest request) {
         return null;
     }
 
     @Override
     @Transactional
-    public FatturaResponse create(FatturaCreateRequest request) {
+    public FatturaResponse create(@Valid FatturaRequest request) {
         Fattura entity = mapper.toEntity(request);
         entity = repository.save(entity);
         return mapper.toResponse(entity);
     }
 
     @Override
-    public FatturaResponse update(Long id, FatturaUpdateRequest request) {
+    public FatturaResponse update(Long id, @Valid FatturaRequest request) {
         return null;
     }
 

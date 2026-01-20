@@ -1,6 +1,7 @@
 
 package it.spindox.stagelab.magazzino.controllers;
 import it.spindox.stagelab.magazzino.dto.magazzino.*;
+import it.spindox.stagelab.magazzino.entities.Magazzino;
 import it.spindox.stagelab.magazzino.services.MagazzinoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class MagazzinoController {
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updateMagazzino(
             @PathVariable Long id,
-            @Valid @RequestBody MagazzinoUpdateRequest request
+            @Valid @RequestBody Magazzino request
     ) {
         magazzinoService.update(id, request);
         return ResponseEntity.noContent().build();
@@ -68,7 +69,7 @@ public class MagazzinoController {
      */
     @PostMapping("/search")
     public ResponseEntity<Page<MagazzinoResponse>> searchMagazzino(
-            @Valid @RequestBody MagazzinoSearchRequest searchRequest
+            @Valid @RequestBody MagazzinoRequest searchRequest
     ) {
         return ResponseEntity.ok(magazzinoService.search(searchRequest));
     }
