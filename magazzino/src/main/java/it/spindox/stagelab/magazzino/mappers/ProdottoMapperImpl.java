@@ -5,66 +5,34 @@ import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoResponse;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import org.springframework.stereotype.Component;
 
-/**
- * Implementazione  mapper Prodotto.
- */
+import java.math.BigDecimal;
+
 @Component
 public class ProdottoMapperImpl implements ProdottoMapper {
 
-    /**
-     * CREATE → DTO → ENTITY
-     */
     @Override
     public Prodotto toEntity(ProdottoRequest request) {
-        if (request == null) {
-            return null;
-        }
-
-        Prodotto prodotto = new Prodotto();
-        prodotto.setNome(request.getNome());
-        prodotto.setDescrizione(request.getDescrizione());
-        prodotto.setPrezzo(request.getPrezzo());
-
-        return prodotto;
+        Prodotto p = new Prodotto();
+        p.setNome(request.getNome());
+        p.setDescrizione(request.getDescrizione());
+        p.setPrezzo(BigDecimal.valueOf(request.getPrezzo()));
+        return p;
     }
 
-    /**
-     * ENTITY → RESPONSE DTO
-     */
     @Override
     public ProdottoResponse toResponse(Prodotto entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        ProdottoResponse response = new ProdottoResponse();
-        response.setId(entity.getId());
-        response.setNome(entity.getNome());
-        response.setDescrizione(entity.getDescrizione());
-        response.setPrezzo(entity.getPrezzo());
-
-        return response;
+        ProdottoResponse r = new ProdottoResponse();
+        r.setId(entity.getId());
+        r.setNome(entity.getNome());
+        r.setDescrizione(entity.getDescrizione());
+        r.setPrezzo(entity.getPrezzo());
+        return r;
     }
 
-    /**
-     * UPDATE → copia solo i campi non null
-     */
     @Override
-    public void updateEntity(Prodotto prodotto, ProdottoRequest request) {
-        if (prodotto == null || request == null) {
-            return;
-        }
-
-        if (request.getNome() != null) {
-            prodotto.setNome(request.getNome());
-        }
-
-        if (request.getDescrizione() != null) {
-            prodotto.setDescrizione(request.getDescrizione());
-        }
-
-        if (request.getPrezzo() != null) {
-            prodotto.setPrezzo(request.getPrezzo());
-        }
+    public void updateEntity(Prodotto p, ProdottoRequest request) {
+        if (request.getNome() != null) p.setNome(request.getNome());
+        if (request.getDescrizione() != null) p.setDescrizione(request.getDescrizione());
+        if (request.getPrezzo() != null) p.setPrezzo(request.getPrezzo());
     }
 }

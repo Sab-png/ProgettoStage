@@ -10,26 +10,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
 
-    /**
-     * Search paginata con filtri opzionali:
-     * - nome
-     * - indirizzo
-     * - capacitaMin / capacitaMax (range)
-     */
     @Query("""
-        SELECT m
+        SELECT ALL
         FROM Magazzino m
-        WHERE (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+        WHERE (:id IS NULL OR m.id = :id)
+          AND (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
           AND (:indirizzo IS NULL OR LOWER(m.indirizzo) LIKE LOWER(CONCAT('%', :indirizzo, '%')))
           AND (:capacitaMin IS NULL OR m.capacita >= :capacitaMin)
           AND (:capacitaMax IS NULL OR m.capacita <= :capacitaMax)
     """)
     Page<Magazzino> search(
+            @Param("id") Long id,
             @Param("nome") String nome,
             @Param("indirizzo") String indirizzo,
             @Param("capacitaMin") Integer capacitaMin,
             @Param("capacitaMax") Integer capacitaMax,
             Pageable pageable
     );
-
-Page<Magazzino> search(String nome, String codice, java.awt.print.Pageable of);}
+Page<Magazzino> search(String nome, Object codice, java.awt.print.Pageable of);}

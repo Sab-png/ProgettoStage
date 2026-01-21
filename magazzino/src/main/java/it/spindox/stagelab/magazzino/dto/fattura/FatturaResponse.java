@@ -1,14 +1,7 @@
 
 package it.spindox.stagelab.magazzino.dto.fattura;
-import lombok.Data;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-/**
- * DTO utilizzato come risposta per le API relative alla Fattura.
- * Contiene i dati restituiti al client e non espone mai
- * direttamente l'entità JPA.
- */
+import jakarta.validation.constraints.Positive;import lombok.Data;
+import java.math.BigDecimal;import java.time.LocalDate;
 
 @Data
 public class FatturaResponse {
@@ -16,7 +9,7 @@ public class FatturaResponse {
     private Long id;
     private String numero;
     private LocalDate dataFattura;
-    private BigDecimal importo;
+    private Double importo;
     private Integer quantita;
     private Long idProdotto;
-}
+public void setImporto(@Positive BigDecimal importo) {}}

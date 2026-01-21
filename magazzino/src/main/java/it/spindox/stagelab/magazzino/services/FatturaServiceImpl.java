@@ -1,15 +1,19 @@
 
 package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;import it.spindox.stagelab.magazzino.entities.Fattura;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import it.spindox.stagelab.magazzino.entities.Fattura;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
+import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
+import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
 import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,91 +21,124 @@ public class FatturaServiceImpl implements FatturaService {
 
     private final FatturaRepository fatturaRepository;
     private final ProdottoRepository prodottoRepository;
+    private final FatturaMapper fatturaMapper;
+
+    // SEARCH
 
     @Override
-    public Page<Fattura> search(FatturaRequest request) {
-
+    public Object search(FatturaRequest request) {
         Pageable pageable = PageRequest.of(
                 request.getPage(),
                 request.getSize(),
-                Sort.by("dataFattura").descending()
+                Sort.by(Sort.Direction.DESC, "dataFattura")
         );
 
-        return fatturaRepository.search(
-                request.getIdProdotto(),
-                request.getDataFrom(),
-                request.getDataTo(),
-                toDouble(request.getImportoMin()),
-                toDouble(request.getImportoMax()),
+        Page page = fatturaRepository.search(
+                request.getNumero(),         // filtro opzionale
+                request.getIdProdotto(),     // filtro opzionale
+                request.getDataFrom(),       // filtro opzionale
+                request.getDataTo(),         // filtro opzionale
+                request.getImportoMin(),     // filtro opzionale (Double)
+                request.getImportoMax(),     // filtro opzionale (Double)
                 pageable
         );
-    }
 
-    @Override
-    public Fattura create(FatturaRequest request) {
-
-        if (request.getNumero() == null) {
-            throw new IllegalArgumentException("Numero fattura obbligatorio");
+        // Mapping manuale
+        List<FatturaResponse> content = new ArrayList<>(page.getContent().size());
+        for (Object f : page.getContent()) {
+            content.add(fatturaMapper.toResponse((Fattura) f));
         }
 
+        return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
+    }
+
+
+    // CREATE
+
+    @Override
+    public FatturaResponse create(FatturaRequest request) {
+        if (request.getNumero() == null || request.getNumero().isBlank()) {
+            throw new IllegalArgumentException("Numero fattura obbligatorio");
+        }
         if (request.getIdProdotto() == null) {
-            throw new IllegalArgumentException("Prodotto obbligatorio");
+            throw new IllegalArgumentException("Id prodotto obbligatorio");
         }
 
         Prodotto prodotto = prodottoRepository.findById(request.getIdProdotto())
-                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
 
-        Fattura fattura = new Fattura();
-        fattura.setNumero(request.getNumero());
-        fattura.setDataFattura(request.getData());
-        fattura.setQuantita(request.getQuantita());
-        fattura.setImporto(request.getImporto());
-        fattura.setProdotto(prodotto);
-
-        return fatturaRepository.save(fattura);
+        Fattura entity = fatturaMapper.toEntity(request, prodotto);
+        entity = (Fattura) fatturaRepository.save(entity);
+        return fatturaMapper.toResponse(entity);
     }
 
+    // UPDATE (PATCH)
+
     @Override
-    public Fattura update(Long id, FatturaRequest request) {
+    public FatturaResponse update(Long id, FatturaRequest request) throws Throwable {
+        Fattura entity = (Fattura) fatturaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
-        Fattura fattura = fatturaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Fattura non trovata"));
-
-        if (request.getNumero() != null) {
-            fattura.setNumero(request.getNumero());
+        Prodotto prodotto = null;
+        if (request.getIdProdotto() != null) {
+            prodotto = prodottoRepository.findById(request.getIdProdotto())
+                    .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
         }
 
-        if (request.getData() != null) {
-            fattura.setDataFattura(request.getData());
-        }
-
-        if (request.getQuantita() != null) {
-            fattura.setQuantita(request.getQuantita());
-        }
-
-        if (request.getImporto() != null) {
-            fattura.setImporto(request.getImporto());
-        }
-
-        return fatturaRepository.save(fattura);
+        fatturaMapper.updateEntity(entity, request, prodotto);
+        entity = (Fattura) fatturaRepository.save(entity);
+        return fatturaMapper.toResponse(entity);
     }
 
+    // GET BY ID
+
     @Override
-    public Fattura findById(Long id) {
-        return fatturaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Fattura non trovata"));
-    }@Override
-    public FatturaResponse getById(Long id) {
-        return null;
-    }@Override
-    public Range getByProdotto(Long idProdotto, int page, int size) {
-        return null;
-    }@Override
+    public FatturaResponse getById(Long id) throws Throwable {
+        Fattura entity = (Fattura) fatturaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
+        return fatturaMapper.toResponse(entity);
+    }
+
+    // GET BY PRODOTTO (paginated)
+
+    @Override
+    public PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size) {
+        if (!prodottoRepository.existsById(idProdotto)) {
+            throw new ResourceNotFoundException("Prodotto non trovato");
+        }
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "dataFattura")
+        );
+
+        Page fatture = fatturaRepository.search(
+                null,           // numero
+                idProdotto,     // idProdotto
+                null,           // dataFrom
+                null,           // dataTo
+                (BigDecimal) null,           // importoMin
+                null,           // importoMax
+                pageable
+        );
+
+        List<FatturaResponse> content = new ArrayList<>(fatture.getContent().size());
+        for (Object f : fatture.getContent()) {
+            content.add(fatturaMapper.toResponse((Fattura) f));
+        }
+
+        return new PageImpl<>(content, pageable, fatture.getTotalElements());
+    }
+
+
+    // DELETE
+
+    @Override
     public void delete(Long id) {
-
-    }
-
-    private Double toDouble(BigDecimal value) {
-        return value != null ? value.doubleValue() : null;
+        if (!fatturaRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Fattura non trovata");
+        }
+        fatturaRepository.deleteById(id);
     }
 }

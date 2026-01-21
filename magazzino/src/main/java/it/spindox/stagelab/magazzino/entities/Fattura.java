@@ -29,15 +29,15 @@ public class Fattura {
     @Column(name = "DATA_FATTURA", nullable = false)
     private LocalDate dataFattura;
 
-    @Positive(message = "L'importo deve essere maggiore di zero")
+    @Positive
     @Column(name = "IMPORTO", nullable = false, precision = 15, scale = 2)
     private BigDecimal importo;
 
-    @Positive(message = "La quantità deve essere maggiore di zero")
+    @Positive
     @Column(name = "QUANTITA", nullable = false)
     private Integer quantita;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_PRODOTTO", nullable = false)
     private Prodotto prodotto;
-public void setIdProdotto(Long idProdotto) {}public void setData(LocalDate data) {}}
+}

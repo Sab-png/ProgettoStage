@@ -1,28 +1,40 @@
 
 package it.spindox.stagelab.magazzino.services;
+
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;import it.spindox.stagelab.magazzino.entities.Fattura;
-import jakarta.validation.constraints.Min;import org.springframework.data.domain.Page;import org.springframework.data.domain.Range;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import org.springframework.data.domain.PageImpl;
 
 public interface FatturaService {
 
     /**
-     * Ricerca fatture con filtri opzionali + paginazione
+     * Ricerca paginata con filtri opzionali (usando i campi del DTO request).
      */
-    Page<Fattura> search(FatturaRequest request);
+    Object search(FatturaRequest request);
 
     /**
-     * Creazione fattura
+     * Crea una nuova fattura.
      */
-    Fattura create(FatturaRequest request);
+    FatturaResponse create(FatturaRequest request);
 
     /**
-     * Aggiornamento fattura
+     * Aggiorna parzialmente una fattura (patch).
      */
-    Fattura update(Long id, FatturaRequest request);
+    FatturaResponse update(Long id, FatturaRequest request) throws Throwable;
 
     /**
-     * Dettaglio fattura
+     * Dettaglio fattura per id.
      */
-    Fattura findById(Long id);
-FatturaResponse getById(Long id); Range getByProdotto(Long idProdotto, @Min(0) int page, @Min(1) int size); void delete(Long id);}
+    FatturaResponse getById(Long id) throws Throwable;
+
+    /**
+     * Elenco fatture per prodotto (paginato).
+     * Il sort è opzionale, es. "dataFattura,desc"
+     */
+    PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size);
+
+    /**
+     * Cancella una fattura.
+     */
+    void delete(Long id);
+}

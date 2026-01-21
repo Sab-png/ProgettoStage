@@ -6,18 +6,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.math.BigDecimal;
 
 @Repository
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
 
     /**
-     * Search  con filtri opzionali:
+     * Search paginata con filtri opzionali:
      * - nome
      * - descrizione
-     * - prezzoMin / prezzoMax (range)
+     * - prezzoMin / prezzoMax
      */
     @Query("""
-        SELECT p
+        SELECT ALL
         FROM Prodotto p
         WHERE (:nome IS NULL OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
           AND (:descrizione IS NULL OR LOWER(p.descrizione) LIKE LOWER(CONCAT('%', :descrizione, '%')))
@@ -27,9 +28,8 @@ public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
     Page<Prodotto> search(
             @Param("nome") String nome,
             @Param("descrizione") String descrizione,
-            @Param("prezzoMin") Double prezzoMin,
-            @Param("prezzoMax") Double prezzoMax,
+            @Param("prezzoMin") BigDecimal prezzoMin,
+            @Param("prezzoMax") BigDecimal prezzoMax,
             Pageable pageable
     );
-
 Page<Prodotto> search(String s, String s1, String s2, Pageable pageable);}

@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Range;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ public class FatturaController {
      * Restituisce 404 se la fattura non esiste
      */
     @GetMapping("/{id}")
-    public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) {
+    public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) throws Throwable {
         return ResponseEntity.ok(fatturaService.getById(id));
     }
 
@@ -39,12 +39,12 @@ public class FatturaController {
      * Recupera le fatture associate a un prodotto
      */
     @GetMapping("/prodotto/{idProdotto}")
-    public ResponseEntity<Range> getFattureByProdotto(
+    public ResponseEntity<PageImpl<FatturaResponse>> getFattureByProdotto(
             @PathVariable Long idProdotto,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
-        Range result;
+        PageImpl<FatturaResponse> result;
         result = fatturaService.getByProdotto(idProdotto, page, size);
         return ResponseEntity.ok(result);
     }
@@ -54,11 +54,11 @@ public class FatturaController {
      * Ritorna 201 Created con Location e body -DTO creato.
      */
     @PostMapping
-    public ResponseEntity<Fattura> saveFattura(
+    public ResponseEntity<FatturaResponse> saveFattura(
             @Valid @RequestBody FatturaRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        Fattura created = fatturaService.create(request);
+        FatturaResponse created = fatturaService.create(request);
         URI location = uriBuilder.path("/fatture/{id}")
                 .buildAndExpand(created.getId())
                 .toUri();
@@ -70,11 +70,11 @@ public class FatturaController {
      * Ritorna il DTO aggiornato
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<Fattura> editFattura(
+    public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
             @Valid @RequestBody FatturaRequest request
-    ) {
-        Fattura updated = fatturaService.update(id, request);
+    ) throws Throwable {
+        FatturaResponse updated = fatturaService.update(id, request);
         return ResponseEntity.ok(updated);
         // Se preferisci 204 senza body: return ResponseEntity.noContent().build();
     }
@@ -86,7 +86,7 @@ public class FatturaController {
     public ResponseEntity<Page<Fattura>> searchFattura(
             @Valid @RequestBody FatturaRequest searchRequest
     ) {
-        Page<Fattura> page = fatturaService.search(searchRequest);
+        Page<Fattura> page = (Page<Fattura>) fatturaService.search(searchRequest);
         return ResponseEntity.ok(page);
     }
 

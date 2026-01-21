@@ -1,5 +1,6 @@
+
 package it.spindox.stagelab.magazzino.dto.prodotto;
-import lombok.Data;
+import lombok.Data;import java.math.BigDecimal;
 
 @Data
 public class ProdottoResponse {
@@ -15,4 +16,4 @@ public class ProdottoResponse {
 
     // Prezzo del prodotto
     private Double prezzo;
-}
+public void setPrezzo(BigDecimal prezzo) {}}
