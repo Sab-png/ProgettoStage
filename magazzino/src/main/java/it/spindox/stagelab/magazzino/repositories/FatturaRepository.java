@@ -4,7 +4,7 @@ import it.spindox.stagelab.magazzino.entities.Fattura;
 import java.time.LocalDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Range;import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +35,4 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
             @Param("importoMax") Double importoMax,
             Pageable pageable
     );
-
-<T> Range<T> findByProdotto_Id(Long idProdotto, Pageable pageable);
-Page<Fattura> search(Long idProdotto, Pageable pageable);}
+}

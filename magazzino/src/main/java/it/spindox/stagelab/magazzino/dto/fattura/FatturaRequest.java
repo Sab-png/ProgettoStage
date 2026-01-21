@@ -52,7 +52,7 @@ public class FatturaRequest {
      * Importo totale della fattura.
      * - CREATE/UPDATE: se presente deve essere > 0
      * - SEARCH: usare importoMin/importoMax per range
-     *
+     * <p>
      * Nota: usare BigDecimal per valori monetari è preferibile a Double.
      */
     @Positive(message = "L'importo deve essere maggiore di zero")
@@ -93,10 +93,13 @@ public class FatturaRequest {
     @Min(value = 1, message = "La dimensione deve essere >= 1")
     private int size = 10;
 
-public LocalDate getDataFrom() {
-    return null;
-}
-public LocalDate getDataTo() {
-    return null;
-}
+
+    public LocalDate getDataFrom() {
+        return dataDa;
+    }
+
+    public LocalDate getDataTo() {
+        return dataA;
+    }
+
 }

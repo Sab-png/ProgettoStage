@@ -16,6 +16,6 @@ public class MagazzinoResponse {
     // Capacità Max
     private Integer capacita;
 
-    public void setDescrizione(Object descrizione) {
+    public void setDescrizione() {
     }
-}
+public <__TMP__> void setDescrizione(__TMP__ descrizione) {}}

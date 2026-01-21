@@ -1,10 +1,14 @@
 package it.spindox.stagelab.magazzino.entities;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;import jakarta.persistence.*;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "FATTURA")
