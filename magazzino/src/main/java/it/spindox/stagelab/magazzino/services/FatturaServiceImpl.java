@@ -1,55 +1,100 @@
 
 package it.spindox.stagelab.magazzino.services;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.*;
-import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
-import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
-import it.spindox.stagelab.magazzino.dto.fattura.*;
+
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.entities.Fattura;
+import it.spindox.stagelab.magazzino.entities.Prodotto;
+import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
+import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
+import it.spindox.stagelab.magazzino.services.FatturaService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
 public class FatturaServiceImpl implements FatturaService {
 
-    private final FatturaRepository repository;
-    private final FatturaMapper mapper;
+    private final FatturaRepository fatturaRepository;
+    private final ProdottoRepository prodottoRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public FatturaResponse getById(Long id) {
-        Fattura fattura = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Fattura non trovata"));
-        return mapper.toResponse(fattura);
+    public Page<Fattura> search(FatturaRequest request) {
+
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getSize(),
+                Sort.by("dataFattura").descending()
+        );
+
+        return fatturaRepository.search(
+                request.getIdProdotto(),
+                request.getDataFrom(),
+                request.getDataTo(),
+                toDouble(request.getImportoMin()),
+                toDouble(request.getImportoMax()),
+                pageable
+        );
     }
 
     @Override
-    public Page<FatturaResponse> getByProdotto(Long idProdotto, int page, int size) {
-        return null;
+    public Fattura create(FatturaRequest request) {
+
+        if (request.getNumero() == null) {
+            throw new IllegalArgumentException("Numero fattura obbligatorio");
+        }
+
+        if (request.getIdProdotto() == null) {
+            throw new IllegalArgumentException("Prodotto obbligatorio");
+        }
+
+        Prodotto prodotto = prodottoRepository.findById(request.getIdProdotto())
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
+
+        Fattura fattura = new Fattura();
+        fattura.setNumero(request.getNumero());
+        fattura.setDataFattura(request.getData());
+        fattura.setQuantita(request.getQuantita());
+        fattura.setImporto(request.getImporto());
+        fattura.setProdotto(prodotto);
+
+        return fatturaRepository.save(fattura);
     }
 
     @Override
-    public Page<FatturaResponse> search(@Valid FatturaRequest request) {
-        return null;
+    public Fattura update(Long id, FatturaRequest request) {
+
+        Fattura fattura = fatturaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Fattura non trovata"));
+
+        if (request.getNumero() != null) {
+            fattura.setNumero(request.getNumero());
+        }
+
+        if (request.getData() != null) {
+            fattura.setDataFattura(request.getData());
+        }
+
+        if (request.getQuantita() != null) {
+            fattura.setQuantita(request.getQuantita());
+        }
+
+        if (request.getImporto() != null) {
+            fattura.setImporto(request.getImporto());
+        }
+
+        return fatturaRepository.save(fattura);
     }
 
     @Override
-    @Transactional
-    public FatturaResponse create(@Valid FatturaRequest request) {
-        Fattura entity = mapper.toEntity(request);
-        entity = repository.save(entity);
-        return mapper.toResponse(entity);
+    public Fattura findById(Long id) {
+        return fatturaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Fattura non trovata"));
     }
 
-    @Override
-    public FatturaResponse update(Long id, @Valid FatturaRequest request) {
-        return null;
-    }
-
-    @Override
-    public void delete(Long id) {
-
+    private Double toDouble(BigDecimal value) {
+        return value != null ? value.doubleValue() : null;
     }
 }

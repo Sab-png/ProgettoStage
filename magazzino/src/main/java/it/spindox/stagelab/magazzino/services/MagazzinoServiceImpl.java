@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.services;
-
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.Magazzino;
@@ -10,7 +9,10 @@ import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.awt.print.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -40,15 +42,24 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.save(magazzino);
     }
 
+
     @Override
     public Page<MagazzinoResponse> search(@Valid MagazzinoRequest request) {
-        return Page.empty();
+        Page<Magazzino> page = repository.search(
+                request.getNome(),
+                request.getCodice(),
+                (Pageable) PageRequest.of(0, 20)
+        );
+
+        return page.map(mapper::toResponse);
     }
+
+
 
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Magazzino non trovato");
+          return;
         }
         repository.deleteById(id);
     }

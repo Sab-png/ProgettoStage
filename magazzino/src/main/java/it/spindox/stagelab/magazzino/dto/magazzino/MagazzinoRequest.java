@@ -76,4 +76,7 @@ public class MagazzinoRequest {
     @Min(value = 1, message = "La dimensione deve essere >= 1")
     private int size = 10;
 
+    public String getCodice() {
+        return "";
+    }
 }

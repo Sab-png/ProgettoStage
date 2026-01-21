@@ -1,18 +1,35 @@
 
 package it.spindox.stagelab.magazzino.repositories;
-
 import it.spindox.stagelab.magazzino.entities.Magazzino;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/**
- * Repository Spring Data JPA per la gestione dell'entità Magazzino.
-
- */
 @Repository
-public interface MagazzinoRepository extends JpaRepository<Magazzino, Long>{
-}
+public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
 
+    /**
+     * Search paginata con filtri opzionali:
+     * - nome
+     * - indirizzo
+     * - capacitaMin / capacitaMax (range)
+     */
+    @Query("""
+        SELECT m
+        FROM Magazzino m
+        WHERE (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+          AND (:indirizzo IS NULL OR LOWER(m.indirizzo) LIKE LOWER(CONCAT('%', :indirizzo, '%')))
+          AND (:capacitaMin IS NULL OR m.capacita >= :capacitaMin)
+          AND (:capacitaMax IS NULL OR m.capacita <= :capacitaMax)
+    """)
+    Page<Magazzino> search(
+            @Param("nome") String nome,
+            @Param("indirizzo") String indirizzo,
+            @Param("capacitaMin") Integer capacitaMin,
+            @Param("capacitaMax") Integer capacitaMax,
+            Pageable pageable
+    );
 
-
-
+Page<Magazzino> search(String nome, String codice, java.awt.print.Pageable of);}

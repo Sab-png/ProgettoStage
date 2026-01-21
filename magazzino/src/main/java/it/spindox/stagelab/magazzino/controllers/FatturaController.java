@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Range;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,12 +38,13 @@ public class FatturaController {
      * Recupera le fatture associate a un prodotto
      */
     @GetMapping("/prodotto/{idProdotto}")
-    public ResponseEntity<Page<FatturaResponse>> getFattureByProdotto(
+    public ResponseEntity<Range> getFattureByProdotto(
             @PathVariable Long idProdotto,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
-        Page<FatturaResponse> result = fatturaService.getByProdotto(idProdotto, page, size);
+        Range result;
+        result = fatturaService.getByProdotto(idProdotto, page, size);
         return ResponseEntity.ok(result);
     }
 

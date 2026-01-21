@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jdk
 
 USER root
 
-EXPOSE 8081
+EXPOSE 8080
 
 # Sposta il jar in macchina
 COPY /target/magazzino-app.jar /app.jar

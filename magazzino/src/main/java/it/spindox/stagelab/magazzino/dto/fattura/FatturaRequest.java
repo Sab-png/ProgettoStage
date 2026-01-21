@@ -93,4 +93,10 @@ public class FatturaRequest {
     @Min(value = 1, message = "La dimensione deve essere >= 1")
     private int size = 10;
 
+public LocalDate getDataFrom() {
+    return null;
+}
+public LocalDate getDataTo() {
+    return null;
+}
 }

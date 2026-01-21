@@ -1,23 +1,29 @@
 
 package it.spindox.stagelab.magazzino.services;
+
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
-import jakarta.validation.Valid;
+import it.spindox.stagelab.magazzino.entities.Fattura;
 import org.springframework.data.domain.Page;
 
 public interface FatturaService {
 
-    // READ (query)
-    FatturaResponse getById(Long id);
+    /**
+     * Ricerca fatture con filtri opzionali + paginazione
+     */
+    Page<Fattura> search(FatturaRequest request);
 
-    Page<FatturaResponse> getByProdotto(Long idProdotto, int page, int size);
+    /**
+     * Creazione fattura
+     */
+    Fattura create(FatturaRequest request);
 
-    Page<FatturaResponse> search(@Valid FatturaRequest request);
+    /**
+     * Aggiornamento fattura
+     */
+    Fattura update(Long id, FatturaRequest request);
 
-    // WRITE (command)
-    FatturaResponse create(@Valid FatturaRequest request);
-
-    FatturaResponse update(Long id, @Valid FatturaRequest request);
-
-    void delete(Long id);
+    /**
+     * Dettaglio fattura
+     */
+    Fattura findById(Long id);
 }

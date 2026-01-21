@@ -2,7 +2,6 @@ package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -11,57 +10,33 @@ import java.time.LocalDate;
 @Table(name = "FATTURA")
 public class Fattura {
 
-    // ID generato tramite sequence Oracle
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fattura_seq_gen")
-    @SequenceGenerator(name = "fattura_seq_gen", sequenceName = "FATTURA_SEQ", allocationSize = 1)
+    @SequenceGenerator(
+            name = "fattura_seq_gen",
+            sequenceName = "FATTURA_SEQ",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 
-    // Data di emissione della fattura
     @Column(name = "DATA_FATTURA")
     private LocalDate dataFattura;
 
-    // Importo totale della fattura
     @Column(name = "IMPORTO")
     private Double importo;
 
-    // Relazione 1:1 con Prodotto (ogni fattura è legata ad un unico prodotto)
     @OneToOne
     @JoinColumn(name = "ID_PRODOTTO", referencedColumnName = "ID")
     private Prodotto prodotto;
 
-    public LocalDate getData() {
-        return null;
-    }
-
-    public <__TMP__> __TMP__ setNumero(String numero) {
-        return null;
-    }
-
-    public void setData(LocalDate data) {
+    public void setQuantita(@Positive(message = "La quantità deve essere maggiore di zero") Integer quantita) {
+        
     }
 
     public void setImporto(@Positive(message = "L'importo deve essere maggiore di zero") BigDecimal importo) {
     }
 
-    public void setQuantita(@Positive(message = "La quantità deve essere maggiore di zero") Integer quantita) {
-    }
-
-    public void setIdProdotto(Long idProdotto) {
-    }
-
-    public String getNumero() {
-        return "";
-    }
-
-    public Integer getQuantita() {
-        return 0;
-    }
-
-    public Long getIdProdotto() {
-        return 0L;
+    public void setNumero(String numero) {
     }
 }
-
-
