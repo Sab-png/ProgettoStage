@@ -67,14 +67,14 @@ public class FatturaController {
 
     /**
      * Aggiorna parzialmente una fattura (PATCH = campi non null).
-     * Ritorna il DTO aggiornato 
+     * Ritorna il DTO aggiornato
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<FatturaResponse> editFattura(
+    public ResponseEntity<Fattura> editFattura(
             @PathVariable Long id,
             @Valid @RequestBody FatturaRequest request
     ) {
-        FatturaResponse updated = fatturaService.update(id, request);
+        Fattura updated = fatturaService.update(id, request);
         return ResponseEntity.ok(updated);
         // Se preferisci 204 senza body: return ResponseEntity.noContent().build();
     }
