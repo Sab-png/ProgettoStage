@@ -28,7 +28,7 @@ public class FatturaMapperImpl implements FatturaMapper {
         fattura.setDataFattura(request.getData());
 
         if (request.getImporto() != null) {
-            fattura.setImporto(request.getImporto().doubleValue());
+            fattura.setImporto(BigDecimal.valueOf(request.getImporto().doubleValue()));
         }
 
         if (request.getIdProdotto() != null) {
@@ -66,7 +66,7 @@ public class FatturaMapperImpl implements FatturaMapper {
         }
 
         if (request.getImporto() != null) {
-            target.setImporto(request.getImporto().doubleValue());
+            target.setImporto(BigDecimal.valueOf(request.getImporto().doubleValue()));
         }
 
         if (request.getIdProdotto() != null) {

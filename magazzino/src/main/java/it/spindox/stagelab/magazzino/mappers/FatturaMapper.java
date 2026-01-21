@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.mappers;
-
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.entities.Fattura;

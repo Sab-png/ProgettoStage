@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.entities;
-import jakarta.persistence.*;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table(name = "FATTURA")
-public class Fattura {
+public class Fattura extends FatturaResponse {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fattura_seq_gen")
@@ -38,5 +38,6 @@ public class Fattura {
     }
 
     public void setNumero(String numero) {
+
     }
 }

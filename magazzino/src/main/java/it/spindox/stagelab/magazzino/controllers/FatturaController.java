@@ -2,6 +2,7 @@
 package it.spindox.stagelab.magazzino.controllers;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import it.spindox.stagelab.magazzino.entities.Fattura;
 import it.spindox.stagelab.magazzino.services.FatturaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -53,11 +54,11 @@ public class FatturaController {
      * Ritorna 201 Created con Location e body -DTO creato.
      */
     @PostMapping
-    public ResponseEntity<FatturaResponse> saveFattura(
+    public ResponseEntity<Fattura> saveFattura(
             @Valid @RequestBody FatturaRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        FatturaResponse created = fatturaService.create(request);
+        Fattura created = fatturaService.create(request);
         URI location = uriBuilder.path("/fatture/{id}")
                 .buildAndExpand(created.getId())
                 .toUri();
@@ -82,10 +83,10 @@ public class FatturaController {
      * Ricerca paginata di fatture applicando filtri.
      */
     @PostMapping("/search")
-    public ResponseEntity<Page<FatturaResponse>> searchFattura(
+    public ResponseEntity<Page<Fattura>> searchFattura(
             @Valid @RequestBody FatturaRequest searchRequest
     ) {
-        Page<FatturaResponse> page = fatturaService.search(searchRequest);
+        Page<Fattura> page = fatturaService.search(searchRequest);
         return ResponseEntity.ok(page);
     }
 

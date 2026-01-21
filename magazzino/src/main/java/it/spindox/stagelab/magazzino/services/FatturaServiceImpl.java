@@ -1,12 +1,10 @@
 
 package it.spindox.stagelab.magazzino.services;
-
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
-import it.spindox.stagelab.magazzino.entities.Fattura;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;import it.spindox.stagelab.magazzino.entities.Fattura;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
-import it.spindox.stagelab.magazzino.services.FatturaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -92,6 +90,15 @@ public class FatturaServiceImpl implements FatturaService {
     public Fattura findById(Long id) {
         return fatturaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Fattura non trovata"));
+    }@Override
+    public FatturaResponse getById(Long id) {
+        return null;
+    }@Override
+    public Range getByProdotto(Long idProdotto, int page, int size) {
+        return null;
+    }@Override
+    public void delete(Long id) {
+
     }
 
     private Double toDouble(BigDecimal value) {

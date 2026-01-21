@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.mappers;
-
 import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoRequest;
 import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoResponse;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
