@@ -1,5 +1,6 @@
 
 package it.spindox.stagelab.magazzino.services;
+
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.entities.Fattura;
@@ -11,8 +12,8 @@ import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,37 +25,42 @@ public class FatturaServiceImpl implements FatturaService {
     private final FatturaMapper fatturaMapper;
 
     // SEARCH
-
     @Override
-    public Object search(FatturaRequest request) {
+    public Page<FatturaResponse> search(FatturaRequest request) {
         Pageable pageable = PageRequest.of(
                 request.getPage(),
                 request.getSize(),
                 Sort.by(Sort.Direction.DESC, "dataFattura")
         );
 
-        Page page = fatturaRepository.search(
-                request.getNumero(),         // filtro opzionale
-                request.getIdProdotto(),     // filtro opzionale
-                request.getDataFrom(),       // filtro opzionale
-                request.getDataTo(),         // filtro opzionale
-                request.getImportoMin(),     // filtro opzionale (Double)
-                request.getImportoMax(),     // filtro opzionale (Double)
+        // Converti eventuali Double -> BigDecimal se il DTO espone Double
+        BigDecimal importoMin = request.getImportoMin() != null
+                ? new BigDecimal(request.getImportoMin().toString())
+                : null;
+
+        BigDecimal importoMax = request.getImportoMax() != null
+                ? new BigDecimal(request.getImportoMax().toString())
+                : null;
+
+        Page<Fattura> page = fatturaRepository.search(
+                request.getNumero(),
+                request.getIdProdotto(),
+                request.getDataFrom(),
+                request.getDataTo(),
+                importoMin,
+                importoMax,
                 pageable
         );
 
-        // Mapping manuale
-        List<FatturaResponse> content = new ArrayList<>(page.getContent().size());
-        for (Object f : page.getContent()) {
-            content.add(fatturaMapper.toResponse((Fattura) f));
-        }
+        List<FatturaResponse> content = page.getContent()
+                .stream()
+                .map(fatturaMapper::toResponse)
+                .toList();
 
         return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
     }
 
-
     // CREATE
-
     @Override
     public FatturaResponse create(FatturaRequest request) {
         if (request.getNumero() == null || request.getNumero().isBlank()) {
@@ -68,15 +74,14 @@ public class FatturaServiceImpl implements FatturaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
 
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
-        entity = (Fattura) fatturaRepository.save(entity);
+        entity = fatturaRepository.save(entity);
         return fatturaMapper.toResponse(entity);
     }
 
     // UPDATE (PATCH)
-
     @Override
     public FatturaResponse update(Long id, FatturaRequest request) throws Throwable {
-        Fattura entity = (Fattura) fatturaRepository.findById(id)
+        Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
         Prodotto prodotto = null;
@@ -86,21 +91,19 @@ public class FatturaServiceImpl implements FatturaService {
         }
 
         fatturaMapper.updateEntity(entity, request, prodotto);
-        entity = (Fattura) fatturaRepository.save(entity);
+        entity = fatturaRepository.save(entity);
         return fatturaMapper.toResponse(entity);
     }
 
     // GET BY ID
-
     @Override
     public FatturaResponse getById(Long id) throws Throwable {
-        Fattura entity = (Fattura) fatturaRepository.findById(id)
+        Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
         return fatturaMapper.toResponse(entity);
     }
 
     // GET BY PRODOTTO (paginated)
-
     @Override
     public PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size) {
         if (!prodottoRepository.existsById(idProdotto)) {
@@ -113,27 +116,25 @@ public class FatturaServiceImpl implements FatturaService {
                 Sort.by(Sort.Direction.DESC, "dataFattura")
         );
 
-        Page fatture = fatturaRepository.search(
+        Page<Fattura> fatture = fatturaRepository.search(
                 null,           // numero
                 idProdotto,     // idProdotto
                 null,           // dataFrom
                 null,           // dataTo
-                (BigDecimal) null,           // importoMin
+                null,           // importoMin
                 null,           // importoMax
                 pageable
         );
 
-        List<FatturaResponse> content = new ArrayList<>(fatture.getContent().size());
-        for (Object f : fatture.getContent()) {
-            content.add(fatturaMapper.toResponse((Fattura) f));
-        }
+        List<FatturaResponse> content = fatture.getContent()
+                .stream()
+                .map(fatturaMapper::toResponse)
+                .toList();
 
         return new PageImpl<>(content, pageable, fatture.getTotalElements());
     }
 
-
     // DELETE
-
     @Override
     public void delete(Long id) {
         if (!fatturaRepository.existsById(id)) {

@@ -14,9 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-/**
- * Implementazione del service Prodotto.
- */
 @Service
 @RequiredArgsConstructor
 public class ProdottoServiceImpl implements ProdottoService {
@@ -32,7 +29,7 @@ public class ProdottoServiceImpl implements ProdottoService {
     }
 
     @Override
-    public void create(ProdottoRequest request) {
+    public void create(@Valid ProdottoRequest request) {
         repository.save(mapper.toEntity(request));
     }
 
@@ -46,23 +43,27 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     public Page<ProdottoResponse> search(@Valid ProdottoRequest request) {
-        // Paging/Sordinamento di default (puoi spostarlo nel Controller e passare un Pageable dinamico)
-        Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "id"));
+        // Default di paginazione se non forniti nel body
+        int page = request.getPage() != null ? request.getPage() : 0;
+        int size = request.getSize() != null ? request.getSize() : 20;
 
-        Page<Prodotto> page = repository.search(
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        Page<Prodotto> pageEntity = repository.search(
                 emptyToNull(request.getNome()),
-                emptyToNull(request.getCodice()),
-                emptyToNull(request.getCategoria()),
+                emptyToNull(request.getDescrizione()),
+                request.getPrezzoMin(),   // BigDecimal direttamente dal DTO
+                request.getPrezzoMax(),   // BigDecimal direttamente dal DTO
                 pageable
         );
 
-        return page.map(mapper::toResponse);
+        return pageEntity.map(mapper::toResponse);
     }
 
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-            return; // idempotente
+            return; // idempotente: se non esiste, non lancia eccezioni
         }
         repository.deleteById(id);
     }

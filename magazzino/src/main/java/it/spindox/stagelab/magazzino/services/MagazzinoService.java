@@ -10,6 +10,6 @@ public interface MagazzinoService {
 
     void create(MagazzinoRequest request);
 
-    Page<MagazzinoResponse> search(@Valid MagazzinoRequest request);
+    void update(Long id, @Valid MagazzinoRequest request);Page<MagazzinoResponse> search(@Valid MagazzinoRequest request);
 void update(Long id, @Valid Magazzino request);
 void delete(Long id);}

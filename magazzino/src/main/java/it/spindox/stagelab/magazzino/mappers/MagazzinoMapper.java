@@ -10,5 +10,5 @@ public interface MagazzinoMapper {
 
     MagazzinoResponse toResponse(Magazzino entity);
 
-    void updateEntity(Magazzino magazzino, @Valid Magazzino request);
+    void updateEntity(Magazzino magazzino, @Valid MagazzinoRequest request);
 }

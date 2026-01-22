@@ -1,19 +1,20 @@
 
 package it.spindox.stagelab.magazzino.repositories;
+
 import it.spindox.stagelab.magazzino.entities.Fattura;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Repository
-public interface FatturaRepository<otto, dataFrom> extends JpaRepository<Fattura, Long> {
+public interface FatturaRepository extends JpaRepository<Fattura, Long> {
 
     @Query("""
-        SELECT ALL
+        SELECT f
         FROM Fattura f
         WHERE (:numero IS NULL OR LOWER(f.numero) LIKE LOWER(CONCAT('%', :numero, '%')))
           AND (:idProdotto IS NULL OR f.prodotto.id = :idProdotto)
@@ -22,7 +23,6 @@ public interface FatturaRepository<otto, dataFrom> extends JpaRepository<Fattura
           AND (:importoMin IS NULL OR f.importo >= :importoMin)
           AND (:importoMax IS NULL OR f.importo <= :importoMax)
     """)
-
     Page<Fattura> search(
             @Param("numero") String numero,
             @Param("idProdotto") Long idProdotto,
@@ -32,5 +32,4 @@ public interface FatturaRepository<otto, dataFrom> extends JpaRepository<Fattura
             @Param("importoMax") BigDecimal importoMax,
             Pageable pageable
     );
-
-Page<Fattura> search(String numero, Long idProdotto, LocalDate dataFrom, LocalDate dataTo, Double importoMin, Double importoMax, Pageable pageable);}
+}

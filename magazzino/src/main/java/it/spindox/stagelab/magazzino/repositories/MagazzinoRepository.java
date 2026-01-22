@@ -1,5 +1,6 @@
 
 package it.spindox.stagelab.magazzino.repositories;
+
 import it.spindox.stagelab.magazzino.entities.Magazzino;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
 
     @Query("""
-        SELECT ALL
+        SELECT m
         FROM Magazzino m
         WHERE (:id IS NULL OR m.id = :id)
           AND (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
@@ -27,4 +28,5 @@ public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
             @Param("capacitaMax") Integer capacitaMax,
             Pageable pageable
     );
-Page<Magazzino> search(String nome, Object codice, java.awt.print.Pageable of);}
+}
+

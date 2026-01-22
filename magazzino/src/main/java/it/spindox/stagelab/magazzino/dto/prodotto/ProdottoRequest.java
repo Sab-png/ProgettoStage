@@ -1,37 +1,39 @@
 
 package it.spindox.stagelab.magazzino.dto.prodotto;
+
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class ProdottoRequest {
 
-    // Nome del prodotto
-    private String nome;
+    // --- Filtri testo (opzionali) ---
+    private String nome;          // filtro su nome (LIKE)
+    private String descrizione;   // filtro su descrizione (LIKE)
 
-    // Descrizione del prodotto
-    private String descrizione;
-
-    // Prezzo del prodotto
+    // --- Prezzo singolo (per create/update) ---
     @Positive(message = "Il prezzo deve essere maggiore di zero")
-    private Double prezzo;
+    private BigDecimal prezzo;
 
-    // Campi SEARCH opzionali
-    private Double prezzoMin;
-    private Double prezzoMax;
+    // --- Filtri di ricerca su range prezzo (opzionali) ---
+    private BigDecimal prezzoMin;
+    private BigDecimal prezzoMax;
 
-    // Paginazione
-    @Min(0)
-    private int page = 0;
+    // --- Paginazione (opzionali; default nel Service) ---
+    @Min(value = 0, message = "La pagina deve essere >= 0")
+    private Integer page;   // default: 0 nel Service
 
-    @Min(1)
-    private int size = 10;
-public String getCategoria() {
-    return "";
-}
+    @Min(value = 1, message = "La size deve essere >= 1")
+    private Integer size;   // default: 20 nel Service
 
-    public String getCodice() {
-        return "";
+    // --- Validazione: prezzoMin <= prezzoMax quando entrambi presenti ---
+    @AssertTrue(message = "prezzoMin non può essere maggiore di prezzoMax")
+    public boolean isPrezzoRangeValido() {
+        if (prezzoMin == null || prezzoMax == null) return true;
+        return prezzoMin.compareTo(prezzoMax) <= 0;
     }
 }

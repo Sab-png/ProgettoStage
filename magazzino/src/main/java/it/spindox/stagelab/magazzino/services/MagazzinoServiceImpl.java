@@ -1,5 +1,6 @@
 
 package it.spindox.stagelab.magazzino.services;
+
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.Magazzino;
@@ -8,11 +9,8 @@ import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-
-import java.awt.print.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +27,11 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
     @Override
-    public void create(MagazzinoRequest request) {
+    public void create(@Valid MagazzinoRequest request) {
         repository.save(mapper.toEntity(request));
     }
 
-    @Override
-    public void update(Long id, @Valid Magazzino request) {
+    @Override public void update(Long id, @Valid MagazzinoRequest request) {
         Magazzino magazzino = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
 
@@ -42,25 +39,37 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.save(magazzino);
     }
 
-
     @Override
     public Page<MagazzinoResponse> search(@Valid MagazzinoRequest request) {
-        Page<Magazzino> page = repository.search(
-                request.getNome(),
-                request.getCodice(),
-                (Pageable) PageRequest.of(0, 20)
+        int page = request.getPage() != 0 ? request.getPage() : 0;
+        int size = request.getSize() != 0 ? request.getSize() : 20;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+
+        Page<Magazzino> pageEntity = repository.search(
+                request.getId(),
+                emptyToNull(request.getNome()),
+                emptyToNull(request.getIndirizzo()),
+                request.getCapacitaMin(),
+                request.getCapacitaMax(),
+                pageable
         );
 
-        return page.map(mapper::toResponse);
+        return pageEntity.map(mapper::toResponse);
+    }@Override
+    public void update(Long id, Magazzino request) {
+
     }
-
-
 
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) {
-          return;
+            return; // idempotente
         }
         repository.deleteById(id);
+    }
+
+    // ---- helpers ----
+    private String emptyToNull(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
     }
 }

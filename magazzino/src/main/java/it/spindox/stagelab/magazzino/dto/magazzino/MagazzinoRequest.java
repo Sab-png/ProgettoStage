@@ -31,6 +31,9 @@ public class MagazzinoRequest {
     public Object getCodice() {
         return null;
     }
+public Long getId() {
+    return 0L;
+}
 }
 
 
