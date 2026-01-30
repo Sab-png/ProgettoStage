@@ -27,4 +27,16 @@ public class ProdottoMagazzino {
 
     @Column(name = "QUANTITA")
     private Integer quantita;
+
+    public int getSogliaMinima() {
+        return 0;
+    }
+
+    public void setStatus(StockStatus nuovoStatus) {
+    }
+
+    public StockStatus getStatus() {
+        return null;
+    }
 }
+

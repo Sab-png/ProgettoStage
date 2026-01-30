@@ -33,7 +33,7 @@ public class FatturaServiceImpl implements FatturaService {
                 Sort.by(Sort.Direction.DESC, "dataFattura")
         );
 
-        // Converti eventuali Double -> BigDecimal se il DTO espone Double
+        // Converte eventuali Double -> BigDecimal se il DTO espone Double
         BigDecimal importoMin = request.getImportoMin() != null
                 ? new BigDecimal(request.getImportoMin().toString())
                 : null;
