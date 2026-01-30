@@ -1,5 +1,6 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 @Data
@@ -38,5 +39,11 @@ public class ProdottoMagazzino {
     public StockStatus getStatus() {
         return null;
     }
+
+    public Integer getScortaMin() {
+        return 0;
+    }
+    
+public void setScortaMin(@Min(0L) Integer scortaMin) {}
 }
 
