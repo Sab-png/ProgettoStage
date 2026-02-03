@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Data
 public class JobExecutionRequest {
 
-    private String jobName;
     private StatusJob status;
     private LocalDateTime startFrom;
     private LocalDateTime startTo;

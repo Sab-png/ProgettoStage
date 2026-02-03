@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 public class JobExecutionResponse {
 
     private Long id;
-    private String jobName;
     private StatusJob status;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
