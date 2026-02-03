@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
 
     @Query("""
-        SELECT p
+        SELECT DISTINCT p
         FROM Prodotto p
         WHERE (:nome IS NULL OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
           AND (:descrizione IS NULL OR LOWER(p.descrizione) LIKE LOWER(CONCAT('%', :descrizione, '%')))

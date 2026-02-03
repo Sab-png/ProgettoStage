@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagazzino, Long> {
 
     @Query("""
-        SELECT pm
+        SELECT DISTINCT pm
         FROM ProdottoMagazzino pm
         JOIN pm.prodotto p
         JOIN pm.magazzino m

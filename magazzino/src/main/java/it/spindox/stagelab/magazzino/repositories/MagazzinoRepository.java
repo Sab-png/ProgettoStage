@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
 
     @Query("""
-        SELECT m
+        SELECT DISTINCT m
         FROM Magazzino m
         WHERE (:id IS NULL OR m.id = :id)
           AND (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))

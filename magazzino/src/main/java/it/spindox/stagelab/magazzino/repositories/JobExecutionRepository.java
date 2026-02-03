@@ -19,7 +19,7 @@ public interface JobExecutionRepository extends JpaRepository<JobExecution, Long
      * Ricerca job execution con filtri opzionali
      */
     @Query("""
-        SELECT j
+        SELECT DISTINCT j
         FROM JobExecution j
         WHERE (:status    IS NULL OR j.status = :status)
           AND (:startFrom IS NULL OR j.startTime >= :startFrom)

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public interface FatturaRepository extends JpaRepository<Fattura, Long> {
 
     @Query("""
-        SELECT f
+        SELECT DISTINCT f
         FROM Fattura f
         WHERE (:numero IS NULL OR LOWER(f.numero) LIKE LOWER(CONCAT('%', :numero, '%')))
           AND (:idProdotto IS NULL OR f.prodotto.id = :idProdotto)
