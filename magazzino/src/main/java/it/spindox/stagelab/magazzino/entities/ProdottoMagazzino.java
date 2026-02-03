@@ -2,7 +2,9 @@ package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Data
 @Entity
 @Table(name = "PRODOTTO_MAGAZZINO")

@@ -1,8 +1,11 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 
+@Slf4j
 @Data
 @Entity
 @Table(name = "MAGAZZINO")

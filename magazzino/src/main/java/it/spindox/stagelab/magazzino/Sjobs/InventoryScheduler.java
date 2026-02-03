@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Slf4j
 @Component
-@EnableScheduling
+
 public class InventoryScheduler {
 
-    private static final Logger logger =
-            Logger.getLogger(InventoryScheduler.class.getName());
+
 
     private final MagazzinoService magazzinoService;
     private final JobExecutionService jobExecutionService;
@@ -29,7 +29,7 @@ public class InventoryScheduler {
     @Scheduled(fixedRateString = "${inventory.check.rate}")
     public void runCheck() {
 
-        logger.info("Il job sta iniziando");
+        log.info("Il job sta iniziando");
 
         // Avvio
         JobExecution job = jobExecutionService.start();
@@ -39,15 +39,15 @@ public class InventoryScheduler {
             jobExecutionService.success(job);
 
             // Log di fine in caso di successo
-            logger.info("Il job è finito (SUCCESS)");
+            log.info("Il job è finito (SUCCESS)");
 
         } catch (Exception e) {
             jobExecutionService.error(job, e);
 
-            logger.log(Level.SEVERE, "Errore durante il job", e);
+            log.info( "Errore durante il job", e);
 
             // Log di fine in caso di errore
-            logger.info("Il job è finito (ERROR)");
+            log.info("Il job è finito (ERROR)");
 
             throw e; // segnala a Spring che il task è fallito
         }

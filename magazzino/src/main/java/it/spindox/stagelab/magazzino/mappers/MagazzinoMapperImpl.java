@@ -5,8 +5,10 @@ import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.Magazzino;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class MagazzinoMapperImpl implements MagazzinoMapper {
 

@@ -10,6 +10,7 @@ import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.List;
  * Implementazione del servizio per la gestione dei Magazzini.
  * Include la logica di controllo livelli di stock con aggiornamento stato (VERDE/GIALLO/ROSSO).
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MagazzinoServiceImpl implements MagazzinoService {

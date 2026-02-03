@@ -10,12 +10,14 @@ import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
 import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FatturaServiceImpl implements FatturaService {

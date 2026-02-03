@@ -2,8 +2,10 @@ package it.spindox.stagelab.magazzino.mappers;
 import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
 

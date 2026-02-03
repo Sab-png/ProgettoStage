@@ -12,11 +12,13 @@ import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {

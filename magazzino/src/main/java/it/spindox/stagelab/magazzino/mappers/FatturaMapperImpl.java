@@ -4,10 +4,12 @@ import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.entities.Fattura;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Component
 public class FatturaMapperImpl implements FatturaMapper {
 
