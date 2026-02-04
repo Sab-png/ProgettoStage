@@ -36,4 +36,11 @@ public class Prodotto {
 
     @OneToMany(mappedBy = "prodotto")
     private List<ProdottoMagazzino> prodottoMagazzino;
+
+    @Column(name = "TOTAL_STOCK", nullable = false)
+    private Integer totalStock; // Stock totale fisico
+
+    @Column(name = "AVAILABLE_STOCK", nullable = false)
+    private Integer availableStock; // Stock disponibile (totale - riservato)
+
 }
