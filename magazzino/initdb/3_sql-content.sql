@@ -10,6 +10,7 @@ INSERT INTO magazzino.PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO) VALUES (magazzino
 INSERT INTO magazzino.PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO) VALUES (magazzino.SEQ_PRODOTTO.NEXTVAL, 'Mozzarella Galbani', 'Mozzarella fresca 125g', 1.19);
 INSERT INTO magazzino.PRODOTTO (ID, NOME, DESCRIZIONE, PREZZO) VALUES (magazzino.SEQ_PRODOTTO.NEXTVAL, 'Succhi Yoga', 'Succo di frutta assortito 200ml', 0.89);
 
+
 -- Inserimento dati di esempio per MAGAZZINO (se non già presenti)
 INSERT INTO magazzino.MAGAZZINO (ID, NOME, INDIRIZZO, CAPACITA) VALUES (magazzino.SEQ_MAGAZZINO.NEXTVAL, 'Magazzino Nord', 'Via Milano 10, Torino', 1000);
 INSERT INTO magazzino.MAGAZZINO (ID, NOME, INDIRIZZO, CAPACITA) VALUES (magazzino.SEQ_MAGAZZINO.NEXTVAL, 'Magazzino Centro', 'Via Roma 22, Bologna', 800);
@@ -36,3 +37,6 @@ INSERT INTO magazzino.FATTURA (ID, DATA_FATTURA, IMPORTO, ID_PRODOTTO) VALUES (m
 INSERT INTO magazzino.FATTURA (ID, DATA_FATTURA, IMPORTO, ID_PRODOTTO) VALUES (magazzino.SEQ_FATTURA.NEXTVAL, TO_DATE('2026-01-12', 'YYYY-MM-DD'), 54.90, 3); -- Olio Extra Vergine
 INSERT INTO magazzino.FATTURA (ID, DATA_FATTURA, IMPORTO, ID_PRODOTTO) VALUES (magazzino.SEQ_FATTURA.NEXTVAL, TO_DATE('2026-01-13', 'YYYY-MM-DD'), 23.90, 4); -- Biscotti Mulino Bianco
 INSERT INTO magazzino.FATTURA (ID, DATA_FATTURA, IMPORTO, ID_PRODOTTO) VALUES (magazzino.SEQ_FATTURA.NEXTVAL, TO_DATE('2026-01-13', 'YYYY-MM-DD'), 3.50, 5); -- Acqua Sant’Anna
+
+
+
