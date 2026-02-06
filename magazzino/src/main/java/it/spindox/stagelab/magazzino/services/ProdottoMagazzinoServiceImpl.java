@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Slf4j
@@ -98,23 +97,6 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         repository.deleteById(id);
     }
 
-    @Override
-    public void checkStockLevels() {
-
-        List<ProdottoMagazzino> all = repository.findAll();
-
-        all.stream()
-                .filter(pm -> pm.getQuantita() != null && pm.getScortaMin() != null)
-                .filter(pm -> pm.getQuantita() < pm.getScortaMin())
-                .forEach(pm -> {
-                    System.out.println("⚠️ Stock basso per: "
-                            + (pm.getProdotto() != null ? pm.getProdotto().getNome() : "Prodotto?")
-                            + " nel magazzino "
-                            + (pm.getMagazzino() != null ? pm.getMagazzino().getNome() : "Magazzino?")
-                            + " — quantita=" + pm.getQuantita()
-                            + ", scortaMin=" + pm.getScortaMin());
-                });
-    }
 
     // ---- helpers ----
     private String emptyToNull(String s) {

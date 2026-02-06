@@ -44,12 +44,12 @@ public class InventoryScheduler {
         } catch (Exception e) {
             jobExecutionService.error(job, e);
 
-            log.info( "Errore durante il job", e);
+            log.error( "Errore durante il job", e);
 
             // Log di fine in caso di errore
-            log.info("Il job è finito (ERROR)");
+            log.error("Il job è finito (ERROR)");
 
-            throw e; // segnala a Spring che il task è fallito
+            throw e; // segnala che il task è fallito
         }
     }
 }

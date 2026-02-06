@@ -12,15 +12,26 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
+import java.util.Objects;
+
+
 
 /**
  * Implementazione del servizio per la gestione dei Magazzini.
  * Include la logica di controllo livelli di stock con aggiornamento stato (VERDE/GIALLO/ROSSO).
+ *
+ * Regole:
+ * - quantita == null     → ignora (no DB update, no log critici)
+ * - quantita == 0        → ROSSO (log ERROR)
+ * - quantita < soglia    → GIALLO (log WARN se soglia > 5)
+ * - quantita >= soglia   → VERDE (apposto)
  */
 @Slf4j
 @Service
@@ -34,13 +45,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     @Value("${inventory.min.threshold:5}")
     private int defaultThreshold;
 
-    // ANSI colori per log console
-    private static final String RESET  = "\u001B[0m";
-    private static final String GREEN  = "\u001B[32m";
-    private static final String YELLOW = "\u001B[33m";
-    private static final String RED    = "\u001B[31m";
-
-    // CRUD Magazzino
+    // CRUD MAGAZZINO
 
 
     @Override
@@ -69,9 +74,9 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     @Override
     @Transactional(readOnly = true)
     public Page<MagazzinoResponse> search(@Valid MagazzinoRequest request) {
-
         int page = request.getPage() != 0 ? request.getPage() : 0;
         int size = request.getSize() != 0 ? request.getSize() : 20;
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
         Page<Magazzino> pageEntity = repository.search(
@@ -97,65 +102,135 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.deleteById(id);
     }
 
+    // LOGICA CONTROLLO STOCK
 
-    //              LOGICA DELLO STOCK CON COLORI ANSI
 
+    /**
+     * Scorre tutti i ProdottoMagazzino
+     */
     @Override
     @Transactional
     public void checkStockLevels() {
-
         List<ProdottoMagazzino> lista = prodottoMagazzinoRepository.findAll();
+        lista.forEach(this::processSingleStockItem);
+    }
 
-        for (ProdottoMagazzino pm : lista) {
+    /** Processa un singolo record di ProdottoMagazzino. */
+    private void processSingleStockItem(ProdottoMagazzino pm) {
+        // 1) Se non c’è quantità, non segniamo nulla (no DB, no log critici)
 
-            int quantita = pm.getQuantita();
-            int soglia = pm.getSogliaMinima() > 0 ? pm.getSogliaMinima() : defaultThreshold;
+        if (pm.getQuantita() == null) {
+            log.debug("Quantità assente: skip | idProdottoMagazzino={}", pm.getId());
+            return;
+        }
 
-            StockStatus nuovoStatus;
+        // 2) Calcola soglia effettiva
 
-            if (quantita == 0) {
-                nuovoStatus = StockStatus.ROSSO;
-            }
-            else if (quantita < soglia) {
-                nuovoStatus = StockStatus.GIALLO;
-            }
-            else {
-                nuovoStatus = StockStatus.VERDE;
-            }
+        int soglia = computeEffectiveThreshold(pm);
 
-            StockStatus attuale = pm.getStatus();
+        // 3) Determina lo stato
 
-            // Aggiorna solo se lo stato è cambiato
-            if (attuale != nuovoStatus) {
-                pm.setStatus(nuovoStatus);
-                prodottoMagazzinoRepository.save(pm);
+        StockStatus nuovo = StockStatus.fromQuantita(pm.getQuantita(), soglia);
+        if (nuovo == null) {
+            log.debug("Quantità non valutabile: skip | idProdottoMagazzino={}", pm.getId());
+            return;
+        }
 
-                System.out.println(
-                        GREEN + "Aggiornato stock: " + RESET +
-                                "'" + pm.getProdotto().getNome() + "'" +
-                                " | da " + attuale + " → " + nuovoStatus +
-                                " | Q=" + quantita + " | soglia=" + soglia
-                );
-            }
+        StockStatus attuale = pm.getStatus();
 
-            // Log colorati di situazione
-            switch (nuovoStatus) {
-                case GIALLO ->
-                        System.out.println(YELLOW +
-                                "SOTTO SOGLIA: '" + pm.getProdotto().getNome() +
-                                "' (Q=" + quantita + ", soglia=" + soglia + ")" +
-                                RESET);
+        // 4) Aggiorna DB solo se necessario (GIALLO/ROSSO) e lo stato è cambiato
 
-                case ROSSO ->
-                        System.out.println(RED +
-                                "ESAURITO: '" + pm.getProdotto().getNome() + "'" +
-                                RESET);
+        updateStatusIfNeeded(pm, attuale, nuovo, soglia);
 
-                case VERDE ->
-                        System.out.println(GREEN +
-                                "OK: '" + pm.getProdotto().getNome() + "' disponibile" +
-                                RESET);
-            }
+        // 5) Log per il livello di gravità (GIALLO → WARN solo se soglia > 5)
+        logStatus(pm, nuovo, soglia);
+    }
+
+    /** Soglia effettiva*/
+
+    private int computeEffectiveThreshold(ProdottoMagazzino pm) {
+        Integer s = pm.getSogliaMinima();
+        return (s != null && s > 0) ? s : defaultThreshold;
+    }
+
+    /**
+     * Aggiorna il DB solo se:
+     * - lo stato è cambiato
+     * - (GIALLO/ROSSO)
+     * Mai  VERDE.
+     */
+
+    private void updateStatusIfNeeded(ProdottoMagazzino pm, StockStatus attuale, StockStatus nuovo, int soglia) {
+        if (!Objects.equals(attuale, nuovo) && shouldPersist(nuovo)) {
+            pm.setStatus(nuovo);
+            prodottoMagazzinoRepository.save(pm);
+
+            var names = getSafeNames(pm);
+            log.info(
+                    "Aggiornato stock | prodotto='{}' | magazzino='{}' | {} → {} | Q={} | soglia={}",
+                    names.nomeProdotto(),
+                    names.nomeMagazzino(),
+                    attuale,
+                    nuovo,
+                    pm.getQuantita(),
+                    soglia
+            );
         }
     }
+
+    /** Si controllano solo stati non-OK (no VERDI). */
+
+    private boolean shouldPersist(StockStatus status) {
+        return status == StockStatus.GIALLO || status == StockStatus.ROSSO;
+    }
+
+    /** Logga la situazione corrente (WARN per GIALLO solo se soglia < 5). */
+
+    private void logStatus(ProdottoMagazzino pm, StockStatus status, int soglia) {
+        var names = getSafeNames(pm);
+        int q = pm.getQuantita();
+
+        switch (status) {
+            case ROSSO -> log.error(
+                    "ESAURITO | prodotto='{}' | magazzino='{}' | Q=0",
+                    names.nomeProdotto(), names.nomeMagazzino()
+            );
+
+            case GIALLO -> {
+                if (soglia < 5) {
+                    log.warn(
+                            "SOTTO SOGLIA | prodotto='{}' | magazzino='{}' | Q={} | soglia={}",
+                            names.nomeProdotto(), names.nomeMagazzino(), q, soglia
+                    );
+                } else {
+                    log.debug(
+                            "SOTTO SOGLIA (silenced, soglia<=5) | prodotto='{}' | magazzino='{}' | Q={} | soglia={}",
+                            names.nomeProdotto(), names.nomeMagazzino(), q, soglia
+                    );
+                }
+            }
+
+            case VERDE -> log.debug(
+                    "OK | prodotto='{}' | magazzino='{}' | Q={}",
+                    names.nomeProdotto(), names.nomeMagazzino(), q
+            );
+        }
+    }
+
+    /** Estrattore nomi sicuri per i log, */
+
+    private Names getSafeNames(ProdottoMagazzino pm) {
+        String prodotto = (pm.getProdotto() != null && pm.getProdotto().getNome() != null)
+                ? pm.getProdotto().getNome()
+                : "Prodotto sconosciuto";
+
+        String magazzino = (pm.getMagazzino() != null && pm.getMagazzino().getNome() != null)
+                ? pm.getMagazzino().getNome()
+                : "Magazzino sconosciuto";
+
+        return new Names(prodotto, magazzino);
+    }
+
+    /** Semplice record per restituire i nomi. */
+    private record Names(String nomeProdotto, String nomeMagazzino) {}
 }

@@ -20,5 +20,4 @@ public interface ProdottoMagazzinoService {
 
     void delete(Long id);
 
-    void checkStockLevels();
 }
