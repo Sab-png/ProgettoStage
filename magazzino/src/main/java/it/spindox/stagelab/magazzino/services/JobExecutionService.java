@@ -13,9 +13,9 @@ import java.util.Optional;
 
 public interface JobExecutionService {
 
-
+    // =========================
     // API / Controller methods
-
+    // =========================
     @Transactional(readOnly = true)
     JobExecutionResponse getById(Long id);
 
@@ -25,34 +25,21 @@ public interface JobExecutionService {
     // =========================
     // Scheduler lifecycle
     // =========================
-
-    /**
-     * Avvia una nuova esecuzione di job
-     */
     JobExecution start();
 
-    /**
-     * Marca l'esecuzione come SUCCESS
-     */
     void success(JobExecution job);
 
-    /**
-     * Marca l'esecuzione come ERROR
-     */
+    /** Per compatibilità: delega a failed(...) */
     void error(JobExecution job, Exception e);
 
+    void failed(JobExecution job, Exception e);
+
+    // =========================
     // Repository-style helpers
-
-
-    /**
-     * Ultima esecuzione (per startTime)
-     */
+    // =========================
     @Transactional(readOnly = true)
     Optional<JobExecution> findLast();
 
-    /**
-     * Esecuzione attualmente in RUNNING
-     */
     @Transactional(readOnly = true)
     Optional<JobExecution> findRunning();
 

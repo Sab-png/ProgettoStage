@@ -49,5 +49,12 @@ public class MagazzinoController {
     ) {
         return ResponseEntity.ok(magazzinoService.search(searchRequest));
     }
-}
 
+    // METODO CHECK STOCK
+
+    @PostMapping("/check-stock")
+    public ResponseEntity<Void> checkStockLevels() {
+        magazzinoService.checkStockLevels();
+        return ResponseEntity.ok().build();
+    }
+}

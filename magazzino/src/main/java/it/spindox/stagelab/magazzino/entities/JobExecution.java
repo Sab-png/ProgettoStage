@@ -1,38 +1,30 @@
 package it.spindox.stagelab.magazzino.entities;
+import it.spindox.stagelab.magazzino.entities.StatusJob;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Slf4j
-@Data
 @Entity
 @Table(name = "JOB_EXECUTION")
+@Data
 public class JobExecution {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "job_exec_seq_gen")
-    @SequenceGenerator(
-            name = "job_exec_seq_gen",
-            sequenceName = "JOB_EXECUTION_SEQ",
-            allocationSize = 1
-    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "job_exec_seq")
+    @SequenceGenerator(name = "job_exec_seq", sequenceName = "JOB_EXECUTION_SEQ", allocationSize = 1)
+    @Column(name = "ID")
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "STATUS", nullable = false)
     private StatusJob status;
 
-    @Column(nullable = false)
+    @Column(name = "START_TIME", nullable = false)
     private LocalDateTime startTime;
 
+    @Column(name = "END_TIME")
     private LocalDateTime endTime;
 
-    @Column(length = 2000)
+    @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;
 }
-

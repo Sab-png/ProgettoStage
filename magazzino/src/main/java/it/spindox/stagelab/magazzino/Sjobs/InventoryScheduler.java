@@ -2,54 +2,47 @@ package it.spindox.stagelab.magazzino.Sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import it.spindox.stagelab.magazzino.services.MagazzinoService;
+import it.spindox.stagelab.magazzino.entities.StatusJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 @Slf4j
 @Component
-
+@RequiredArgsConstructor
 public class InventoryScheduler {
-
-
 
     private final MagazzinoService magazzinoService;
     private final JobExecutionService jobExecutionService;
 
-    public InventoryScheduler(MagazzinoService magazzinoService,
-                              JobExecutionService jobExecutionService) {
-        this.magazzinoService = magazzinoService;
-        this.jobExecutionService = jobExecutionService;
-    }
-
-    @Scheduled(fixedRateString = "${inventory.check.rate}")
+    /**
+     * Job schedulato di controllo stock.
+     * Usa fixedDelay per evitare overlap.
+     */
+    @Scheduled(fixedDelayString = "${inventory.check.rate}")
     public void runCheck() {
 
-        log.info("Il job sta iniziando");
+        log.info("JOB INVENTORY | Avvio controllo stock");
 
-        // Avvio
+        //  Avvio job
         JobExecution job = jobExecutionService.start();
 
         try {
+            //  Business logic
             magazzinoService.checkStockLevels();
-            jobExecutionService.success(job);
 
-            // Log di fine in caso di successo
-            log.info("Il job è finito (SUCCESS)");
+            //  Successo
+            jobExecutionService.success(job);
+            log.info("JOB INVENTORY | Completato con SUCCESS");
 
         } catch (Exception e) {
-            jobExecutionService.error(job, e);
 
-            log.error( "Errore durante il job", e);
+            // Errore
+            jobExecutionService.failed(job, e);
+            log.error("JOB INVENTORY | Errore durante l'esecuzione", e);
 
-            // Log di fine in caso di errore
-            log.error("Il job è finito (ERROR)");
-
-            throw e; // segnala che il task è fallito
         }
     }
 }

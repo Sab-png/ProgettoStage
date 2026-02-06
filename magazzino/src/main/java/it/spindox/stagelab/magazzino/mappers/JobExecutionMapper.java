@@ -1,5 +1,4 @@
 package it.spindox.stagelab.magazzino.mappers;
-import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJob;

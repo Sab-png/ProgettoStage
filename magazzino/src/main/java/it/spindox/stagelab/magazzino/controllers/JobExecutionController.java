@@ -3,10 +3,7 @@ import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +28,7 @@ public class JobExecutionController {
      * Ricerca JobExecution con filtri (POST)
      */
     @PostMapping("/search")
-    public ResponseEntity<Page<JobExecutionResponse>> search(
+    public ResponseEntity search(
             @Valid @RequestBody JobExecutionRequest request
     ) {
         return ResponseEntity.ok(jobExecutionService.search(request));

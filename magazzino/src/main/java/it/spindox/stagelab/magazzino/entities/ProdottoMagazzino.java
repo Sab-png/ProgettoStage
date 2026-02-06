@@ -1,5 +1,6 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
+import it.spindox.stagelab.magazzino.entities.StockStatus;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 public class ProdottoMagazzino {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prod_mag_seq_gen")
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "prod_mag_seq_gen"
+    )
     @SequenceGenerator(
             name = "prod_mag_seq_gen",
             sequenceName = "PRODOTTO_MAGAZZINO_SEQ",
@@ -31,21 +35,15 @@ public class ProdottoMagazzino {
     @Column(name = "QUANTITA")
     private Integer quantita;
 
-    public int getSogliaMinima() {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", length = 20)
+    private StockStatus status;
+
+    @Column(name = "SCORTA_MIN")
+    @Min(0)
+    private Integer scortaMin;
+
+    public Integer getSogliaMinima() {
         return 0;
     }
-
-    public void setStatus(StockStatus nuovoStatus) {
-    }
-
-    public StockStatus getStatus() {
-        return null;
-    }
-
-    public Integer getScortaMin() {
-        return 0;
-    }
-    
-public void setScortaMin(@Min(0L) Integer scortaMin) {}
 }
-
