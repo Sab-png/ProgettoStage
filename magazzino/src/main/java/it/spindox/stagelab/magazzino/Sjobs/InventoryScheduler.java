@@ -43,6 +43,8 @@ public class InventoryScheduler {
             jobExecutionService.failed(job, e);
             log.error("JOB INVENTORY | Errore durante l'esecuzione", e);
 
+            log.info("JOB INVENTORY | Fine controllo stock");
+
         }
     }
 }

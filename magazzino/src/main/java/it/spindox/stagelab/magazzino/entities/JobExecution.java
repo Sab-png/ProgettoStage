@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "JOB_EXECUTION")
 @Data
@@ -11,7 +12,11 @@ public class JobExecution {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "job_exec_seq")
-    @SequenceGenerator(name = "job_exec_seq", sequenceName = "JOB_EXECUTION_SEQ", allocationSize = 1)
+    @SequenceGenerator(
+            name = "job_exec_seq",
+            sequenceName = "JOB_EXECUTION_SEQ",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 
