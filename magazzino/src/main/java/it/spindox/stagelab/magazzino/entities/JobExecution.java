@@ -30,6 +30,10 @@ public class JobExecution {
     @Column(name = "END_TIME")
     private LocalDateTime endTime;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ERROR_TYPE")
+    private SJobErrorType errorType;
+
     @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;
 }

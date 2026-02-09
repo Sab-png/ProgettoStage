@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.services;
-
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import org.springframework.data.domain.PageImpl;

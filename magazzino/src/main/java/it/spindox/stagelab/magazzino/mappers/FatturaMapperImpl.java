@@ -16,9 +16,8 @@ public class FatturaMapperImpl implements FatturaMapper {
     @Override
     public Fattura toEntity(FatturaRequest request, Prodotto prodotto) {
         Fattura f = new Fattura();
-        f.setNumero(request.getNumero());
         f.setDataFattura(request.getDataFattura());
-        f.setImporto(BigDecimal.valueOf(request.getImporto()));
+        f.setImporto(request.getImporto());
         f.setQuantita(request.getQuantita());
         f.setProdotto(prodotto);
         return f;
@@ -41,15 +40,11 @@ public class FatturaMapperImpl implements FatturaMapper {
 
     @Override
     public void updateEntity(Fattura target, FatturaRequest request, Prodotto prodotto) {
-
-        if (request.getNumero() != null) {
-            target.setNumero(request.getNumero());
-        }
         if (request.getDataFattura() != null) {
             target.setDataFattura(request.getDataFattura());
         }
         if (request.getImporto() != null) {
-            target.setImporto(BigDecimal.valueOf(request.getImporto()));
+            target.setImporto(request.getImporto());
         }
         if (request.getQuantita() != null) {
             target.setQuantita(request.getQuantita());

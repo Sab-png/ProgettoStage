@@ -1,40 +1,55 @@
 
 package it.spindox.stagelab.magazzino.dto.fattura;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+
 
 @Data
 public class FatturaRequest {
 
-    // Numero fattura
-    private String numero;
-
-    // Data fattura
+    @NotNull(message = "La data fattura è obbligatoria")
     private LocalDate dataFattura;
 
-    // Prodotto associato
+    @NotNull(message = "Il prodotto è obbligatorio")
     private Long idProdotto;
 
-    // Quantità
+    @NotNull(message = "La quantità è obbligatoria")
     @Positive(message = "La quantità deve essere maggiore di zero")
     private Integer quantita;
 
-    // Importo totale
+    @NotNull(message = "L'importo è obbligatorio")
     @Positive(message = "L'importo deve essere maggiore di zero")
-    private Double importo;
+    private BigDecimal importo;
 
-    // Campi SEARCH
-    private LocalDate dataFrom;
-    private LocalDate dataTo;
-    private Double importoMin;
-    private Double importoMax;
+    public int getPage() {
+        return 0;
+    }
 
-    // Paginazione
-    @Min(0)
-    private int page = 0;
+    public int getSize() {
+        return 0;
+    }
 
-    @Min(1)
-    private int size = 10;
+    public Object getImportoMin() {
+        return null;
+    }
+
+    public Object getImportoMax() {
+        return null;
+    }
+
+    public String getNumero() {
+        return "";
+    }
+
+    public LocalDate getDataFrom() {
+        return null;
+    }
+
+    public LocalDate getDataTo() {
+        return null;
+    }
 }

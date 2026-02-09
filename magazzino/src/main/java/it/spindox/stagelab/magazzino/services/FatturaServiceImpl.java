@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.services;
-
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.entities.Fattura;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 
