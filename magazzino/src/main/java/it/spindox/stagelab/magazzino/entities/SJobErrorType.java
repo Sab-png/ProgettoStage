@@ -1,11 +1,13 @@
 package it.spindox.stagelab.magazzino.entities;
 
 public enum SJobErrorType {
-    BUSINESS_ERROR,     // errore di dominio
-    VALIDATION_ERROR,   // dati non validi
-    TECHNICAL_ERROR,    // DB, rete, timeout
-    SYSTEM_ERROR,       // crash, NPE, OOM
-    EXTERNAL_SERVICE,   // chiamata a servizi esterni
-    UNKNOWN             // fallback
-}
 
+    VALIDATION_ERROR,     // dati non validi
+    CONFIGURATION_ERROR,  // configurazione errata o mancante
+    TECHNICAL_ERROR,      // DB, rete, timeout
+    EXTERNAL_SERVICE,     // servizi esterni
+    SECURITY_ERROR,       // auth, token, certificati
+    SYSTEM_ERROR,         // crash, NPE, OOM
+    INTERRUPTED,          // job interrotto
+    UNKNOWN               // fallback
+}

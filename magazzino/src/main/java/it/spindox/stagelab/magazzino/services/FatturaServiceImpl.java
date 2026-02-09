@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,6 @@ public class FatturaServiceImpl implements FatturaService {
                 Sort.by(Sort.Direction.DESC, "dataFattura")
         );
 
-        // Converte eventuali Double -> BigDecimal se il DTO espone Double
         BigDecimal importoMin = request.getImportoMin() != null
                 ? new BigDecimal(request.getImportoMin().toString())
                 : null;
@@ -60,12 +60,10 @@ public class FatturaServiceImpl implements FatturaService {
         return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
     }
 
-    // CREATE
+    // CREATE CON SEQUENCE
     @Override
     public FatturaResponse create(FatturaRequest request) {
-        if (request.getNumero() == null || request.getNumero().isBlank()) {
-            throw new IllegalArgumentException("Numero fattura obbligatorio");
-        }
+
         if (request.getIdProdotto() == null) {
             throw new IllegalArgumentException("Id prodotto obbligatorio");
         }
@@ -74,6 +72,11 @@ public class FatturaServiceImpl implements FatturaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
 
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
+
+        // ✅ GENERAZIONE NUMERO FATTURA DA SEQUENCE
+        Long nextVal = fatturaRepository.nextNumeroSeq();
+        entity.setNumero("FAT-" + nextVal);
+
         entity = fatturaRepository.save(entity);
         return fatturaMapper.toResponse(entity);
     }
@@ -103,9 +106,10 @@ public class FatturaServiceImpl implements FatturaService {
         return fatturaMapper.toResponse(entity);
     }
 
-    // GET BY PRODOTTO (paginated)
+    // GET BY PRODOTTO
     @Override
     public PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size) {
+
         if (!prodottoRepository.existsById(idProdotto)) {
             throw new ResourceNotFoundException("Prodotto non trovato");
         }
@@ -117,12 +121,12 @@ public class FatturaServiceImpl implements FatturaService {
         );
 
         Page<Fattura> fatture = fatturaRepository.search(
-                null,           // numero
-                idProdotto,     // idProdotto
-                null,           // dataFrom
-                null,           // dataTo
-                null,           // importoMin
-                null,           // importoMax
+                null,
+                idProdotto,
+                null,
+                null,
+                null,
+                null,
                 pageable
         );
 

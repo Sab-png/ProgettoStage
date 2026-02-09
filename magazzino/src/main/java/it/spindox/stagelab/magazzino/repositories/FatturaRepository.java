@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
 public interface FatturaRepository extends JpaRepository<Fattura, Long> {
 
     @Query("""
@@ -32,4 +31,8 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
             @Param("importoMax") BigDecimal importoMax,
             Pageable pageable
     );
+
+    //  LETTURA SEQUENCE ORACLE
+    @Query(value = "SELECT MAGAZZINO.FATTURA_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
+    Long nextNumeroSeq();
 }

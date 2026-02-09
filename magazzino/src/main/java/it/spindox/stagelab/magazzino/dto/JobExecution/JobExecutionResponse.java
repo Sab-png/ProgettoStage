@@ -1,4 +1,5 @@
 package it.spindox.stagelab.magazzino.dto.JobExecution;
+import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import lombok.Data;
@@ -11,8 +12,8 @@ public class JobExecutionResponse {
     private StatusJob status;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private SJobErrorType errorType;
     private String errorMessage;
-
-    public void setStatus(it.spindox.stagelab.magazzino.entities.StatusJob status) {
-    }
 }
+
+

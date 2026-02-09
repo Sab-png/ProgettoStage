@@ -3,6 +3,7 @@ import it.spindox.stagelab.magazzino.entities.StatusJob;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 
 @Entity
@@ -25,10 +26,11 @@ public class JobExecution {
     private StatusJob status;
 
     @Column(name = "START_TIME", nullable = false)
-    private LocalDateTime startTime;
+    private OffsetDateTime startTime;
 
     @Column(name = "END_TIME")
-    private LocalDateTime endTime;
+    private OffsetDateTime endTime;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ERROR_TYPE")

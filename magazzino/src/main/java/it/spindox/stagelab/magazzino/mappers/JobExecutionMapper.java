@@ -1,6 +1,7 @@
 package it.spindox.stagelab.magazzino.mappers;
 import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
+import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 
 public interface JobExecutionMapper {
@@ -20,5 +21,10 @@ public interface JobExecutionMapper {
      */
     void updateEntity(JobExecution target,
                       StatusJob status,
+                      String errorMessage);
+
+    void updateEntity(JobExecution target,
+                      StatusJob status,
+                      SJobErrorType errorType,
                       String errorMessage);
 }

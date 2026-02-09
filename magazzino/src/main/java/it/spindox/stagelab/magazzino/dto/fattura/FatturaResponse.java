@@ -17,7 +17,6 @@ public class FatturaResponse {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataFattura;
-
     private BigDecimal importo;
     private Integer quantita;
     private Long idProdotto;
