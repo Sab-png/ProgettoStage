@@ -44,3 +44,5 @@ public interface JobExecutionRepository extends JpaRepository<JobExecution, Long
      */
     Optional<JobExecution> findFirstByStatus(StatusJob status);
 }
+
+

@@ -5,11 +5,13 @@ import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
+import it.spindox.stagelab.magazzino.mappers.JobExecutionMapper;
 import it.spindox.stagelab.magazzino.repositories.JobExecutionRepository;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,23 +21,46 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class JobExecutionServiceImpl implements JobExecutionService {
 
     private final JobExecutionRepository jobExecutionRepository;
+    private final JobExecutionMapper jobExecutionMapper;
+
+
+    // API
+
 
     @Override
+    @Transactional(readOnly = true)
     public JobExecutionResponse getById(Long id) {
-        return null;
+        JobExecution job = jobExecutionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("JobExecution not found: " + id));
+
+        return jobExecutionMapper.toResponse(job);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<JobExecutionResponse> search(JobExecutionRequest request) {
-        return null;
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+
+        Page<JobExecution> page = jobExecutionRepository.search(
+                request.getStatus(),
+                request.getStartFrom(),
+                request.getStartTo(),
+                request.getHasError(),
+                pageable
+        );
+
+        return page.map(jobExecutionMapper::toResponse);
     }
+
+
+    // Job lifecycle
+
 
     @Override
     @Transactional
@@ -91,29 +116,83 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         );
     }
 
+
+    // Repository helpers
+
+
     @Override
+    @Transactional(readOnly = true)
     public Optional<JobExecution> findLast() {
-        return Optional.empty();
+        return jobExecutionRepository.findFirstByOrderByStartTimeDesc();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<JobExecution> findRunning() {
-        return Optional.empty();
+        return jobExecutionRepository.findFirstByStatus(StatusJob.RUNNING);
     }
 
     @Override
-    public Page<JobExecution> search(StatusJob status, LocalDateTime startFrom, LocalDateTime startTo, Boolean hasError, Pageable pageable) {
-        return null;
+    @Transactional(readOnly = true)
+    public Page<JobExecution> search(
+            StatusJob status,
+            LocalDateTime startFrom,
+            LocalDateTime startTo,
+            Boolean hasError,
+            Pageable pageable
+    ) {
+        return jobExecutionRepository.search(status, startFrom, startTo, hasError, pageable);
     }
 
-    // =========================
+
     // ERROR TYPE MAPPER
-    // =========================
+
 
     private SJobErrorType mapErrorType(Exception e) {
 
         if (e == null) {
+            return SJobErrorType.UNKNOWN;
         }
-        return null;
+
+        // VALIDATION
+        if (e instanceof IllegalArgumentException ||
+                e instanceof jakarta.validation.ValidationException) {
+            return SJobErrorType.VALIDATION_ERROR;
+        }
+
+        // CONFIGURATION
+        if (e instanceof IllegalStateException ||
+                (e.getMessage() != null && e.getMessage().toLowerCase().contains("configuration"))) {
+            return SJobErrorType.CONFIGURATION_ERROR;
+        }
+
+        // TECHNICAL (DB, rete, IO, timeout)
+        if (e instanceof java.sql.SQLException ||
+                e instanceof org.springframework.dao.DataAccessException ||
+                e instanceof java.net.SocketTimeoutException ||
+                e instanceof java.io.IOException) {
+            return SJobErrorType.TECHNICAL_ERROR;
+        }
+
+        // EXTERNAL SERVICES (RestTemplate, WebClient, Feign)
+        if (e instanceof org.springframework.web.client.RestClientException
+                || e.getClass().getName().startsWith("feign.")) {
+            return SJobErrorType.EXTERNAL_SERVICE;
+        }
+
+        // SECURITY
+        if (e instanceof org.springframework.security.core.AuthenticationException ||
+                e instanceof org.springframework.security.access.AccessDeniedException) {
+            return SJobErrorType.SECURITY_ERROR;
+        }
+
+        // INTERRUPTED
+        if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+            return SJobErrorType.INTERRUPTED;
+        }
+
+        // QUALSIASI ALTRO TIPO DI ERRORE
+        return SJobErrorType.SYSTEM_ERROR;
     }
 }

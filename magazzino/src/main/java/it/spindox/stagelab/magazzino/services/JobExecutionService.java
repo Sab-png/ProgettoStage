@@ -34,13 +34,19 @@ public interface JobExecutionService {
 
     void success(JobExecution job);
 
-    /** legacy */
+    /**
+     * legacy
+     */
     void error(JobExecution job, Exception e);
 
-    /** legacy */
+    /**
+     * legacy
+     */
     void failed(JobExecution job, Exception e);
 
-    /** nuovo e corretto */
+    /**
+     * nuovo e corretto
+     */
     void failed(JobExecution job, SJobErrorType errorType, Exception e);
 
     // =========================

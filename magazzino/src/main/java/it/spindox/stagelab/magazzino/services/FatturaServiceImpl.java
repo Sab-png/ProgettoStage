@@ -73,7 +73,7 @@ public class FatturaServiceImpl implements FatturaService {
 
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
 
-        // ✅ GENERAZIONE NUMERO FATTURA DA SEQUENCE
+        // GENERAZIONE NUMERO FATTURA DA SEQUENCE
         Long nextVal = fatturaRepository.nextNumeroSeq();
         entity.setNumero("FAT-" + nextVal);
 

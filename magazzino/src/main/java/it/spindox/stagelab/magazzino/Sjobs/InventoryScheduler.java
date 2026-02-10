@@ -17,34 +17,41 @@ public class InventoryScheduler {
     private final MagazzinoService magazzinoService;
     private final JobExecutionService jobExecutionService;
 
-    /**
-     * Job schedulato di controllo stock.
-     * Usa fixedDelay per evitare overlap.
-     */
     @Scheduled(fixedDelayString = "${inventory.check.rate}")
     public void runCheck() {
 
         log.info("JOB INVENTORY | Avvio controllo stock");
 
-        //  Avvio job
+        // FASE 1  : CREA UNA JOB_EXECUTION NEL DB (status = RUNNING)
         JobExecution job = jobExecutionService.start();
 
         try {
-            //  Business logic
+            // FASE 2: LOGICA BUSINESS DEL JOB
             magazzinoService.checkStockLevels();
 
-            //  Successo
+            // Identificare se un job è già in RUNNING
+            if (jobExecutionService.findRunning().isPresent()) {
+                log.warn("JOB INVENTORY | Job già in esecuzione, skip");
+                return;
+            }
+
+            // FASE 3 :  FORZAMENTO E  FALLIMENTO PER TESTING  <<<
+           // if (true) {
+                //throw new RuntimeException("Errore di test (force FAIL)");
+           // }
+
+            // FASE 4 : SUCCESSO DEL JOB
             jobExecutionService.success(job);
             log.info("JOB INVENTORY | Completato con SUCCESS");
 
         } catch (Exception e) {
 
-            // Errore
+            // FASE 5:  ERRORE : AVVIENE IL MAPPING AUTOMATICO A SJobErrorType
             jobExecutionService.failed(job, e);
             log.error("JOB INVENTORY | Errore durante l'esecuzione", e);
 
-            log.info("JOB INVENTORY | Fine controllo stock");
-
         }
+
+        log.info("JOB INVENTORY | Fine controllo stock");
     }
 }

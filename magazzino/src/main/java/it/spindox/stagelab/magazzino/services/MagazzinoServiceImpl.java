@@ -129,7 +129,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         StockStatus nuovo = StockStatus.fromQuantita(pm.getQuantita(), soglia);
         if (nuovo == null) return;
 
-        // ✅ CORRETTO: enum diretto
+        //  CORRETTO: enum diretto
         StockStatus attuale = pm.getStatus();
 
         // 4) Persistenza se cambia
