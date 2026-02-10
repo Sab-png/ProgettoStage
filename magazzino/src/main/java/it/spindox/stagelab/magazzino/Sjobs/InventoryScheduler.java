@@ -22,36 +22,41 @@ public class InventoryScheduler {
 
         log.info("JOB INVENTORY | Avvio controllo stock");
 
-        // FASE 1  : CREA UNA JOB_EXECUTION NEL DB (status = RUNNING)
+        //  PRIMA DI TUTTO: controllo iniziale
+        if (jobExecutionService.findRunning().isPresent()) {
+            log.warn("JOB INVENTORY | Job già in esecuzione, skip");
+            return;
+        }
+
+        // FASE 1 CREAZIONE DI  UNA JOB_EXECUTION NEL DB (status = RUNNING)
         JobExecution job = jobExecutionService.start();
 
         try {
-            // FASE 2: LOGICA BUSINESS DEL JOB
+            // FASE 2 :  LOGICA BUSINESS DEL JOB
             magazzinoService.checkStockLevels();
 
-            // Identificare se un job è già in RUNNING
-            if (jobExecutionService.findRunning().isPresent()) {
-                log.warn("JOB INVENTORY | Job già in esecuzione, skip");
-                return;
-            }
-
-            // FASE 3 :  FORZAMENTO E  FALLIMENTO PER TESTING  <<<
-           // if (true) {
-                //throw new RuntimeException("Errore di test (force FAIL)");
-           // }
-
-            // FASE 4 : SUCCESSO DEL JOB
+            // FASE 3: IL JOB E' COMPLETATO CON  SUCCESSO
             jobExecutionService.success(job);
             log.info("JOB INVENTORY | Completato con SUCCESS");
 
         } catch (Exception e) {
 
-            // FASE 5:  ERRORE : AVVIENE IL MAPPING AUTOMATICO A SJobErrorType
+            // FASE 4 :  ERRORE — MAPPING AUTOMATICO A SJobErrorType
             jobExecutionService.failed(job, e);
             log.error("JOB INVENTORY | Errore durante l'esecuzione", e);
-
         }
 
         log.info("JOB INVENTORY | Fine controllo stock");
     }
 }
+
+
+// FASE per Testing di FORZAMENTO E  FALLIMENTO su DB per provare gli errori  <<<
+// if (true) {
+//throw new RuntimeException("Errore di test (force FAIL)");
+// }
+
+
+// l mapping degli errori avviene grazie a mapErrorType
+//
+// private SJobErrorType mapErrorType(Exception e)
