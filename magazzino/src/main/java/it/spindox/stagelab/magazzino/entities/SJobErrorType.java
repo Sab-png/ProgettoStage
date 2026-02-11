@@ -5,7 +5,6 @@ public enum SJobErrorType {
     VALIDATION_ERROR,     // dati non validi
     CONFIGURATION_ERROR,  // configurazione errata o mancante
     TECHNICAL_ERROR,      // DB, rete, timeout
-    EXTERNAL_SERVICE,     // servizi esterni
     SECURITY_ERROR,       // auth, token, certificati
     SYSTEM_ERROR,         // crash, NPE, OOM
     INTERRUPTED,          // job interrotto

@@ -20,7 +20,7 @@ import java.util.Optional;
 public class JobExecutionController {
 
     private final JobExecutionService jobExecutionService;
-    private final JobExecutionMapper jobExecutionMapper;   // ① Iniettato
+    private final JobExecutionMapper jobExecutionMapper;
 
     @GetMapping("/{id}")
     public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {

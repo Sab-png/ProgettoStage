@@ -6,7 +6,7 @@ import it.spindox.stagelab.magazzino.entities.StatusJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+
 
 
 @Slf4j
@@ -17,7 +17,8 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     public JobExecution toEntity(String jobName, StatusJob status) {
         JobExecution job = new JobExecution();
         job.setStatus(status);
-        job.setStartTime(OffsetDateTime.from(LocalDateTime.now()));  // FIX
+        // Salviamo in UTC per consistenza
+        job.setStartTime(LocalDateTime.now());
         return job;
     }
 
@@ -28,8 +29,8 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
         return JobExecutionResponse.builder()
                 .id(entity.getId())
                 .status(entity.getStatus())
-                .startTime(entity.getStartTime().toLocalDateTime())  // FIX
-                .endTime(entity.getEndTime().toLocalDateTime())      // FIX
+                .startTime(entity.getStartTime() != null ? entity.getStartTime().toLocalDateTime() : null)
+                .endTime(entity.getEndTime() != null ? entity.getEndTime().toLocalDateTime() : null)
                 .errorType(entity.getErrorType())
                 .errorMessage(entity.getErrorMessage())
                 .build();
@@ -38,14 +39,14 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     @Override
     public void updateEntity(JobExecution target, StatusJob status, String errorMessage) {
         target.setStatus(status);
-        target.setEndTime(LocalDateTime.now());   // FIX
+        target.setEndTime(LocalDateTime.now());
         target.setErrorMessage(errorMessage);
     }
 
     @Override
     public void updateEntity(JobExecution target, StatusJob status, SJobErrorType errorType, String errorMessage) {
         target.setStatus(status);
-        target.setEndTime(LocalDateTime.now());   // FIX
+        target.setEndTime(LocalDateTime.now());
         target.setErrorType(errorType);
         target.setErrorMessage(errorMessage);
     }
