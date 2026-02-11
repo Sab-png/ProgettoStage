@@ -31,7 +31,7 @@ public class CartController {
         return headerCartId.trim();
     }
 
-    // POST addToCart
+    // POST addToCart   --> complicazione inutile, semplifichiamo!!
     @PostMapping("/add")
     public ResponseEntity<CartItemResponse> addToCart(
             @RequestHeader(value = "X-Cart-Id", required = false) String cartId,
