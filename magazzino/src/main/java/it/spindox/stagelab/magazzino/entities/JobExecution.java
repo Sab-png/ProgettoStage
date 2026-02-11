@@ -1,10 +1,9 @@
 package it.spindox.stagelab.magazzino.entities;
-import it.spindox.stagelab.magazzino.entities.StatusJob;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-
+import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "JOB_EXECUTION")
@@ -38,4 +37,16 @@ public class JobExecution {
 
     @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;
+
+    public void setStartTime(OffsetDateTime from) {
+        this.startTime = from;
+    }
+
+    public void setStartTime(LocalDateTime now) {
+        this.startTime = now.atOffset(ZoneOffset.UTC);
+    }
+
+    public void setEndTime(LocalDateTime now) {
+        this.endTime = now.atOffset(ZoneOffset.UTC);
+    }
 }

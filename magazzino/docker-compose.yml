@@ -20,6 +20,7 @@ services:
       - "5500:5500"
     environment:
       ORACLE_PASSWORD: password
+      TZ: Europe/Rome   # FUSO ORARIO PER ROMA
     volumes:
       - oracle_data:/opt/oracle/oradata
       - ./initdb:/container-entrypoint-initdb.d

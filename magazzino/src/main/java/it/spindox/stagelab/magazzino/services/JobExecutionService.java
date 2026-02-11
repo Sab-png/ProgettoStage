@@ -7,19 +7,15 @@ import it.spindox.stagelab.magazzino.entities.StatusJob;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.time.OffsetDateTime;
 
 
 public interface JobExecutionService {
 
-
-    // API
+    // =====================
+    //  API: CONTROLLER
+    // =====================
 
     @Transactional(readOnly = true)
     JobExecutionResponse getById(Long id);
@@ -28,29 +24,29 @@ public interface JobExecutionService {
     Page<JobExecutionResponse> search(JobExecutionRequest request);
 
 
-    // Job lifecycle
+    // =====================
+    //  JOB LIFECYCLE
+    // =====================
 
+    /**
+     * Crea un nuovo JobExecution con status RUNNING
+     */
     JobExecution start();
 
+    /**
+     * Marca il job come completato con successo
+     */
     void success(JobExecution job);
 
     /**
-     * legacy
-     */
-    void error(JobExecution job, Exception e);
-
-    /**
-     * legacy
-     */
-    void failed(JobExecution job, Exception e);
-
-    /**
-     * nuovo e corretto
+     * Marca il job come fallito (VERSIONE CORRETTA)
      */
     void failed(JobExecution job, SJobErrorType errorType, Exception e);
 
 
-    // Repository helpers
+    // =====================
+    //  REPOSITORY HELPERS
+    // =====================
 
     @Transactional(readOnly = true)
     Optional<JobExecution> findLast();
@@ -58,12 +54,17 @@ public interface JobExecutionService {
     @Transactional(readOnly = true)
     Optional<JobExecution> findRunning();
 
+    /**
+     * Ricerca interna (non per controller)
+     */
     @Transactional(readOnly = true)
     Page<JobExecution> search(
             StatusJob status,
-            LocalDateTime startFrom,
-            LocalDateTime startTo,
+            OffsetDateTime startFrom,
+            OffsetDateTime startTo,
             Boolean hasError,
             Pageable pageable
     );
+
+    void failed(JobExecution job, Exception e);
 }

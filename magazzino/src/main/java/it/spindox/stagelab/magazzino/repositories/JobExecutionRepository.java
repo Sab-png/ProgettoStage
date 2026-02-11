@@ -13,9 +13,6 @@ import java.util.Optional;
 @Repository
 public interface JobExecutionRepository extends JpaRepository<JobExecution, Long> {
 
-    /**
-     * Ricerca job execution con filtri opzionali
-     */
     @Query("""
         SELECT j
         FROM JobExecution j
@@ -23,8 +20,8 @@ public interface JobExecutionRepository extends JpaRepository<JobExecution, Long
           AND (:startFrom IS NULL OR j.startTime >= :startFrom)
           AND (:startTo IS NULL OR j.startTime <= :startTo)
           AND (:hasError IS NULL OR
-              (:hasError = TRUE AND j.errorMessage IS NOT NULL) OR
-              (:hasError = FALSE AND j.errorMessage IS NULL))
+               (:hasError = TRUE AND j.errorMessage IS NOT NULL) OR
+               (:hasError = FALSE AND j.errorMessage IS NULL))
     """)
     Page<JobExecution> search(
             @Param("status") StatusJob status,
@@ -34,16 +31,7 @@ public interface JobExecutionRepository extends JpaRepository<JobExecution, Long
             Pageable pageable
     );
 
-    /**
-     * Ultima esecuzione (per startTime)
-     */
     Optional<JobExecution> findFirstByOrderByStartTimeDesc();
 
-    /**
-     * Job attualmente in RUNNING
-     */
     Optional<JobExecution> findFirstByStatus(StatusJob status);
 }
-
-
-

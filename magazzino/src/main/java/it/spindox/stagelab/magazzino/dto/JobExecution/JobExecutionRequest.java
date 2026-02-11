@@ -2,7 +2,6 @@ package it.spindox.stagelab.magazzino.dto.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,18 +10,16 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 public class JobExecutionRequest {
 
     private StatusJob status;
-    private LocalDateTime startFrom;
-    private LocalDateTime startTo;
+    private LocalDateTime startFrom;   //  LocalDateTime
+    private LocalDateTime startTo;     //  LocalDateTime
     private Boolean hasError;
 
     @Min(0)
-    private Integer page;
+    private Integer page = 0;
 
     @Min(1)
-    private Integer size;
+    private Integer size = 20;
 }

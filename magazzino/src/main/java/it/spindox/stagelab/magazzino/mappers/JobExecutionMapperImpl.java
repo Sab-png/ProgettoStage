@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
+
 @Slf4j
 @Component
 public class JobExecutionMapperImpl implements JobExecutionMapper {
@@ -16,40 +17,35 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     public JobExecution toEntity(String jobName, StatusJob status) {
         JobExecution job = new JobExecution();
         job.setStatus(status);
-        job.setStartTime(OffsetDateTime.now());
+        job.setStartTime(OffsetDateTime.from(LocalDateTime.now()));  // FIX
         return job;
     }
 
     @Override
     public JobExecutionResponse toResponse(JobExecution entity) {
-        if (entity == null) {
-            return null;
-        }
+        if (entity == null) return null;
 
-        JobExecutionResponse response = new JobExecutionResponse();
-        response.setId(entity.getId());
-        response.setStatus(entity.getStatus());
-        response.setStartTime(entity.getStartTime().toLocalDateTime());
-        response.setEndTime(entity.getEndTime().toLocalDateTime());
-        response.setErrorType(entity.getErrorType());
-        response.setErrorMessage(entity.getErrorMessage());
-
-        return response;
+        return JobExecutionResponse.builder()
+                .id(entity.getId())
+                .status(entity.getStatus())
+                .startTime(entity.getStartTime().toLocalDateTime())  // FIX
+                .endTime(entity.getEndTime().toLocalDateTime())      // FIX
+                .errorType(entity.getErrorType())
+                .errorMessage(entity.getErrorMessage())
+                .build();
     }
 
     @Override
     public void updateEntity(JobExecution target, StatusJob status, String errorMessage) {
-
+        target.setStatus(status);
+        target.setEndTime(LocalDateTime.now());   // FIX
+        target.setErrorMessage(errorMessage);
     }
 
     @Override
-    public void updateEntity(JobExecution target,
-                             StatusJob status,
-                             SJobErrorType errorType,
-                             String errorMessage) {
-
+    public void updateEntity(JobExecution target, StatusJob status, SJobErrorType errorType, String errorMessage) {
         target.setStatus(status);
-        target.setEndTime(OffsetDateTime.now());
+        target.setEndTime(LocalDateTime.now());   // FIX
         target.setErrorType(errorType);
         target.setErrorMessage(errorMessage);
     }
