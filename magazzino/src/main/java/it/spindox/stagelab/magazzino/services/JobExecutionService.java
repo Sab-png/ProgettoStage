@@ -18,18 +18,18 @@ import java.util.Optional;
 
 public interface JobExecutionService {
 
-    // =========================
+
     // API
-    // =========================
+
     @Transactional(readOnly = true)
     JobExecutionResponse getById(Long id);
 
     @Transactional(readOnly = true)
     Page<JobExecutionResponse> search(JobExecutionRequest request);
 
-    // =========================
+
     // Job lifecycle
-    // =========================
+
     JobExecution start();
 
     void success(JobExecution job);
@@ -49,9 +49,9 @@ public interface JobExecutionService {
      */
     void failed(JobExecution job, SJobErrorType errorType, Exception e);
 
-    // =========================
+
     // Repository helpers
-    // =========================
+
     @Transactional(readOnly = true)
     Optional<JobExecution> findLast();
 

@@ -2,10 +2,15 @@ package it.spindox.stagelab.magazzino.dto.JobExecution;
 import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class JobExecutionResponse {
 
     private Long id;

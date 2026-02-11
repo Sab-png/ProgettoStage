@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.repositories;
-
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

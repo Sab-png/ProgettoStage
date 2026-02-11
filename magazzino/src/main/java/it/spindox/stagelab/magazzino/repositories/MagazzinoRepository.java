@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.repositories;
-
 import it.spindox.stagelab.magazzino.entities.Magazzino;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,4 +28,6 @@ public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
             Pageable pageable
     );
 }
+
+
 

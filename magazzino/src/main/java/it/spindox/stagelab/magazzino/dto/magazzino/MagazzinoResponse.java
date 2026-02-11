@@ -1,8 +1,15 @@
 
 package it.spindox.stagelab.magazzino.dto.magazzino;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
 public class MagazzinoResponse {
 
     private Long id;

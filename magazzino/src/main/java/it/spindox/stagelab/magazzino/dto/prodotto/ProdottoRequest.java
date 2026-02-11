@@ -4,16 +4,23 @@ package it.spindox.stagelab.magazzino.dto.prodotto;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
 public class ProdottoRequest {
 
     // --- Filtri testo (opzionali) ---
-    private String nome;          // filtro su nome (LIKE)
-    private String descrizione;   // filtro su descrizione (LIKE)
+    private String nome;          // filtro su nome
+    private String descrizione;   // filtro su descrizione
 
     // --- Prezzo singolo (per create/update) ---
     @Positive(message = "Il prezzo deve essere maggiore di zero")

@@ -44,9 +44,9 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     @Value("${inventory.min.threshold:5}")
     private int defaultThreshold;
 
-    // =========================
+
     // CRUD MAGAZZINO
-    // =========================
+
 
     @Override
     @Transactional(readOnly = true)
@@ -103,9 +103,9 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.deleteById(id);
     }
 
-    // =========================
+
     // LOGICA CONTROLLO STOCK
-    // =========================
+
 
     @Override
     @Transactional

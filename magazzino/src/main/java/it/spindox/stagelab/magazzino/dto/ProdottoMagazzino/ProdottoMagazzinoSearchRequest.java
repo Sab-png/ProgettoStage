@@ -5,6 +5,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class ProdottoMagazzinoSearchRequest {
 
     // Filtri
