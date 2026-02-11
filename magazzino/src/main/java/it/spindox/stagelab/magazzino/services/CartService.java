@@ -9,15 +9,15 @@ import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
 
 public interface CartService {
 
-    CartItemResponse addToCart(String sessionId, AddToCartRequest request);
+    CartItemResponse addToCart(String cartId, AddToCartRequest request);
 
-    CartResponse getCart(String sessionId);
+    CartResponse getCart(String cartId);
 
-    CartItemResponse updateCartItem(String sessionId, Long cartItemId, UpdateCartItemRequest request);
+    CartItemResponse updateCartItem(String cartId, Long cartItemId, UpdateCartItemRequest request);
 
-    void removeFromCart(String sessionId, Long cartItemId);
+    void removeFromCart(String cartId, Long cartItemId);
 
-    CheckoutResponse checkout(String sessionId, CheckoutRequest request);
+    CheckoutResponse checkout(String cartId, CheckoutRequest request);
 
     void cleanExpiredReservations();
 }

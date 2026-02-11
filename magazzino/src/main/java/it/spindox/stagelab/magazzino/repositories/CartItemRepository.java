@@ -14,10 +14,10 @@ import java.util.Optional;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
-    List<CartItem> findBySessionIdAndStatus(String sessionId, ReservationStatus status);
+    List<CartItem> findByCartIdAndStatus(String cartId, ReservationStatus status);
 
-    Optional<CartItem> findBySessionIdAndProdottoIdAndStatus(
-            String sessionId,
+    Optional<CartItem> findByCartIdAndProdottoIdAndStatus(
+            String cartId,
             Long prodottoId,
             ReservationStatus status
     );
@@ -35,12 +35,12 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Query("""
         SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END
         FROM CartItem c
-        WHERE c.sessionId = :sessionId
+        WHERE c.cartId = :cartId
         AND c.status = 'RESERVED'
         AND c.expiresAt > :now
     """)
-    boolean hasActiveSession(
-            @Param("sessionId") String sessionId,
+    boolean hasActiveCart(
+            @Param("cartId") String cartId,
             @Param("now") LocalDateTime now
     );
 }

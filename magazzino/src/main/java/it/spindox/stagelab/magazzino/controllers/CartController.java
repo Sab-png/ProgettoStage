@@ -7,12 +7,12 @@ import it.spindox.stagelab.magazzino.dto.response.CartItemResponse;
 import it.spindox.stagelab.magazzino.dto.response.CartResponse;
 import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
 import it.spindox.stagelab.magazzino.services.CartService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -24,48 +24,68 @@ public class CartController {
         this.service = service;
     }
 
+    private static String resolveCartId(String headerCartId) {
+        if (headerCartId == null || headerCartId.isBlank()) {
+            return UUID.randomUUID().toString();
+        }
+        return headerCartId.trim();
+    }
+
     // POST addToCart
     @PostMapping("/add")
     public ResponseEntity<CartItemResponse> addToCart(
-            HttpSession session,
+            @RequestHeader(value = "X-Cart-Id", required = false) String cartId,
             @Valid @RequestBody AddToCartRequest request) {
-        String sessionId = session.getId();
-        return ResponseEntity.ok(service.addToCart(sessionId, request));
+        String resolvedCartId = resolveCartId(cartId);
+        return ResponseEntity
+                .ok()
+                .header("X-Cart-Id", resolvedCartId)
+                .body(service.addToCart(resolvedCartId, request));
     }
 
     // GET getCart
     @GetMapping
-    public ResponseEntity<CartResponse> getCart(HttpSession session) {
-        String sessionId = session.getId();
-        return ResponseEntity.ok(service.getCart(sessionId));
+    public ResponseEntity<CartResponse> getCart(
+            @RequestHeader(value = "X-Cart-Id", required = false) String cartId) {
+        String resolvedCartId = resolveCartId(cartId);
+        return ResponseEntity
+                .ok()
+                .header("X-Cart-Id", resolvedCartId)
+                .body(service.getCart(resolvedCartId));
     }
 
     // PATCH updateCartItem
     @PatchMapping("/items/{itemId}")
     public ResponseEntity<CartItemResponse> updateCartItem(
-            HttpSession session,
+            @RequestHeader("X-Cart-Id") String cartId,
             @PathVariable Long itemId,
             @Valid @RequestBody UpdateCartItemRequest request) {
-        String sessionId = session.getId();
-        return ResponseEntity.ok(service.updateCartItem(sessionId, itemId, request));
+        return ResponseEntity
+                .ok()
+                .header("X-Cart-Id", cartId)
+                .body(service.updateCartItem(cartId, itemId, request));
     }
 
     // DELETE removeFromCart
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<Void> removeFromCart(
-            HttpSession session,
+            @RequestHeader("X-Cart-Id") String cartId,
             @PathVariable Long itemId) {
-        String sessionId = session.getId();
-        service.removeFromCart(sessionId, itemId);
-        return ResponseEntity.noContent().build();
+        service.removeFromCart(cartId, itemId);
+        return ResponseEntity
+                .noContent()
+                .header("X-Cart-Id", cartId)
+                .build();
     }
 
     // POST checkout
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponse> checkout(
-            HttpSession session,
+            @RequestHeader("X-Cart-Id") String cartId,
             @Valid @RequestBody CheckoutRequest request) {
-        String sessionId = session.getId();
-        return ResponseEntity.ok(service.checkout(sessionId, request));
+        return ResponseEntity
+                .ok()
+                .header("X-Cart-Id", cartId)
+                .body(service.checkout(cartId, request));
     }
 }

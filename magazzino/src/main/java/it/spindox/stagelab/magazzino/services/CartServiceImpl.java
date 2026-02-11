@@ -40,8 +40,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public CartItemResponse addToCart(String sessionId, AddToCartRequest request) {
-        //log.info("Aggiunta prodotto {} al carrello per sessione {}", request.getProdottoId(), sessionId);
+    public CartItemResponse addToCart(String cartId, AddToCartRequest request) {
+        //log.info("Aggiunta prodotto {} al carrello {}", request.getProdottoId(), cartId);
 
         // Pulisce prenotazioni scadute
         cleanExpiredReservations();
@@ -64,8 +64,8 @@ public class CartServiceImpl implements CartService {
 
         // Verifica se l'utente ha già questo prodotto nel carrello
         Optional<CartItem> existingItem = cartItemRepository
-                .findBySessionIdAndProdottoIdAndStatus(
-                        sessionId,
+                .findByCartIdAndProdottoIdAndStatus(
+                        cartId,
                         request.getProdottoId(),
                         ReservationStatus.RESERVED
                 );
@@ -91,7 +91,7 @@ public class CartServiceImpl implements CartService {
         } else {
             // Crea nuova prenotazione
             cartItem = new CartItem();
-            cartItem.setSessionId(sessionId);
+            cartItem.setCartId(cartId);
             cartItem.setProdotto(prodotto);
             cartItem.setQuantity(request.getQuantity());
             cartItem.setReservedAt(LocalDateTime.now());
@@ -112,28 +112,28 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional(readOnly = true)
-    public CartResponse getCart(String sessionId) {
-        //log.info("Recupero carrello per sessione {}", sessionId);
+    public CartResponse getCart(String cartId) {
+        //log.info("Recupero carrello {}", cartId);
 
         List<CartItem> items = cartItemRepository
-                .findBySessionIdAndStatus(sessionId, ReservationStatus.RESERVED);
+                .findByCartIdAndStatus(cartId, ReservationStatus.RESERVED);
 
         return CartMapper.toCartResponse(items);
     }
 
     @Override
     @Transactional
-    public CartItemResponse updateCartItem(String sessionId, Long cartItemId,
+    public CartItemResponse updateCartItem(String cartId, Long cartItemId,
                                            UpdateCartItemRequest request) {
-        //log.info("Aggiornamento elemento carrello {} per sessione {}", cartItemId, sessionId);
+        //log.info("Aggiornamento elemento carrello {} per carrello {}", cartItemId, cartId);
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(
                         "Elemento carrello con ID " + cartItemId + " non trovato"
                 ));
 
-        // Verifica che l'item appartenga alla sessione
-        if (!cartItem.getSessionId().equals(sessionId)) {
+        // Verifica che l'item appartenga al carrello
+        if (!cartItem.getCartId().equals(cartId)) {
             throw new UnauthorizedAccessException(
                     "Non autorizzato ad accedere a questo elemento"
             );
@@ -177,15 +177,15 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public void removeFromCart(String sessionId, Long cartItemId) {
-        //log.info("Rimozione elemento carrello {} per sessione {}", cartItemId, sessionId);
+    public void removeFromCart(String cartId, Long cartItemId) {
+        //log.info("Rimozione elemento carrello {} per carrello {}", cartItemId, cartId);
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(
                         "Elemento carrello con ID " + cartItemId + " non trovato"
                 ));
 
-        if (!cartItem.getSessionId().equals(sessionId)) {
+        if (!cartItem.getCartId().equals(cartId)) {
             throw new UnauthorizedAccessException(
                     "Non autorizzato ad accedere a questo elemento"
             );
@@ -206,11 +206,11 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public CheckoutResponse checkout(String sessionId, CheckoutRequest request) {
-        //log.info("Elaborazione checkout per sessione {}", sessionId);
+    public CheckoutResponse checkout(String cartId, CheckoutRequest request) {
+        //log.info("Elaborazione checkout per carrello {}", cartId);
 
         List<CartItem> items = cartItemRepository
-                .findBySessionIdAndStatus(sessionId, ReservationStatus.RESERVED);
+                .findByCartIdAndStatus(cartId, ReservationStatus.RESERVED);
 
         if (items.isEmpty()) {
             throw new EmptyCartException("Il carrello è vuoto");
@@ -233,7 +233,7 @@ public class CartServiceImpl implements CartService {
                 .mapToDouble(item -> item.getProdotto().getPrezzo() * item.getQuantity())
                 .sum();
 
-        // Aggiorna lo stock totale e marca le prenotazioni come completate
+        // Aggiorna lo stock totale e rimuove le prenotazioni completate
         for (CartItem item : items) {
             Prodotto prodotto = item.getProdotto();
 
@@ -241,9 +241,8 @@ public class CartServiceImpl implements CartService {
             prodotto.setTotalStock(prodotto.getTotalStock() - item.getQuantity());
             prodottoRepository.save(prodotto);
 
-            // Marca la prenotazione come completata
-            item.setStatus(ReservationStatus.COMPLETED);
-            cartItemRepository.save(item);
+            // Rimuove definitivamente la riga di carrello
+            cartItemRepository.delete(item);
 
             //log.info("Completato acquisto di {} unità del prodotto {}",
                     //item.getQuantity(), prodotto.getId());
@@ -263,7 +262,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Scheduled(fixedRate = 60000) // Ogni 60 secondi
     @Transactional
     public void cleanExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
@@ -281,13 +279,9 @@ public class CartServiceImpl implements CartService {
             Prodotto prodotto = item.getProdotto();
             prodotto.setAvailableStock(prodotto.getAvailableStock() + item.getQuantity());
             prodottoRepository.save(prodotto);
-
-            // Marca come scaduto
-            item.setStatus(ReservationStatus.EXPIRED);
-            cartItemRepository.save(item);
-
-            //log.info("Scaduto elemento carrello {} - rilasciate {} unità del prodotto {}",
-                   // item.getId(), item.getQuantity(), prodotto.getId(););
         }
+
+        // Elimina fisicamente tutte le prenotazioni scadute
+        cartItemRepository.deleteAll(expiredItems);
     }
 }

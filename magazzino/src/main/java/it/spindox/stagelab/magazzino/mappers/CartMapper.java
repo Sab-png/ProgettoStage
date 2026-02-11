@@ -55,7 +55,7 @@ public class CartMapper {
                 .orElse(0L);
 
         response.setSecondsRemaining(minSeconds);
-        response.setSessionActive(!items.isEmpty() && minSeconds > 0);
+        response.setCartActive(!items.isEmpty() && minSeconds > 0);
 
         return response;
     }

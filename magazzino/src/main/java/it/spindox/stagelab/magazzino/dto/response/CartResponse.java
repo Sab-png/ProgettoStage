@@ -10,5 +10,5 @@ public class CartResponse {
     private Integer totalItems;
     private Double totalPrice;
     private Long secondsRemaining;
-    private Boolean sessionActive;
+    private Boolean cartActive;
 }

@@ -22,8 +22,8 @@ public class CartItem {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "SESSION_ID", nullable = false, length = 255)
-    private String sessionId;
+    @Column(name = "CART_ID", nullable = false, length = 255)
+    private String cartId;
 
     @ManyToOne
     @JoinColumn(name = "ID_PRODOTTO", referencedColumnName = "ID")
