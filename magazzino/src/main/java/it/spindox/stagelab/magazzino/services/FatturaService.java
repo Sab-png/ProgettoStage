@@ -2,6 +2,9 @@
 package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 public interface FatturaService {
@@ -9,7 +12,7 @@ public interface FatturaService {
     /**
      * Ricerca paginata con filtri opzionali (usando i campi del DTO request).
      */
-    Object search(FatturaRequest request);
+    Page<FatturaResponse> search(@Valid FatturaSearchRequest request);
 
     /**
      * Crea una nuova fattura.

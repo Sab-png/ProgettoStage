@@ -2,6 +2,7 @@
 package it.spindox.stagelab.magazzino.controllers;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
 import it.spindox.stagelab.magazzino.services.FatturaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -61,9 +62,9 @@ public class FatturaController {
 
     @PostMapping("/search")
     public ResponseEntity<Page<FatturaResponse>> searchFattura(
-            @Valid @RequestBody FatturaRequest searchRequest
+            @Valid @RequestBody FatturaSearchRequest searchRequest
     ) {
-        Page<FatturaResponse> page = (Page<FatturaResponse>) fatturaService.search(searchRequest);
+        Page<FatturaResponse> page = fatturaService.search(searchRequest);
         return ResponseEntity.ok(page);
     }
 

@@ -2,19 +2,20 @@
 package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
 import it.spindox.stagelab.magazzino.entities.Fattura;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
 import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
-
 
 @Slf4j
 @Service
@@ -27,37 +28,24 @@ public class FatturaServiceImpl implements FatturaService {
 
     // SEARCH
     @Override
-    public Page<FatturaResponse> search(FatturaRequest request) {
+    public Page<FatturaResponse> search(FatturaSearchRequest request) {
         Pageable pageable = PageRequest.of(
                 request.getPage(),
                 request.getSize(),
                 Sort.by(Sort.Direction.DESC, "dataFattura")
         );
 
-        BigDecimal importoMin = request.getImportoMin() != null
-                ? new BigDecimal(request.getImportoMin().toString())
-                : null;
-
-        BigDecimal importoMax = request.getImportoMax() != null
-                ? new BigDecimal(request.getImportoMax().toString())
-                : null;
-
         Page<Fattura> page = fatturaRepository.search(
                 request.getNumero(),
                 request.getIdProdotto(),
                 request.getDataFrom(),
                 request.getDataTo(),
-                importoMin,
-                importoMax,
+                request.getImportoMin(), // BigDecimal già tipizzato
+                request.getImportoMax(),
                 pageable
         );
 
-        List<FatturaResponse> content = page.getContent()
-                .stream()
-                .map(fatturaMapper::toResponse)
-                .toList();
-
-        return new PageImpl<>(content, page.getPageable(), page.getTotalElements());
+        return page.map(fatturaMapper::toResponse);
     }
 
     // CREATE CON SEQUENCE
@@ -121,13 +109,7 @@ public class FatturaServiceImpl implements FatturaService {
         );
 
         Page<Fattura> fatture = fatturaRepository.search(
-                null,
-                idProdotto,
-                null,
-                null,
-                null,
-                null,
-                pageable
+                null, idProdotto, null, null, null, null, pageable
         );
 
         List<FatturaResponse> content = fatture.getContent()
