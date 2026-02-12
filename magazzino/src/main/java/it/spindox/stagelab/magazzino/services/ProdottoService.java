@@ -16,4 +16,6 @@ public interface ProdottoService {
 void delete(Long id);
 
     Page<Long> searchIds(ProdottoRequest req);
+
+    Page<ProdottoResponse> getAllPaged(int page, int size);
 }

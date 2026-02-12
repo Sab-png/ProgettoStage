@@ -5,6 +5,11 @@ import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoResp
 import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoSearchRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ProdottoMagazzinoService {
 
@@ -14,11 +19,12 @@ public interface ProdottoMagazzinoService {
 
     void update(Long id, @Valid ProdottoMagazzinoRequest request);
 
-    <ProdottoMagazzinoSearchRequest> Page<ProdottoMagazzinoResponse> search(@Valid ProdottoMagazzinoSearchRequest request);
-
-    Page<ProdottoMagazzinoResponse> search(@Valid ProdottoMagazzinoSearchRequest request);
-
     void delete(Long id);
 
-    Page<Long> searchIds(ProdottoMagazzinoSearchRequest req);
+    @Transactional(readOnly = true)
+    Page<ProdottoMagazzinoResponse> getAllPaged(int page, int size);
+
+    Page<Long> searchIds(ProdottoMagazzinoSearchRequest request);
+
+    Page<ProdottoMagazzinoResponse> search(ProdottoMagazzinoSearchRequest request);
 }

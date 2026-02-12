@@ -2,110 +2,140 @@ package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoResponse;
 import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoSearchRequest;
-import it.spindox.stagelab.magazzino.entities.Magazzino;
-import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.ProdottoMagazzinoMapper;
-import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
-import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
-@Slf4j
+
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
-    private final ProdottoMagazzinoRepository repository;
-    private final ProdottoRepository prodottoRepository;
-    private final MagazzinoRepository magazzinoRepository;
+    private final ProdottoMagazzinoRepository repo;
     private final ProdottoMagazzinoMapper mapper;
 
+    // ===============================================================
+    // GET ALL PAGED + STREAM  (GET /prodotto-magazzino/list)
+    // ===============================================================
     @Override
+    @Transactional(readOnly = true)
+    public Page<ProdottoMagazzinoResponse> getAllPaged(int page, int size) {
+
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.max(size, 1)
+        );
+
+        Page<ProdottoMagazzino> result = repo.findAll(pageable);
+
+        // STREAM mapping Entity -> DTO
+        List<ProdottoMagazzinoResponse> content = result.getContent()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        return new PageImpl<>(content, pageable, result.getTotalElements());
+    }
+
+    // ===============================================================
+    // GET IDs FILTRATI (GET /prodotto-magazzino)
+    // ===============================================================
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Long> searchIds(ProdottoMagazzinoSearchRequest r) {
+
+        Pageable pageable = PageRequest.of(
+                r.getPage(),
+                r.getSize()
+        );
+
+        return repo.searchIds(
+                r.getProdottoId(),
+                r.getMagazzinoId(),
+                pageable
+        );
+    }
+
+    // ===============================================================
+    // GET BY ID (GET /prodotto-magazzino/{id})
+    // ===============================================================
+    @Override
+    @Transactional(readOnly = true)
     public ProdottoMagazzinoResponse getById(Long id) {
-        ProdottoMagazzino pm = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Stock non trovato"));
-        return mapper.toResponse(pm);
+
+        ProdottoMagazzino entity = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Record non trovato"));
+
+        return mapper.toResponse(entity);
     }
 
+    // ===============================================================
+    // CREATE (POST /prodotto-magazzino)
+    // ===============================================================
     @Override
-    public void create(@Valid ProdottoMagazzinoRequest request) {
-
-        Prodotto prodotto = prodottoRepository.findById(request.getProdottoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
-
-        Magazzino magazzino = magazzinoRepository.findById(request.getMagazzinoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
-
-        ProdottoMagazzino pm = mapper.toEntity(request);
-
-        pm.setProdotto(prodotto);
-        pm.setMagazzino(magazzino);
-
-        repository.save(pm);
+    @Transactional
+    public void create(ProdottoMagazzinoRequest r) {
+        repo.save(mapper.toEntity(r));
     }
 
+    // ===============================================================
+    // UPDATE (PUT /prodotto-magazzino/{id})
+    // ===============================================================
     @Override
-    public void update(Long id, @Valid ProdottoMagazzinoRequest request) {
-        ProdottoMagazzino pm = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Stock non trovato"));
+    @Transactional
+    public void update(Long id, ProdottoMagazzinoRequest r) {
 
-        mapper.updateEntity(pm, request);
+        ProdottoMagazzino entity = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Record non trovato"));
 
-        repository.save(pm);
+        mapper.updateEntity(entity, r);
+        repo.save(entity);
     }
 
+    // ===============================================================
+    // DELETE (DELETE /prodotto-magazzino/{id})
+    // ===============================================================
     @Override
-    public <ProdottoMagazzinoSearchRequest> Page<ProdottoMagazzinoResponse> search(ProdottoMagazzinoSearchRequest prodottoMagazzinoSearchRequest) {
-        return null;
+    @Transactional
+    public void delete(Long id) {
+        if (!repo.existsById(id)) {
+            throw new ResourceNotFoundException("Record non trovato");
+        }
+        repo.deleteById(id);
     }
 
-
+    // ===============================================================
+    // SEARCH COMPLETA → DTO COMPLETI (POST /prodotto-magazzino/search)
+    // ===============================================================
     @Override
-    public Page<ProdottoMagazzinoResponse> search(@Valid ProdottoMagazzinoSearchRequest request) {
+    @Transactional(readOnly = true)
+    public Page<ProdottoMagazzinoResponse> search(ProdottoMagazzinoSearchRequest r) {
 
-        int page = request.getPage() != null ? request.getPage() : 0;
-        int size = request.getSize() != null ? request.getSize() : 20;
+        Pageable pageable = PageRequest.of(
+                r.getPage(),
+                r.getSize()
+        );
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-
-        Page<ProdottoMagazzino> pageEntity = repository.search(
-                request.getId(),
-                request.getProdottoId(),
-                request.getMagazzinoId(),
-                request.getQuantitaMin(),
-                request.getQuantitaMax(),
-                emptyToNull(request.getNomeProdotto()),
-                emptyToNull(request.getNomeMagazzino()),
+        Page<ProdottoMagazzino> result = repo.search(
+                r.getId(),
+                r.getProdottoId(),
+                r.getMagazzinoId(),
+                r.getQuantitaMin(),
+                r.getQuantitaMax(),
+                r.getNomeProdotto(),
+                r.getNomeMagazzino(),
                 pageable
         );
 
-        return pageEntity.map(mapper::toResponse);
-    }
-
-    @Override
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            return; // idempotente: come in ProdottoServiceImpl
-        }
-        repository.deleteById(id);
-    }
-
-    @Override
-    public Page<Long> searchIds(ProdottoMagazzinoSearchRequest req) {
-        return null;
-    }
-
-
-    // ---- helpers ----
-    private String emptyToNull(String s) {
-        return (s == null || s.isBlank()) ? null : s.trim();
+        return result.map(mapper::toResponse);
     }
 }
-

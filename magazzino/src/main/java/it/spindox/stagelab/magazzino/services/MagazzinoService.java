@@ -20,4 +20,6 @@ public interface MagazzinoService {
     void checkStockLevels();
 
     Page<Long> searchIds(MagazzinoRequest req);
+
+    Page<MagazzinoResponse> getAllPaged(int page, int size);
 }

@@ -4,6 +4,7 @@ import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
@@ -41,4 +42,6 @@ public interface FatturaService {
     void delete(Long id);
 
     Page<Long> searchIds(FatturaSearchRequest req);
+
+    Page<FatturaResponse> getAllPaged(@Min(0) int page, @Min(1) int size);
 }

@@ -13,9 +13,6 @@ import java.time.OffsetDateTime;
 
 public interface JobExecutionService {
 
-    // =====================
-    //  API: CONTROLLER
-    // =====================
 
     @Transactional(readOnly = true)
     JobExecutionResponse getById(Long id);
@@ -23,10 +20,6 @@ public interface JobExecutionService {
     @Transactional(readOnly = true)
     Page<JobExecutionResponse> search(JobExecutionRequest request);
 
-
-    // =====================
-    //  JOB LIFECYCLE
-    // =====================
 
     /**
      * Crea un nuovo JobExecution con status RUNNING
@@ -42,11 +35,6 @@ public interface JobExecutionService {
      * Marca il job come fallito (VERSIONE CORRETTA)
      */
     void failed(JobExecution job, SJobErrorType errorType, Exception e);
-
-
-    // =====================
-    //  REPOSITORY HELPERS
-    // =====================
 
     @Transactional(readOnly = true)
     Optional<JobExecution> findLast();

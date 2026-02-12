@@ -6,71 +6,77 @@ import it.spindox.stagelab.magazzino.services.ProdottoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
+import java.math.BigDecimal;
 
 
 @RestController
 @RequestMapping("/prodotti")
 @RequiredArgsConstructor
+@Validated
 public class ProdottoController {
 
-    private final ProdottoService prodottoService;
+    private final ProdottoService service;
 
-    /** GET ALL – solo ID filtrati **/
+    // GET ALL solo ID
     @GetMapping
-    public ResponseEntity<Page<Long>> getProdottiIds(
+    public ResponseEntity<Page<Long>> getIds(
             @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String descrizione,
+            @RequestParam(required = false) BigDecimal prezzoMin,
+            @RequestParam(required = false) BigDecimal prezzoMax,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        ProdottoRequest req = new ProdottoRequest();
-        req.setNome(nome);
-        req.setCategoria(categoria);
-        req.setPage(page);
-        req.setSize(size);
+        ProdottoRequest r = new ProdottoRequest();
+        r.setNome(nome);
+        r.setDescrizione(descrizione);
+        r.setPrezzoMin(prezzoMin);
+        r.setPrezzoMax(prezzoMax);
+        r.setPage(page);
+        r.setSize(size);
 
-        Page<Long> ids = prodottoService.searchIds(req);
-        return ResponseEntity.ok(ids);
+        return ResponseEntity.ok(service.searchIds(r));
     }
 
-    /** GET BY ID **/
+    // GET ALL paged + stream
+    @GetMapping("/list")
+    public ResponseEntity<Page<ProdottoResponse>> getAllPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(service.getAllPaged(page, size));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<ProdottoResponse> getProdotto(@PathVariable Long id) {
-        return ResponseEntity.ok(prodottoService.getById(id));
+    public ResponseEntity<ProdottoResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 
-    /** CREATE **/
     @PostMapping
-    public ResponseEntity<Void> saveProdotto(@Valid @RequestBody ProdottoRequest request) {
-        prodottoService.create(request);
-        return ResponseEntity.status(201).build();
+    public ResponseEntity<Void> create(@Valid @RequestBody ProdottoRequest request) {
+        service.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    /** UPDATE **/
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> editProdotto(
-            @PathVariable Long id,
-            @Valid @RequestBody ProdottoRequest request
-    ) {
-        prodottoService.update(id, request);
+    public ResponseEntity<Void> update(@PathVariable Long id,
+                                       @Valid @RequestBody ProdottoRequest request) {
+        service.update(id, request);
         return ResponseEntity.noContent().build();
     }
 
-    /** DELETE **/
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProdotto(@PathVariable Long id) {
-        prodottoService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    /** SEARCH COMPLETA **/
     @PostMapping("/search")
-    public ResponseEntity<Page<ProdottoResponse>> searchProdotto(
-            @Valid @RequestBody ProdottoRequest searchRequest
-    ) {
-        return ResponseEntity.ok(prodottoService.search(searchRequest));
+    public ResponseEntity<Page<ProdottoResponse>> search(@RequestBody @Valid ProdottoRequest r) {
+        return ResponseEntity.ok(service.search(r));
     }
 }

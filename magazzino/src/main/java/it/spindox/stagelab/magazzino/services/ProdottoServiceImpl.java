@@ -6,14 +6,13 @@ import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.mappers.ProdottoMapper;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+
 
 
 @Slf4j
@@ -21,63 +20,107 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProdottoServiceImpl implements ProdottoService {
 
-    private final ProdottoRepository repository;
+    private final ProdottoRepository repo;
     private final ProdottoMapper mapper;
 
+    // ===============================================================
+    // GET ALL PAGED + STREAM (GET /prodotti/list)
+    // ===============================================================
     @Override
-    public ProdottoResponse getById(Long id) {
-        Prodotto prodotto = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
-        return mapper.toResponse(prodotto);
+    @Transactional(readOnly = true)
+    public Page<ProdottoResponse> getAllPaged(int page, int size) {
+
+        // Costruzione pageable con ordinamento per nome
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nome"));
+
+        // Recupero paginato dal repository
+        Page<Prodotto> result = repo.findAll(pageable);
+
+        // STREAM: Entity -> DTO
+        List<ProdottoResponse> list = result.getContent()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        // Ritorno il risultato paginato
+        return new PageImpl<>(list, pageable, result.getTotalElements());
     }
 
+    // ===============================================================
+    // GET SOLO ID FILTRATI (GET /prodotti)
+    // ===============================================================
     @Override
-    public void create(@Valid ProdottoRequest request) {
-        repository.save(mapper.toEntity(request));
-    }
+    public Page<Long> searchIds(ProdottoRequest r) {
 
-    @Override
-    public void update(Long id, @Valid ProdottoRequest request) {
-        Prodotto prodotto = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
-        mapper.updateEntity(prodotto, request);
-        repository.save(prodotto);
-    }
+        Pageable pageable = PageRequest.of(r.getPage(), r.getSize());
 
-    @Override
-    public Page<ProdottoResponse> search(@Valid ProdottoRequest request) {
-        // Default di paginazione se non forniti nel body
-        int page = request.getPage() != null ? request.getPage() : 0;
-        int size = request.getSize() != null ? request.getSize() : 20;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-
-        Page<Prodotto> pageEntity = repository.search(
-                emptyToNull(request.getNome()),
-                emptyToNull(request.getDescrizione()),
-                request.getPrezzoMin(),   // BigDecimal direttamente dal DTO
-                request.getPrezzoMax(),   // BigDecimal direttamente dal DTO
+        // JPQL custom nel repository che restituisce solo gli ID
+        return repo.searchIds(
+                r.getNome(),
+                r.getDescrizione(),
+                r.getPrezzoMin(),
+                r.getPrezzoMax(),
                 pageable
         );
-
-        return pageEntity.map(mapper::toResponse);
     }
 
+    // ===============================================================
+    // GET BY ID (GET /prodotti/{id})
+    // ===============================================================
+    @Override
+    public ProdottoResponse getById(Long id) {
+
+        Prodotto entity = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
+
+        return mapper.toResponse(entity);
+    }
+
+    // ===============================================================
+    // CREATE (POST /prodotti)
+    // ===============================================================
+    @Override
+    public void create(ProdottoRequest req) {
+        repo.save(mapper.toEntity(req));
+    }
+
+    // ===============================================================
+    // UPDATE (PATCH /prodotti/{id})
+    // ===============================================================
+    @Override
+    public void update(Long id, ProdottoRequest req) {
+
+        Prodotto p = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
+
+        mapper.updateEntity(p, req);
+
+        repo.save(p);
+    }
+
+    // ===============================================================
+    // DELETE (DELETE /prodotti/{id})
+    // ===============================================================
     @Override
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            return; // idempotente: se non esiste, non lancia eccezioni
-        }
-        repository.deleteById(id);
+        repo.deleteById(id);
     }
 
+    // ===============================================================
+    // SEARCH COMPLETA (POST /prodotti/search)
+    // ===============================================================
     @Override
-    public Page<Long> searchIds(ProdottoRequest req) {
-        return null;
-    }
+    public Page<ProdottoResponse> search(ProdottoRequest r) {
 
-    // ---- helpers ----
-    private String emptyToNull(String s) {
-        return (s == null || s.isBlank()) ? null : s.trim();
+        Pageable pageable = PageRequest.of(r.getPage(), r.getSize());
+
+        // JPQL search + mapping a DTO
+        return repo.search(
+                r.getNome(),
+                r.getDescrizione(),
+                r.getPrezzoMin(),
+                r.getPrezzoMax(),
+                pageable
+        ).map(mapper::toResponse);
     }
 }

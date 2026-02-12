@@ -29,13 +29,10 @@ public class FatturaController {
     private final FatturaService fatturaService;
 
     /**
-     * NEW: GET /fatture
-     * Restituisce SOLO gli ID delle fatture filtrate.
-     * Esempi:
-     *   /fatture?numero=FAT-2025
-     *   /fatture?idProdotto=10
-     *   /fatture?page=1&size=20
+     * GET /fatture       → solo ID (già implementato)
+     * GET /fatture/list  → fatture complete (stream), paginato
      */
+
     @GetMapping
     public ResponseEntity<Page<Long>> getFattureIds(
             @RequestParam(required = false) String numero,
@@ -65,18 +62,25 @@ public class FatturaController {
     }
 
     /**
+     * NEW: GET /fatture/list
+     * Ritorna fatture COMPLETE, paginazione + stream
+     */
+    @GetMapping("/list")
+    public ResponseEntity<Page<FatturaResponse>> getAllFatturePaged(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size
+    ) {
+        return ResponseEntity.ok(fatturaService.getAllPaged(page, size));
+    }
+
+    /**
      * GET /fatture/{id}
-     * Torna il dettaglio di UNA fattura
      */
     @GetMapping("/{id}")
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) throws Throwable {
         return ResponseEntity.ok(fatturaService.getById(id));
     }
 
-    /**
-     * GET /fatture/prodotto/{idProdotto}
-     * Lista paginata di fatture per prodotto
-     */
     @GetMapping("/prodotto/{idProdotto}")
     public ResponseEntity<PageImpl<FatturaResponse>> getFattureByProdotto(
             @PathVariable Long idProdotto,
@@ -87,10 +91,6 @@ public class FatturaController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * POST /fatture
-     * Crea nuova fattura
-     */
     @PostMapping
     public ResponseEntity<FatturaResponse> saveFattura(
             @Valid @RequestBody FatturaRequest request,
@@ -103,10 +103,6 @@ public class FatturaController {
         return ResponseEntity.created(location).body(created);
     }
 
-    /**
-     * PATCH /fatture/{id}
-     * Aggiorna parzialmente una fattura
-     */
     @PatchMapping("/{id}")
     public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
@@ -116,10 +112,6 @@ public class FatturaController {
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * POST /fatture/search
-     * Ricerca paginata con filtri avanzati via request body
-     */
     @PostMapping("/search")
     public ResponseEntity<Page<FatturaResponse>> searchFattura(
             @Valid @RequestBody FatturaSearchRequest searchRequest
@@ -128,9 +120,6 @@ public class FatturaController {
         return ResponseEntity.ok(page);
     }
 
-    /**
-     * DELETE /fatture/{id}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {
         fatturaService.delete(id);
