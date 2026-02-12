@@ -9,14 +9,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 public class FatturaRequest {
-
     @NotNull(message = "La data fattura è obbligatoria")
     private LocalDate dataFattura;
 
@@ -30,32 +26,4 @@ public class FatturaRequest {
     @NotNull(message = "L'importo è obbligatorio")
     @Positive(message = "L'importo deve essere maggiore di zero")
     private BigDecimal importo;
-
-    public int getPage() {
-        return 0;
-    }
-
-    public int getSize() {
-        return 0;
-    }
-
-    public Object getImportoMin() {
-        return null;
-    }
-
-    public Object getImportoMax() {
-        return null;
-    }
-
-    public String getNumero() {
-        return "";
-    }
-
-    public LocalDate getDataFrom() {
-        return null;
-    }
-
-    public LocalDate getDataTo() {
-        return null;
-    }
 }

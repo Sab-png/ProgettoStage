@@ -7,17 +7,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class FatturaSearchRequest {
 
-    // Filtro opzionale sul numero
     private String numero;
-
     private Long idProdotto;
     private LocalDate dataFrom;
     private LocalDate dataTo;
@@ -25,11 +21,9 @@ public class FatturaSearchRequest {
     private BigDecimal importoMax;
 
     @Min(0)
-    @Builder.Default
-    private int page = 0;
+    private int page = 0;     // default applicato anche con Jackson
 
     @Min(1)
-    @Builder.Default
-    private int size = 10;
-
+    private int size = 10;    // default applicato anche con Jackson
 }
+
