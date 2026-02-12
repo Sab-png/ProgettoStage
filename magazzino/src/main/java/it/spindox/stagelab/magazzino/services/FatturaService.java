@@ -39,4 +39,6 @@ public interface FatturaService {
      * Cancella una fattura.
      */
     void delete(Long id);
+
+    Page<Long> searchIds(FatturaSearchRequest req);
 }

@@ -1,6 +1,5 @@
 
 package it.spindox.stagelab.magazzino.controllers;
-
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.services.MagazzinoService;
@@ -16,6 +15,27 @@ import org.springframework.web.bind.annotation.*;
 public class MagazzinoController {
 
     private final MagazzinoService magazzinoService;
+
+    /**
+     * NEW: GET /magazzino
+     * Ritorna SOLO gli ID dei magazzini filtrati (Page<Long>)
+     */
+    @GetMapping
+    public ResponseEntity<Page<Long>> getMagazzinoIds(
+            @RequestParam(required = false) String codice,
+            @RequestParam(required = false) Long idProdotto,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        MagazzinoRequest req = new MagazzinoRequest();
+        req.setCodice(codice);
+        req.setIdProdotto(idProdotto);
+        req.setPage(page);
+        req.setSize(size);
+
+        Page<Long> ids = magazzinoService.searchIds(req);
+        return ResponseEntity.ok(ids);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<MagazzinoResponse> getMagazzino(@PathVariable Long id) {
@@ -49,8 +69,6 @@ public class MagazzinoController {
     ) {
         return ResponseEntity.ok(magazzinoService.search(searchRequest));
     }
-
-    // METODO -CHECK STOCK
 
     @PostMapping("/check-stock")
     public ResponseEntity<Void> checkStockLevels() {

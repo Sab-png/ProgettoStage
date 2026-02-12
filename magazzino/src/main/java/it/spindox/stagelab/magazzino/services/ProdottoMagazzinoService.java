@@ -20,4 +20,5 @@ public interface ProdottoMagazzinoService {
 
     void delete(Long id);
 
+    Page<Long> searchIds(ProdottoMagazzinoSearchRequest req);
 }

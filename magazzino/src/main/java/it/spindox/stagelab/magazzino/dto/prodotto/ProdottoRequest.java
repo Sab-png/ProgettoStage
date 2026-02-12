@@ -43,4 +43,8 @@ public class ProdottoRequest {
         if (prezzoMin == null || prezzoMax == null) return true;
         return prezzoMin.compareTo(prezzoMax) <= 0;
     }
+
+    public void setCategoria(String categoria) {
+
+    }
 }

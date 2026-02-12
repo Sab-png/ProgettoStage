@@ -71,6 +71,11 @@ public class ProdottoServiceImpl implements ProdottoService {
         repository.deleteById(id);
     }
 
+    @Override
+    public Page<Long> searchIds(ProdottoRequest req) {
+        return null;
+    }
+
     // ---- helpers ----
     private String emptyToNull(String s) {
         return (s == null || s.isBlank()) ? null : s.trim();

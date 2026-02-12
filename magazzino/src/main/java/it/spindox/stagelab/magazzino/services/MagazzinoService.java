@@ -18,4 +18,6 @@ public interface MagazzinoService {
     void delete(Long id);
 
     void checkStockLevels();
+
+    Page<Long> searchIds(MagazzinoRequest req);
 }

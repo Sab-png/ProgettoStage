@@ -32,6 +32,6 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
     );
 
     //  LETTURA SEQUENCE ORACLE
-    @Query(value = "SELECT MAGAZZINO.FATTURA_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT FATTURA_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
     Long nextNumeroSeq();
 }

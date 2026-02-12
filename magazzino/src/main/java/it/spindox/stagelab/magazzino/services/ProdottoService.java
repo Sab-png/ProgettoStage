@@ -13,4 +13,7 @@ public interface ProdottoService {
     void update(Long id, @Valid ProdottoRequest request);
 
     Page<ProdottoResponse> search(@Valid ProdottoRequest request);
-void delete(Long id);}
+void delete(Long id);
+
+    Page<Long> searchIds(ProdottoRequest req);
+}

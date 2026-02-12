@@ -41,6 +41,13 @@ public class MagazzinoRequest {
 public Long getId() {
     return 0L;
 }
+
+    public void setCodice(String codice) {
+    }
+
+    public void setIdProdotto(Long idProdotto) {
+
+    }
 }
 
 

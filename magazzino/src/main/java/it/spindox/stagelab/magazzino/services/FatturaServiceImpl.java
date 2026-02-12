@@ -128,4 +128,9 @@ public class FatturaServiceImpl implements FatturaService {
         }
         fatturaRepository.deleteById(id);
     }
+
+    @Override
+    public Page<Long> searchIds(FatturaSearchRequest req) {
+        return null;
+    }
 }

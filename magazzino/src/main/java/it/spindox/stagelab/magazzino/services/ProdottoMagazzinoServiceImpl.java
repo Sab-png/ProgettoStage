@@ -97,6 +97,11 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         repository.deleteById(id);
     }
 
+    @Override
+    public Page<Long> searchIds(ProdottoMagazzinoSearchRequest req) {
+        return null;
+    }
+
 
     // ---- helpers ----
     private String emptyToNull(String s) {

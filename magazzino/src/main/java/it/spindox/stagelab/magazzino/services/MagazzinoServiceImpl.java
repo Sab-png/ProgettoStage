@@ -114,6 +114,11 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         lista.forEach(this::processSingleStockItem);
     }
 
+    @Override
+    public Page<Long> searchIds(MagazzinoRequest req) {
+        return null;
+    }
+
     private void processSingleStockItem(ProdottoMagazzino pm) {
 
         // 1) Quantità assente → skip
