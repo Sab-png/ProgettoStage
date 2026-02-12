@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 
+
 @RestController
 @RequestMapping("/fatture")
 @RequiredArgsConstructor
@@ -29,23 +30,26 @@ public class FatturaController {
 
     /**
      * NEW: GET /fatture
-     * Ritorna SOLO gli ID (Page<Long>) delle fatture che matchano i filtri indicati via query params.
+     * Restituisce SOLO gli ID delle fatture filtrate.
      * Esempi:
-     *  - GET /fatture?idProdotto=5&page=0&size=20
-     *  - GET /fatture?numero=FAT-2026
-     *  - GET /fatture?dataFrom=2026-01-01&dataTo=2026-02-01
+     *   /fatture?numero=FAT-2025
+     *   /fatture?idProdotto=10
+     *   /fatture?page=1&size=20
      */
     @GetMapping
     public ResponseEntity<Page<Long>> getFattureIds(
             @RequestParam(required = false) String numero,
             @RequestParam(required = false) Long idProdotto,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFrom,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataTo,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFrom,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataTo,
             @RequestParam(required = false) BigDecimal importoMin,
             @RequestParam(required = false) BigDecimal importoMax,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
+
         FatturaSearchRequest req = new FatturaSearchRequest();
         req.setNumero(numero);
         req.setIdProdotto(idProdotto);
@@ -62,7 +66,7 @@ public class FatturaController {
 
     /**
      * GET /fatture/{id}
-     * Dettaglio fattura.
+     * Torna il dettaglio di UNA fattura
      */
     @GetMapping("/{id}")
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) throws Throwable {
@@ -71,7 +75,7 @@ public class FatturaController {
 
     /**
      * GET /fatture/prodotto/{idProdotto}
-     * Lista paginata di fatture per prodotto (ritorna DTO completi).
+     * Lista paginata di fatture per prodotto
      */
     @GetMapping("/prodotto/{idProdotto}")
     public ResponseEntity<PageImpl<FatturaResponse>> getFattureByProdotto(
@@ -85,7 +89,7 @@ public class FatturaController {
 
     /**
      * POST /fatture
-     * Crea una nuova fattura e ritorna 201 con Location header.
+     * Crea nuova fattura
      */
     @PostMapping
     public ResponseEntity<FatturaResponse> saveFattura(
@@ -101,7 +105,7 @@ public class FatturaController {
 
     /**
      * PATCH /fatture/{id}
-     * Aggiorna parzialmente una fattura.
+     * Aggiorna parzialmente una fattura
      */
     @PatchMapping("/{id}")
     public ResponseEntity<FatturaResponse> editFattura(
@@ -114,7 +118,7 @@ public class FatturaController {
 
     /**
      * POST /fatture/search
-     * Ricerca paginata con filtri via body (ritorna DTO completi).
+     * Ricerca paginata con filtri avanzati via request body
      */
     @PostMapping("/search")
     public ResponseEntity<Page<FatturaResponse>> searchFattura(
@@ -126,7 +130,6 @@ public class FatturaController {
 
     /**
      * DELETE /fatture/{id}
-     * Cancella una fattura.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {

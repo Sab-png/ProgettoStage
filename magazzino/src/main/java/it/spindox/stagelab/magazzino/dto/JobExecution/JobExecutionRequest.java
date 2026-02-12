@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
+
 
 @Data
 @NoArgsConstructor
@@ -13,8 +13,10 @@ import java.time.LocalDateTime;
 public class JobExecutionRequest {
 
     private StatusJob status;
-    private LocalDateTime startFrom;   //  LocalDateTime
-    private LocalDateTime startTo;     //  LocalDateTime
+
+    private LocalDateTime startFrom;
+    private LocalDateTime startTo;
+
     private Boolean hasError;
 
     @Min(0)
@@ -22,4 +24,17 @@ public class JobExecutionRequest {
 
     @Min(1)
     private Integer size = 20;
+
+    public void setNomeJob(String nomeJob) {
+    }
+
+    public void setStato(String stato) {
+    }
+
+    public void setFrom(LocalDateTime from) {
+    }
+
+    public void setTo(LocalDateTime to) {
+    }
 }
+

@@ -66,5 +66,8 @@ public interface JobExecutionService {
             Pageable pageable
     );
 
+
     void failed(JobExecution job, Exception e);
+
+    Page<Long> searchIds(JobExecutionRequest req);
 }

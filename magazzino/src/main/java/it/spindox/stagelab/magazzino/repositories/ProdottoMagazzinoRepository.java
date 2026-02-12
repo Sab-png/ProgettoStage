@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagazzino, Long> {
 
+    // SEARCH COMPLETA
     @Query("""
         SELECT DISTINCT pm
         FROM ProdottoMagazzino pm
@@ -33,6 +34,19 @@ public interface ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagaz
             @Param("quantitaMax") Integer quantitaMax,
             @Param("nomeProdotto") String nomeProdotto,
             @Param("nomeMagazzino") String nomeMagazzino,
+            Pageable pageable
+    );
+
+    // GET ALL SOLO ID
+    @Query("""
+        SELECT pm.id
+        FROM ProdottoMagazzino pm
+        WHERE (:prodottoId IS NULL OR pm.prodotto.id = :prodottoId)
+          AND (:magazzinoId IS NULL OR pm.magazzino.id = :magazzinoId)
+    """)
+    Page<Long> searchIds(
+            @Param("prodottoId") Long prodottoId,
+            @Param("magazzinoId") Long magazzinoId,
             Pageable pageable
     );
 }

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/magazzino")
 @RequiredArgsConstructor
@@ -16,10 +17,7 @@ public class MagazzinoController {
 
     private final MagazzinoService magazzinoService;
 
-    /**
-     * NEW: GET /magazzino
-     * Ritorna SOLO gli ID dei magazzini filtrati (Page<Long>)
-     */
+    /** GET ALL – solo ID filtrati **/
     @GetMapping
     public ResponseEntity<Page<Long>> getMagazzinoIds(
             @RequestParam(required = false) String codice,
@@ -37,17 +35,20 @@ public class MagazzinoController {
         return ResponseEntity.ok(ids);
     }
 
+    /** GET BY ID **/
     @GetMapping("/{id}")
     public ResponseEntity<MagazzinoResponse> getMagazzino(@PathVariable Long id) {
         return ResponseEntity.ok(magazzinoService.getById(id));
     }
 
+    /** CREATE **/
     @PostMapping
     public ResponseEntity<Void> saveMagazzino(@Valid @RequestBody MagazzinoRequest request) {
         magazzinoService.create(request);
         return ResponseEntity.status(201).build();
     }
 
+    /** UPDATE **/
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updateMagazzino(
             @PathVariable Long id,
@@ -57,12 +58,14 @@ public class MagazzinoController {
         return ResponseEntity.noContent().build();
     }
 
+    /** DELETE **/
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMagazzino(@PathVariable Long id) {
         magazzinoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    /** SEARCH COMPLETA **/
     @PostMapping("/search")
     public ResponseEntity<Page<MagazzinoResponse>> searchMagazzino(
             @Valid @RequestBody MagazzinoRequest searchRequest

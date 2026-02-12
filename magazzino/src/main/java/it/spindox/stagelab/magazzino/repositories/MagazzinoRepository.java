@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
 
+    // SEARCH COMPLETA
     @Query("""
         SELECT DISTINCT m
         FROM Magazzino m
@@ -27,7 +28,21 @@ public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
             @Param("capacitaMax") Integer capacitaMax,
             Pageable pageable
     );
+
+    // GET ALL SOLO ID
+    @Query("""
+        SELECT m.id
+        FROM Magazzino m
+        WHERE (:nome IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+          AND (:indirizzo IS NULL OR LOWER(m.indirizzo) LIKE LOWER(CONCAT('%', :indirizzo, '%')))
+          AND (:capacitaMin IS NULL OR m.capacita >= :capacitaMin)
+          AND (:capacitaMax IS NULL OR m.capacita <= :capacitaMax)
+    """)
+    Page<Long> searchIds(
+            @Param("nome") String nome,
+            @Param("indirizzo") String indirizzo,
+            @Param("capacitaMin") Integer capacitaMin,
+            @Param("capacitaMax") Integer capacitaMax,
+            Pageable pageable
+    );
 }
-
-
-

@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.math.BigDecimal;
+
 
 @Repository
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
 
+    // SEARCH COMPLETA
     @Query("""
         SELECT DISTINCT p
         FROM Prodotto p
@@ -22,6 +23,23 @@ public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
           AND (:prezzoMax IS NULL OR p.prezzo <= :prezzoMax)
     """)
     Page<Prodotto> search(
+            @Param("nome") String nome,
+            @Param("descrizione") String descrizione,
+            @Param("prezzoMin") BigDecimal prezzoMin,
+            @Param("prezzoMax") BigDecimal prezzoMax,
+            Pageable pageable
+    );
+
+    // GET ALL SOLO ID
+    @Query("""
+        SELECT p.id
+        FROM Prodotto p
+        WHERE (:nome IS NULL OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+          AND (:descrizione IS NULL OR LOWER(p.descrizione) LIKE LOWER(CONCAT('%', :descrizione, '%')))
+          AND (:prezzoMin IS NULL OR p.prezzo >= :prezzoMin)
+          AND (:prezzoMax IS NULL OR p.prezzo <= :prezzoMax)
+    """)
+    Page<Long> searchIds(
             @Param("nome") String nome,
             @Param("descrizione") String descrizione,
             @Param("prezzoMin") BigDecimal prezzoMin,

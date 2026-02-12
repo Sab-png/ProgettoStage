@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+
 @RestController
 @RequestMapping("/prodotti")
 @RequiredArgsConstructor
@@ -17,10 +18,7 @@ public class ProdottoController {
 
     private final ProdottoService prodottoService;
 
-    /**
-     * NEW: GET /prodotti
-     * Ritorna SOLO gli ID dei prodotti filtrati (Page<Long>)
-     */
+    /** GET ALL – solo ID filtrati **/
     @GetMapping
     public ResponseEntity<Page<Long>> getProdottiIds(
             @RequestParam(required = false) String nome,
@@ -38,17 +36,20 @@ public class ProdottoController {
         return ResponseEntity.ok(ids);
     }
 
+    /** GET BY ID **/
     @GetMapping("/{id}")
     public ResponseEntity<ProdottoResponse> getProdotto(@PathVariable Long id) {
         return ResponseEntity.ok(prodottoService.getById(id));
     }
 
+    /** CREATE **/
     @PostMapping
     public ResponseEntity<Void> saveProdotto(@Valid @RequestBody ProdottoRequest request) {
         prodottoService.create(request);
         return ResponseEntity.status(201).build();
     }
 
+    /** UPDATE **/
     @PatchMapping("/{id}")
     public ResponseEntity<Void> editProdotto(
             @PathVariable Long id,
@@ -58,12 +59,14 @@ public class ProdottoController {
         return ResponseEntity.noContent().build();
     }
 
+    /** DELETE **/
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProdotto(@PathVariable Long id) {
         prodottoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    /** SEARCH COMPLETA **/
     @PostMapping("/search")
     public ResponseEntity<Page<ProdottoResponse>> searchProdotto(
             @Valid @RequestBody ProdottoRequest searchRequest

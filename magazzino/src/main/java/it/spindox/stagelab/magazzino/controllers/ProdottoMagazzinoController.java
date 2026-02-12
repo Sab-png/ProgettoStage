@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+
 @RestController
 @RequestMapping("/prodotto-magazzino")
 @RequiredArgsConstructor
@@ -18,10 +19,7 @@ public class ProdottoMagazzinoController {
 
     private final ProdottoMagazzinoService service;
 
-    /**
-     * NEW: GET /prodotto-magazzino
-     * Ritorna SOLO gli ID filtrati (Page<Long>)
-     */
+    /** GET ALL – solo ID filtrati **/
     @GetMapping
     public ResponseEntity<Page<Long>> getIds(
             @RequestParam(required = false) Long prodottoId,
@@ -39,41 +37,40 @@ public class ProdottoMagazzinoController {
         return ResponseEntity.ok(ids);
     }
 
-    // ------------------------------
-    // CRUD
-    // ------------------------------
-
+    /** GET BY ID **/
     @GetMapping("/{id}")
     public ProdottoMagazzinoResponse getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
+    /** CREATE **/
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody @Valid ProdottoMagazzinoRequest request) {
+    public void create(@Valid @RequestBody ProdottoMagazzinoRequest request) {
         service.create(request);
     }
 
+    /** UPDATE **/
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@PathVariable Long id,
-                       @RequestBody @Valid ProdottoMagazzinoRequest request) {
+    public void update(
+            @PathVariable Long id,
+            @Valid @RequestBody ProdottoMagazzinoRequest request
+    ) {
         service.update(id, request);
     }
 
+    /** DELETE **/
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
     }
 
-    // ------------------------------
-    // SEARCH (DTO completi)
-    // ------------------------------
-
+    /** SEARCH COMPLETA **/
     @PostMapping("/search")
     public Page<ProdottoMagazzinoResponse> search(
-            @RequestBody @Valid ProdottoMagazzinoSearchRequest request
+            @Valid @RequestBody ProdottoMagazzinoSearchRequest request
     ) {
         return service.search(request);
     }

@@ -155,4 +155,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     public void failed(JobExecution job, Exception e) {
         failed(job, SJobErrorType.UNKNOWN, e);
     }
+
+    @Override
+    public Page<Long> searchIds(JobExecutionRequest req) {
+        return null;
+    }
 }
