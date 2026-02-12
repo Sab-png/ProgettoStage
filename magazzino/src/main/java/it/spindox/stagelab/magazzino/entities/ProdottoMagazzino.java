@@ -1,6 +1,5 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
-import it.spindox.stagelab.magazzino.entities.StockStatus;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +39,14 @@ public class ProdottoMagazzino {
 
     /**
      * Stato derivato
-     * NON va settato manualmente
      */
+
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", length = 5, nullable = false)
-    private StockStatus status;
+    private StockStatusProdotto status;
 
     /**
-     *  Dato di dominio persistito
+     *  SCORTA MIN
      */
     @Column(name = "SCORTA_MIN")
     @Min(0)
@@ -69,11 +68,11 @@ public class ProdottoMagazzino {
         }
 
         //  Calcolo STATUS tramite enum
-        this.status = StockStatus.fromQuantita(this.quantita, this.scortaMin);
+        this.status = StockStatusProdotto.fromQuantita(this.quantita, this.scortaMin);
     }
 
     /**
-     *  Metodo di dominio leggibile
+     *  Metodo di dominio
      * (opzionale, ma utile)
      */
     @Transient

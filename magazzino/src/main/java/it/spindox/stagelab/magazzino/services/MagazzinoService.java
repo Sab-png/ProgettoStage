@@ -1,5 +1,4 @@
 package it.spindox.stagelab.magazzino.services;
-
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import jakarta.validation.Valid;

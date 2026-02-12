@@ -10,7 +10,8 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+
+
 public class FatturaSearchRequest {
 
     private String numero;

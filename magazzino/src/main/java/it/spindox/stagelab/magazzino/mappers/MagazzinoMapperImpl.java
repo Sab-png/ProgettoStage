@@ -1,89 +1,75 @@
 
 package it.spindox.stagelab.magazzino.mappers;
-
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.Magazzino;
+import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
+import it.spindox.stagelab.magazzino.entities.StockStatusMagazzino;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import java.util.Objects;
+
+
+
+
 @Slf4j
 @Component
 public class MagazzinoMapperImpl implements MagazzinoMapper {
 
-    /**
-     * Converte un DTO MagazzinoRequest in una entity Magazzino.
-     *
-     * Viene usato in:
-     *  - create()
-     *
-     * NOTE:
-     *  - L'ID è generato dal DB
-     *  - 'capacita' è facoltativa nel DTO: viene mappata solo se presente (!= null)
-     */
     @Override
     public Magazzino toEntity(MagazzinoRequest request) {
-        if (request == null) {
-            return null;
-        }
+        if (request == null) return null;
+
         Magazzino m = new Magazzino();
         m.setNome(request.getNome());
         m.setIndirizzo(request.getIndirizzo());
-
-        // Mappa 'capacita' se fornita nella request
-        if (request.getCapacita() != null) {
-            m.setCapacita(request.getCapacita());
-        }
+        if (request.getCapacita() != null) m.setCapacita(request.getCapacita());
         return m;
     }
 
-    /**
-     * Converte una entity Magazzino in un DTO MagazzinoResponse.
-     *
-     * Viene usato quando si restituisce il magazzino al client:
-     *  - GET /magazzini/{id}
-     *  - GET /magazzini/list
-     *  - POST /magazzini/search
-     *
-     * NOTE:
-     *  - Protegge da null su entity
-     */
     @Override
     public MagazzinoResponse toResponse(Magazzino entity) {
-        if (entity == null) {
-            return null;
-        }
+        if (entity == null) return null;
+
         MagazzinoResponse r = new MagazzinoResponse();
         r.setId(entity.getId());
         r.setNome(entity.getNome());
         r.setIndirizzo(entity.getIndirizzo());
         r.setCapacita(entity.getCapacita());
+
+        int totale = 0;
+        if (entity.getProdottiMagazzino() != null) {
+            totale = entity.getProdottiMagazzino().stream()
+                    .map(ProdottoMagazzino::getQuantita)
+                    .filter(Objects::nonNull)
+                    .mapToInt(Integer::intValue)
+                    .sum();
+        }
+        r.setQuantitaTotale(totale);
+
+        int capacita = (entity.getCapacita() != null && entity.getCapacita() > 0)
+                ? entity.getCapacita()
+                : 1;
+
+        double percentuale = (totale * 100.0) / capacita;
+        r.setPercentuale(percentuale);
+
+        StockStatusMagazzino stato = entity.getStockStatus();
+        r.setStockStatus(stato);
+        if (stato != null) {
+            r.setStatusColor(stato.getDbValue());
+            r.setStatusDescription(stato.getDescription());
+        }
+
         return r;
     }
 
-    /**
-     * Aggiorna una entity esistente in modalità "PATCH":
-     * modifica solo i campi NON NULL presenti nella request.
-     *
-     * Viene usato in:
-     *  - update()
-     *
-     * NOTE:
-     *  - Se request è null non viene effettuata alcuna modifica
-     */
     @Override
     public void updateEntity(Magazzino m, @Valid MagazzinoRequest request) {
-        if (m == null || request == null) {
-            return;
-        }
-        if (request.getNome() != null) {
-            m.setNome(request.getNome());
-        }
-        if (request.getIndirizzo() != null) {
-            m.setIndirizzo(request.getIndirizzo());
-        }
-        if (request.getCapacita() != null) {
-            m.setCapacita(request.getCapacita());
-        }
+        if (m == null || request == null) return;
+        if (request.getNome() != null) m.setNome(request.getNome());
+        if (request.getIndirizzo() != null) m.setIndirizzo(request.getIndirizzo());
+        if (request.getCapacita() != null) m.setCapacita(request.getCapacita());
     }
 }

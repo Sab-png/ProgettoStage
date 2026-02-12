@@ -1,12 +1,11 @@
 package it.spindox.stagelab.magazzino.dto.ProdottoMagazzino;
-import it.spindox.stagelab.magazzino.entities.StockStatus;
+import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
 import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class ProdottoMagazzinoResponse {
 
     private Long id;
@@ -20,12 +19,10 @@ public class ProdottoMagazzinoResponse {
     private Integer quantita;
     private Integer scortaMin;
 
-    // NUOVI CAMPI (DERIVATI) per colors
-    private StockStatus status;
+
+    // Stato basato su scortaMin
+    private StockStatusProdotto status;
     private String statusColor;
     private String statusDescription;
 
-    public ProdottoMagazzinoResponse(Long id, Long aLong, String s, Long aLong1, String s1, Integer quantita, Object scortaMin) {
-    }
 }
-

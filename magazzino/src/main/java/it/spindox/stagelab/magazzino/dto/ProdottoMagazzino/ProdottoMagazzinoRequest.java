@@ -6,8 +6,6 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 public class ProdottoMagazzinoRequest {
 
     @NotNull
@@ -17,7 +15,9 @@ public class ProdottoMagazzinoRequest {
     private Long magazzinoId;
 
     @Min(0)
-    private Integer quantita;   // può essere null su update
+    private Integer quantita;
+
     @Min(0)
-    private Integer scortaMin;  // *Integer*  Scorta Minima
+    private Integer scortaMin;
+
 }

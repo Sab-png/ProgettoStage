@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.Converter;
-import it.spindox.stagelab.magazzino.entities.StockStatus;
+import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -8,15 +8,15 @@ import jakarta.persistence.Converter;
 
 @Converter(autoApply = true)
 public class StockStatusConverter
-        implements AttributeConverter<StockStatus, String> {
+        implements AttributeConverter<StockStatusProdotto, String> {
 
     @Override
-    public String convertToDatabaseColumn(StockStatus status) {
+    public String convertToDatabaseColumn(StockStatusProdotto status) {
         return status != null ? status.getDbValue() : null;
     }
 
     @Override
-    public StockStatus convertToEntityAttribute(String dbValue) {
-        return StockStatus.fromDbValue(dbValue);
+    public StockStatusProdotto convertToEntityAttribute(String dbValue) {
+        return StockStatusProdotto.fromDbValue(dbValue);
     }
 }
