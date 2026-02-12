@@ -22,11 +22,13 @@ public class JobExecutionController {
     private final JobExecutionService jobExecutionService;
     private final JobExecutionMapper jobExecutionMapper;
 
+    // GET /jobs/{id}
     @GetMapping("/{id}")
     public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(jobExecutionService.getById(id));
     }
 
+    // POST /jobs/search
     @PostMapping("/search")
     public ResponseEntity<Page<JobExecutionResponse>> search(
             @Valid @RequestBody JobExecutionRequest request
@@ -34,6 +36,7 @@ public class JobExecutionController {
         return ResponseEntity.ok(jobExecutionService.search(request));
     }
 
+    // GET /jobs/errors/last
     @GetMapping("/errors/last")
     public ResponseEntity<JobExecutionResponse> getLastError() {
 
@@ -43,7 +46,6 @@ public class JobExecutionController {
             return ResponseEntity.noContent().build();
         }
 
-        //  si usa il mapper iniettato
         return ResponseEntity.ok(jobExecutionMapper.toResponse(last.get()));
     }
 }
