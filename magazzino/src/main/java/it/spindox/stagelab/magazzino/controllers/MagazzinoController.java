@@ -47,7 +47,7 @@ public class MagazzinoController {
     @GetMapping("/list")
     public ResponseEntity<Page<MagazzinoResponse>> getAllPaged(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "8") int size
     ) {
         return ResponseEntity.ok(magazzinoService.getAllPaged(page, size));
     }

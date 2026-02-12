@@ -224,8 +224,7 @@ public class FatturaServiceImpl implements FatturaService {
 
         Pageable pageable = PageRequest.of(
                 request.getPage(),
-                request.getSize(),
-                Sort.by(Sort.Direction.DESC, "dataFattura")
+                request.getSize()
         );
 
         // Query JPQL del repository che ritorna SOLO gli ID

@@ -31,7 +31,7 @@ public class ProdottoServiceImpl implements ProdottoService {
     public Page<ProdottoResponse> getAllPaged(int page, int size) {
 
         // Costruzione pageable con ordinamento per nome
-        Pageable pageable = PageRequest.of(page, size, Sort.by("nome"));
+       Pageable pageable = PageRequest.of(page, size, Sort.by("nome"));
 
         // Recupero paginato dal repository
         Page<Prodotto> result = repo.findAll(pageable);

@@ -33,8 +33,8 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         // Pageable con fallback (page >=0, size >=1)
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
-                Math.max(size, 1),
-                Sort.by("nome").ascending()
+                Math.max(size, 1)
+
         );
 
         Page<Magazzino> p = repository.findAll(pageable);
