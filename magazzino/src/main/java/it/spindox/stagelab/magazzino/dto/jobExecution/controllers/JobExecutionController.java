@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.controllers;
+package it.spindox.stagelab.magazzino.dto.jobExecution.controllers;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;

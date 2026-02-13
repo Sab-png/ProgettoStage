@@ -170,7 +170,8 @@ public class InventoryScheduler {
         log.error("JOB FAILED — id={}, type={}, msg={}",
                 job.getId(), type, e.getMessage(), e);
 
-        // Il service accetta Exception → se è Throwable lo impacchettiamo
+        // Il service accetta Exception → se è Throwable si impacchetta
+
         Exception ex = (e instanceof Exception)
                 ? (Exception) e
                 : new Exception(e);
