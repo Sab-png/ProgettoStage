@@ -1,6 +1,7 @@
 package it.spindox.stagelab.magazzino.sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
+import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.MagazzinoException;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import it.spindox.stagelab.magazzino.services.MagazzinoService;
 import org.hibernate.internal.util.config.ConfigurationException;
@@ -42,9 +43,10 @@ public class InventoryScheduler {
 
     @Value("${inventory.check.rate}")
     private long checkRateMs;
+    private Object errorType;
 
 
-     //Metodo schedule che esegue il controllo inventario a intervalli regolari.
+    //Metodo schedule che esegue il controllo inventario a intervalli regolari.
      //Il valore è configurato tramite la proprietà "inventory.check.rate".
 
     @Scheduled(fixedRateString = "${inventory.check.rate}")
@@ -62,29 +64,16 @@ public class InventoryScheduler {
 
 
 
-        // 2) Prevenzione esecuzioni concorrenti
-
-
-        Optional<JobExecution> running = jobExecutionService.findRunning();
-        if (running.isPresent()) {
-            log.warn("Job già in esecuzione — runningId={}, startTime={}",
-                    running.get().getId(), running.get().getStartTime());
-            return;
-        }
-
-
         JobExecution job = null;
 
         try {
 
 
-            // 3) Registrazione job in RUNNING
+            // 2) Registrazione job in RUNNING
 
 
             job = jobExecutionService.start();
 
-            // Aggiunge jobId al MDC per arricchire automaticamente i log
-            MDC.put("jobId", String.valueOf(job.getId()));
 
             log.info("JOB START — id={}, dbStartTime={}, appStartTime={}",
                     job.getId(),
@@ -92,40 +81,30 @@ public class InventoryScheduler {
                     startTs);
 
 
-            // 4) Logica applicativa principale
+            // 3) Logica applicativa principale
 
 
             magazzinoService.checkStockLevels();
 
 
 
-            // 5) Successo del job
+            // 4) Successo del job
 
 
             jobExecutionService.success(job);
             log.info("JOB SUCCESS — id={}", job.getId());
 
 
-        } catch (IllegalArgumentException e) {
+        } catch (MagazzinoException e) {
 
-            handle(job, StatusJobErrorType.VALIDATION_ERROR, e);
-
-        } catch (ConfigurationException e) {
-
-            handle(job, StatusJobErrorType.CONFIGURATION_ERROR, e);
+             handle(job,StatusJobErrorType.VALIDATION_ERROR, e);
+            // catch : magazzino exception
 
 
-        } catch (SecurityException e) {
-
-            handle(job, StatusJobErrorType.SECURITY_ERROR, e);
-
-        } catch (RuntimeException e) {
-
-            handle(job, StatusJobErrorType.TECHNICAL_ERROR, e);
 
         } catch (Exception e) {
 
-            handle(job, StatusJobErrorType.UNKNOWN, e);
+            handle(job,StatusJobErrorType.UNKNOWN, e);
 
         } finally {
 
@@ -144,8 +123,6 @@ public class InventoryScheduler {
             log.info("[InventoryScheduler] Fine scheduler: job Startato con successo — id={}, start={}, end={}, durata={} ms ({})",
                     jobId, startTs, endTs, durationMs, humanDuration);
 
-            // Rimuove jobId dal MDC
-            MDC.remove("jobId");
         }
     }
 

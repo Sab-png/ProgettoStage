@@ -1,0 +1,37 @@
+package it.spindox.stagelab.magazzino.exceptions.jobsexceptions;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
+import org.springframework.http.HttpStatus;
+
+
+ // Tutte le eccezioni  erediteranno da questa classe
+// Run time exception non sono obbligato a dichiararla perche' e' gia implementata e dichiarata da java
+
+public abstract class JobException extends RuntimeException {
+
+     // Tipo di errore del job
+
+    private final StatusJobErrorType errorType;
+
+     // Lo status HTTP che il GlobalExceptionHandler restituirà al client
+
+    private final HttpStatus httpStatus;
+
+    protected JobException(String message, StatusJobErrorType errorType, HttpStatus httpStatus) {
+        super(message);
+        this.errorType = errorType;
+        this.httpStatus = httpStatus;
+    }
+
+     // Restituisce la tipologia di errore associata all'eccezione
+
+    public StatusJobErrorType getErrorType() {
+        return errorType;
+    }
+
+
+      // Restituisce lo status HTTP che rappresenta questo errore
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+}

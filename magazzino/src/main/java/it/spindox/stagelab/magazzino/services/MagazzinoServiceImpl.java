@@ -1,9 +1,8 @@
 package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
-import it.spindox.stagelab.magazzino.entities.Magazzino;
-import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
-import it.spindox.stagelab.magazzino.entities.StockStatusMagazzino;
+import it.spindox.stagelab.magazzino.entities.*;
+import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.MagazzinoException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +66,18 @@ public class MagazzinoServiceImpl implements MagazzinoService {
                         .sum();
             }
 
-            int capacita = (m.getCapacita() != null && m.getCapacita() > 0)
+
+
+            Integer cap = m.getCapacita();
+
+            if (cap == null || cap == 0) {
+                throw new MagazzinoException(
+                        "Capacità non valida per il magazzino '" + m.getNome() + "': " + cap,
+                        StatusJob.FAILED
+                );
+            }
+
+                int capacita = (m.getCapacita() != null && m.getCapacita() > 0)
                     ? m.getCapacita()
                     : 1;
 

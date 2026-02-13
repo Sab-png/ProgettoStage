@@ -21,12 +21,12 @@ public interface FatturaService {
     FatturaResponse create(FatturaRequest request);
 
 
-      // Aggiorna parzialmente una fattura (patch).
+      // Aggiorna parzialmente una fattura (patch)
 
     FatturaResponse update(Long id, FatturaRequest request) throws Throwable;
 
 
-    // Dettaglio fattura per id.
+    // Dettaglio fattura per id
 
     FatturaResponse getById(Long id) throws Throwable;
 
