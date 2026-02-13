@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
-import it.spindox.stagelab.magazzino.entities.SJobErrorType;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import it.spindox.stagelab.magazzino.services.MagazzinoService;
 import org.hibernate.internal.util.config.ConfigurationException;
@@ -108,24 +108,24 @@ public class InventoryScheduler {
 
         } catch (IllegalArgumentException e) {
 
-            handle(job, SJobErrorType.VALIDATION_ERROR, e);
+            handle(job, StatusJobErrorType.VALIDATION_ERROR, e);
 
         } catch (ConfigurationException e) {
 
-            handle(job, SJobErrorType.CONFIGURATION_ERROR, e);
+            handle(job, StatusJobErrorType.CONFIGURATION_ERROR, e);
 
 
         } catch (SecurityException e) {
 
-            handle(job, SJobErrorType.SECURITY_ERROR, e);
+            handle(job, StatusJobErrorType.SECURITY_ERROR, e);
 
         } catch (RuntimeException e) {
 
-            handle(job, SJobErrorType.TECHNICAL_ERROR, e);
+            handle(job, StatusJobErrorType.TECHNICAL_ERROR, e);
 
         } catch (Exception e) {
 
-            handle(job, SJobErrorType.UNKNOWN, e);
+            handle(job, StatusJobErrorType.UNKNOWN, e);
 
         } finally {
 
@@ -160,7 +160,7 @@ public class InventoryScheduler {
       //Metodo centralizzato per gestire errori di job.
     //  Accetta Throwable per evitare problemi con eccezioni non-Exception.
 
-    private void handle(JobExecution job, SJobErrorType type, Throwable e) {
+    private void handle(JobExecution job, StatusJobErrorType type, Throwable e) {
 
         if (job == null) {
             log.error("JOB FAILED — (no-id) type={}, msg={}", type, e.getMessage(), e);

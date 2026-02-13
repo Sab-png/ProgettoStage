@@ -33,7 +33,7 @@ public class JobExecution {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ERROR_TYPE")
-    private SJobErrorType errorType;
+    private StatusJobErrorType errorType;
 
     @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;

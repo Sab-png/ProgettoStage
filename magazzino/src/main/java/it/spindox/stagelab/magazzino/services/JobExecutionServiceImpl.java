@@ -2,7 +2,7 @@ package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
-import it.spindox.stagelab.magazzino.entities.SJobErrorType;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import it.spindox.stagelab.magazzino.mappers.JobExecutionMapper;
 import it.spindox.stagelab.magazzino.repositories.JobExecutionRepository;
@@ -98,7 +98,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void failed(JobExecution job, SJobErrorType errorType, Exception e) {
+    public void failed(JobExecution job, StatusJobErrorType errorType, Exception e) {
         job.setStatus(StatusJob.FAILED);
         job.setEndTime(LocalDateTime.now());                // timestamp fine
         job.setErrorType(errorType);
@@ -159,7 +159,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(JobExecution job, Exception e) {
-        failed(job, SJobErrorType.UNKNOWN, e);
+        failed(job, StatusJobErrorType.UNKNOWN, e);
     }
 
     @Override

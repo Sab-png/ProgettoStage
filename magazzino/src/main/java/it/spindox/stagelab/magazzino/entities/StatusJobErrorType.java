@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.entities;
 
-public enum SJobErrorType {
+public enum StatusJobErrorType {
 
     VALIDATION_ERROR,     // dati non validi
     CONFIGURATION_ERROR,  // configurazione errata o mancante

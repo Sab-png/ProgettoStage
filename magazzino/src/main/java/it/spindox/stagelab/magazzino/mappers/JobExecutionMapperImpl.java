@@ -1,7 +1,7 @@
 package it.spindox.stagelab.magazzino.mappers;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
-import it.spindox.stagelab.magazzino.entities.SJobErrorType;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -92,7 +92,7 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
 
 
     @Override
-    public void updateEntity(JobExecution target, StatusJob status, SJobErrorType errorType, String errorMessage) {
+    public void updateEntity(JobExecution target, StatusJob status, StatusJobErrorType errorType, String errorMessage) {
         target.setStatus(status);
         target.setEndTime(LocalDateTime.now());
         target.setErrorType(errorType);

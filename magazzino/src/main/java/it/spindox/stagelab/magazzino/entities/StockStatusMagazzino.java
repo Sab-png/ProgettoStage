@@ -30,14 +30,14 @@ public enum StockStatusMagazzino {
 
     public enum Severity { OK, WARN, ERROR }
 
-    /**
-     * percentuale capacità = (totale/capacità)*100
-     * Logica:
-     * - <= 5%      → ROSSO
-     * - 5%–20%     → GIALLO
-     * - 20%–50%    → GIALLO
-     * - >= 50%     → VERDE
-     */
+
+      // percentuale capacità = (totale/capacità)*100
+     // Logica:
+     // - <= 5%      → ROSSO
+     // - 5%–20%     → GIALLO
+     // - 20%–50%    → GIALLO
+      // - >= 50%     → VERDE
+
     public static StockStatusMagazzino fromPercentuale(double percent) {
         if (percent <= 5) return ROSSO;
         if (percent < 50) return GIALLO;

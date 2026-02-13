@@ -2,7 +2,7 @@ package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
-import it.spindox.stagelab.magazzino.entities.SJobErrorType;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +34,7 @@ public interface JobExecutionService {
 
       // Segna il job come fallito (VERSIONE CORRETTA)
 
-    void failed(JobExecution job, SJobErrorType errorType, Exception e);
+    void failed(JobExecution job, StatusJobErrorType errorType, Exception e);
 
     @Transactional(readOnly = true)
     Optional<JobExecution> findLast();

@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.dto.jobExecution;
-import it.spindox.stagelab.magazzino.entities.SJobErrorType;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +20,6 @@ public class JobExecutionResponse {
     private StatusJob status;
     private LocalDateTime startTime;   //  LocalDateTime
     private LocalDateTime endTime;     //  LocalDateTime
-    private SJobErrorType errorType;
+    private StatusJobErrorType errorType;
     private String errorMessage;
 }
