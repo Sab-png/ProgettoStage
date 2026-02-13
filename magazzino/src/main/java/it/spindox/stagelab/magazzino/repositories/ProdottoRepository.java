@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
 
     // SEARCH COMPLETA
+
     @Query("""
         SELECT DISTINCT p
         FROM Prodotto p
@@ -31,6 +32,7 @@ public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
     );
 
     // GET ALL SOLO ID
+
     @Query("""
         SELECT p.id
         FROM Prodotto p

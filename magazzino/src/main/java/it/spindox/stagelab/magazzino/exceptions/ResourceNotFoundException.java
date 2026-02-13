@@ -1,14 +1,14 @@
 
 package it.spindox.stagelab.magazzino.exceptions;
 
-/**
- * Eccezione custom di dominio utilizzata quando
- * una risorsa richiesta (Prodotto, Magazzino, Fattura, ecc.)
- * non viene trovata a database.
- * Viene lanciata tipicamente nel Service layer
- * e intercettata dal GlobalExceptionHandler per
- * restituire un HTTP 404 (Not Found).
- */
+
+  // Eccezione custom di dominio utilizzata quando
+ // una risorsa richiesta (Prodotto, Magazzino, Fattura, ecc.)
+  // non viene trovata a database.
+ // Viene lanciata tipicamente nel Service layer
+ // e intercettata dal GlobalExceptionHandler per
+  // restituire un HTTP 404 (Not Found).
+
 public class ResourceNotFoundException extends RuntimeException {
 
     /**

@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.Sjobs;
+package it.spindox.stagelab.magazzino.sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
@@ -23,36 +23,36 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class InventoryScheduler {
 
-    /**
-     * Timezone applicativa utilizzata nei log
-     */
+
+     // Timezone applicativa utilizzata nei log
+
     private static final ZoneId ZONE_ROME = ZoneId.of("Europe/Rome");
 
-    /**
-     * Format leggibile per timestamp
-     */
+
+     // Format leggibile per timestamp
+
     private static final DateTimeFormatter TS =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(ZONE_ROME);
 
     private final MagazzinoService magazzinoService;
     private final JobExecutionService jobExecutionService;
 
-    /**
-     * Intervallo tra una run e la successiva, letto da application.properties
-     */
+
+      // Intervallo tra una run e la successiva, letto da application.properties
+
     @Value("${inventory.check.rate}")
     private long checkRateMs;
 
-    /**
-     * Metodo schedulato che esegue il controllo inventario a intervalli regolari.
-     * Il valore è configurato tramite la proprietà "inventory.check.rate".
-     */
+
+     //Metodo schedule che esegue il controllo inventario a intervalli regolari.
+     //Il valore è configurato tramite la proprietà "inventory.check.rate".
+
     @Scheduled(fixedRateString = "${inventory.check.rate}")
     public void runCheck() {
 
-        // =============================
+
         // 1) Timestamp di avvio job
-        // =============================
+
 
         final Instant startInstant = Instant.now();                     // Tempo UTC
         final String startTs = TS.format(startInstant);                 // Tempo formattato in Europe/Rome
@@ -61,9 +61,9 @@ public class InventoryScheduler {
                 startTs, checkRateMs);
 
 
-        // =============================
+
         // 2) Prevenzione esecuzioni concorrenti
-        // =============================
+
 
         Optional<JobExecution> running = jobExecutionService.findRunning();
         if (running.isPresent()) {
@@ -77,9 +77,9 @@ public class InventoryScheduler {
 
         try {
 
-            // =============================
+
             // 3) Registrazione job in RUNNING
-            // =============================
+
 
             job = jobExecutionService.start();
 
@@ -91,16 +91,16 @@ public class InventoryScheduler {
                     job.getStartTime().atZoneSameInstant(ZoneId.of("Europe/Rome")).toLocalDateTime(),
                     startTs);
 
-            // =============================
+
             // 4) Logica applicativa principale
-            // =============================
+
 
             magazzinoService.checkStockLevels();
 
 
-            // =============================
+
             // 5) Successo del job
-            // =============================
+
 
             jobExecutionService.success(job);
             log.info("JOB SUCCESS — id={}", job.getId());
@@ -129,9 +129,9 @@ public class InventoryScheduler {
 
         } finally {
 
-            // =============================
+
             // 6) Log di chiusura con durata
-            // =============================
+
 
             final Instant endInstant = Instant.now();
             final String endTs = TS.format(endInstant);
@@ -149,17 +149,17 @@ public class InventoryScheduler {
         }
     }
 
-    /**
-     * Converte la durata in un formato leggibile (implementazione vuota come da tuo codice)
-     */
+
+      //Converte la durata in un formato leggibile
+
     private String humanReadableDuration(long durationMs) {
         return "";
     }
 
-    /**
-     * Metodo centralizzato per gestire errori di job.
-     * Accetta Throwable per evitare problemi con eccezioni non-Exception.
-     */
+
+      //Metodo centralizzato per gestire errori di job.
+    //  Accetta Throwable per evitare problemi con eccezioni non-Exception.
+
     private void handle(JobExecution job, SJobErrorType type, Throwable e) {
 
         if (job == null) {

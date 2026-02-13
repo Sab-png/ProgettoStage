@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.dto.JobExecution;
+package it.spindox.stagelab.magazzino.dto.jobExecution;
 import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import lombok.AllArgsConstructor;

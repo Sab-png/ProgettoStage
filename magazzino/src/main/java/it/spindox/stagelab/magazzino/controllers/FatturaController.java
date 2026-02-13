@@ -29,10 +29,9 @@ public class FatturaController {
 
     private final FatturaService fatturaService;
 
-    /**
-     * GET /fatture       → solo ID (già implementato)
-     * GET /fatture/list  → fatture complete (stream), paginato
-     */
+
+      // GET /fatture : singola fattura solo per ID
+
 
     @GetMapping
     public ResponseEntity<Page<Long>> getFattureIds(
@@ -62,10 +61,11 @@ public class FatturaController {
         return ResponseEntity.ok(ids);
     }
 
-    /**
-     * NEW: GET /fatture/list
-     * Ritorna fatture COMPLETE, paginazione + stream
-     */
+
+     //  GET /fatture/list
+     // Ritorna lista fatture COMPLETE, paginazione + stream
+
+
     @GetMapping("/list")
     public ResponseEntity<Page<FatturaResponse>> getAllFatturePaged(
             @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -74,9 +74,9 @@ public class FatturaController {
         return ResponseEntity.ok(fatturaService.getAllPaged(page, size));
     }
 
-    /**
-     * GET /fatture/{id}
-     */
+
+     // GET /fatture/{id}
+
     @GetMapping("/{id}")
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) throws Throwable {
         return ResponseEntity.ok(fatturaService.getById(id));

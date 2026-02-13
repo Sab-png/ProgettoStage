@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.mappers.JobExecutionMapper;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
@@ -25,10 +25,10 @@ public class JobExecutionController {
     private final JobExecutionService jobExecutionService;
     private final JobExecutionMapper jobExecutionMapper;
 
-    /**
-     * NEW: GET /jobs
-     * Restituisce SOLO gli ID dei job filtrati (Page<Long>)
-     */
+
+      // GET /jobs
+     // Restituisce SOLO gli ID dei job filtrati (Page<Long>)
+
     @GetMapping
     public ResponseEntity<Page<Long>> getJobIds(
             @RequestParam(required = false) String nomeJob,
@@ -53,17 +53,18 @@ public class JobExecutionController {
         return ResponseEntity.ok(ids);
     }
 
-    /**
-     * GET BY ID: /jobs/{id}
-     */
+
+     // GET BY ID: /jobs/{id}
+
+
     @GetMapping("/{id}")
     public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(jobExecutionService.getById(id));
     }
 
-    /**
-     * Ricerca completa con DTO
-     */
+
+      // Ricerca completa/search con DTO
+
     @PostMapping("/search")
     public ResponseEntity<Page<JobExecutionResponse>> search(
             @Valid @RequestBody JobExecutionRequest request
@@ -71,10 +72,10 @@ public class JobExecutionController {
         return ResponseEntity.ok(jobExecutionService.search(request));
     }
 
-    /**
-     * GET /jobs/errors/last
-     * Ritorna l'ultimo job che ha generato un errore
-     */
+
+     // GET /jobs/errors/last
+      // Ritorna l'ultimo job che ha generato un errore
+
     @GetMapping("/errors/last")
     public ResponseEntity<JobExecutionResponse> getLastError() {
 

@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
@@ -27,10 +27,10 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     private final JobExecutionRepository jobExecutionRepository;
     private final JobExecutionMapper jobExecutionMapper;
 
-    /**
-     * Recupera un JobExecution dal DB tramite ID.
-     * Usa readOnly perché è una semplice operazione di lettura.
-     */
+
+     // Recupera un JobExecution dal DB tramite ID.
+     // Usa readOnly perché è una semplice operazione di lettura.
+
     @Override
     @Transactional(readOnly = true)
     public JobExecutionResponse getById(Long id) {
@@ -40,10 +40,10 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return jobExecutionMapper.toResponse(job);
     }
 
-    /**
-     * Ricerca con filtro avanzato via DTO (status, date, errori, paginazione).
-     * Anche questa solo lettura.
-     */
+
+     // Ricerca con filtro avanzato via DTO (status, date, errori, paginazione).
+    // solo lettura
+
     @Override
     @Transactional(readOnly = true)
     public Page<JobExecutionResponse> search(JobExecutionRequest request) {
@@ -61,11 +61,11 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return result.map(jobExecutionMapper::toResponse);
     }
 
-    /**
-     * CREA un nuovo job in stato RUNNING.
-     * Propagation = REQUIRES_NEW → crea sempre una nuova transazione indipendente.
-     * Questo garantisce che il record venga salvato anche se la logica schedulata fallisce.
-     */
+
+     // CREA un nuovo job in stato RUNNING.
+     // Propagation = REQUIRES_NEW : va a creare sempre una nuova transazione indipendente
+    // Questo garantisce che il record venga salvato anche se la logica schedule fallisce.
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public JobExecution start() {
@@ -78,10 +78,11 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return job;
     }
 
-    /**
-     * Marca un job come SUCCESS.
-     * Per evitare rollback, anche qui usiamo REQUIRES_NEW.
-     */
+
+     // Segna un job come SUCCESS.
+     // Per evitare rollback: si usa  REQUIRES_NEW.
+
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void success(JobExecution job) {
@@ -90,10 +91,11 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         jobExecutionRepository.save(job);
     }
 
-    /**
-     * Marca un job come FAILED con un tipo errore specifico.
-     * Registra: stato, data fine, tipo errore, messaggio.
-     */
+
+     // Segna un job come FAILED con un tipo errore specifico.
+     // Registra: stato, data fine, tipo errore, messaggio.
+
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(JobExecution job, SJobErrorType errorType, Exception e) {
@@ -104,29 +106,31 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         jobExecutionRepository.save(job);
     }
 
-    /**
-     * Ritorna l'ultimo job ordinato per start time (il più recente).
-     */
+
+     //  Ritorna l'ultimo job ordinato per start time (il più recente)
+
     @Override
     @Transactional(readOnly = true)
     public Optional<JobExecution> findLast() {
         return jobExecutionRepository.findFirstByOrderByStartTimeDesc();
     }
 
-    /**
-     * Ritorna eventuale job ancora in RUNNING.
-     * Serve allo scheduler per evitare esecuzioni parallele.
-     */
+
+     // Ritorna eventuale job ancora in RUNNING
+      // Serve allo scheduler per evitare esecuzioni parallele
+
+
     @Override
     @Transactional(readOnly = true)
     public Optional<JobExecution> findRunning() {
         return jobExecutionRepository.findFirstByStatus(StatusJob.RUNNING);
     }
 
-    /**
-     * Versione interna della ricerca (non via DTO).
-     * Delegata al repository con conversione delle date.
-     */
+
+      // Versione interna della ricerca (non via DTO).
+     // Delegata al repository con conversione delle date.
+
+
     @Override
     @Transactional(readOnly = true)
     public Page<JobExecution> search(
@@ -145,11 +149,13 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         );
     }
 
-    /**
-     * Gestione fallback del failed SENZA tipo errore esplicito.
-     * Mappa automaticamente l'errore come UNKNOWN.
-     * Fondamentale: prima era vuoto → rompeva tutto.
-     */
+
+     // Gestione fallback del failed SENZA tipo errore esplicito.
+     // Mappa automaticamente l'errore come UNKNOWN.
+      // fallback = meccanismo tolleranza degli errori, che esegue un azione alternativa quando un operazione fallisce
+      // per evitare di crashare il sistema
+
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(JobExecution job, Exception e) {

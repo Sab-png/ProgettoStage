@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.dto.ProdottoMagazzino;
+package it.spindox.stagelab.magazzino.dto.prodottomagazzino;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

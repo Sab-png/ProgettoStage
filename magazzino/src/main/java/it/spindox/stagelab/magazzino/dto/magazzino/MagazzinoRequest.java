@@ -13,21 +13,20 @@ import lombok.NoArgsConstructor;
 
 public class MagazzinoRequest {
 
-    // Nome magazzino
     private String nome;
 
-    // Indirizzo
     private String indirizzo;
 
-    // Capacità
     @Positive(message = "La capacità deve essere maggiore di zero")
     private Integer capacita;
 
     // Campi SEARCH
+
     private Integer capacitaMin;
     private Integer capacitaMax;
 
     // Paginazione
+
     @Min(0)
     private int page = 0;
 

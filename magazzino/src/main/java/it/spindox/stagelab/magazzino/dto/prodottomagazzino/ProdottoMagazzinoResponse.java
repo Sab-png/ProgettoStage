@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.dto.ProdottoMagazzino;
+package it.spindox.stagelab.magazzino.dto.prodottomagazzino;
 import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
 import lombok.*;
 
@@ -21,6 +21,7 @@ public class ProdottoMagazzinoResponse {
 
 
     // Stato basato su scortaMin
+
     private StockStatusProdotto status;
     private String statusColor;
     private String statusDescription;

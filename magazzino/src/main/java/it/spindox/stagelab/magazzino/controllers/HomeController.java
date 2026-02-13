@@ -11,20 +11,20 @@ import java.util.Map;
 @RequestMapping("/home")
 public class HomeController {
 
-    /**
-     * Homepage del servizio.
-     * URL: GET /home
-     */
+
+     //Homepage del servizio.
+     //URL: GET /home
+
     @GetMapping
     public ResponseEntity<String> home() {
         return ResponseEntity.ok("Magazzino API Running ☻");
     }
 
-    /**
-     * Health check endpoint.
-     * Restituisce stato e timestamp corrente.
-     * URL: GET /home/health
-     */
+
+     // Health check endpoint.
+      // Restituisce stato e timestamp corrente.
+      // URL: GET /home/health
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> response = Map.of(
@@ -34,10 +34,10 @@ public class HomeController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Informazioni base sul servizio.
-     * URL: GET /home/info
-     */
+
+     // Informazioni base sul servizio.
+     // URL: GET /home/info
+
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> info() {
         Map<String, Object> response = Map.of(

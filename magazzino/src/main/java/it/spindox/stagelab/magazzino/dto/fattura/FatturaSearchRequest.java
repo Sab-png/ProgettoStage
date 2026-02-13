@@ -1,7 +1,6 @@
 package it.spindox.stagelab.magazzino.dto.fattura;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
@@ -22,9 +21,9 @@ public class FatturaSearchRequest {
     private BigDecimal importoMax;
 
     @Min(0)
-    private int page = 0;     // default applicato anche con Jackson
+    private int page = 0;
 
     @Min(1)
-    private int size = 10;    // default applicato anche con Jackson
+    private int size = 10;
 }
 

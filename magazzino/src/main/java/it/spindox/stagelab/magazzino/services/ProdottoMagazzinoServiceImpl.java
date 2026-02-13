@@ -1,7 +1,7 @@
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoRequest;
-import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoResponse;
-import it.spindox.stagelab.magazzino.dto.ProdottoMagazzino.ProdottoMagazzinoSearchRequest;
+import it.spindox.stagelab.magazzino.dto.prodottomagazzino.ProdottoMagazzinoRequest;
+import it.spindox.stagelab.magazzino.dto.prodottomagazzino.ProdottoMagazzinoResponse;
+import it.spindox.stagelab.magazzino.dto.prodottomagazzino.ProdottoMagazzinoSearchRequest;
 import it.spindox.stagelab.magazzino.entities.Magazzino;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
@@ -28,9 +28,9 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
     private final MagazzinoRepository magazzinoRepo;
     private final ProdottoMagazzinoMapper mapper;
 
-    // ===============================================================
     // GET ALL PAGED
-    // ===============================================================
+
+
     @Override
     @Transactional(readOnly = true)
     public Page<ProdottoMagazzinoResponse> getAllPaged(int page, int size) {
@@ -50,9 +50,9 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         return new PageImpl<>(content, pageable, result.getTotalElements());
     }
 
-    // ===============================================================
     // GET IDs FILTRATI
-    // ===============================================================
+
+
     @Override
     @Transactional(readOnly = true)
     public Page<Long> searchIds(ProdottoMagazzinoSearchRequest r) {
@@ -69,9 +69,10 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         );
     }
 
-    // ===============================================================
+
     // GET BY ID
-    // ===============================================================
+
+
     @Override
     @Transactional(readOnly = true)
     public ProdottoMagazzinoResponse getById(Long id) {
@@ -82,9 +83,10 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         return mapper.toResponse(entity);
     }
 
-    // ===============================================================
+
     // CREATE
-    // ===============================================================
+
+
     @Override
     @Transactional
     public void create(ProdottoMagazzinoRequest r) {
@@ -102,9 +104,9 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         repo.save(entity);
     }
 
-    // ===============================================================
     // UPDATE
-    // ===============================================================
+
+
     @Override
     @Transactional
     public void update(Long id, ProdottoMagazzinoRequest r) {
@@ -117,9 +119,10 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         repo.save(entity);
     }
 
-    // ===============================================================
+
     // DELETE
-    // ===============================================================
+
+
     @Override
     @Transactional
     public void delete(Long id) {
@@ -129,9 +132,8 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         repo.deleteById(id);
     }
 
-    // ===============================================================
     // SEARCH COMPLETA
-    // ===============================================================
+
     @Override
     @Transactional(readOnly = true)
     public Page<ProdottoMagazzinoResponse> search(ProdottoMagazzinoSearchRequest r) {

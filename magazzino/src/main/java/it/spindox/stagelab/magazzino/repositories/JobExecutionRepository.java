@@ -10,10 +10,12 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+
 @Repository
 public interface JobExecutionRepository extends JpaRepository<JobExecution, Long> {
 
     // SEARCH COMPLETA
+
     @Query("""
         SELECT j
         FROM JobExecution j

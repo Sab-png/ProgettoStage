@@ -37,26 +37,24 @@ public class ProdottoMagazzino {
     @Column(name = "QUANTITA", nullable = false)
     private Integer quantita;
 
-    /**
-     * Stato derivato
-     */
+    // Stato derivato
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", length = 5, nullable = false)
     private StockStatusProdotto status;
 
-    /**
-     *  SCORTA MIN
-     */
+
+     // SCORTA MIN
+
     @Column(name = "SCORTA_MIN")
     @Min(0)
     private Integer scortaMin;
 
-    /**
-     *  Logica di dominio centrale
-     * - garantisce SCORTA_MIN
-     * - ricalcola sempre STATUS
-     */
+
+     // Logica di dominio
+     // garantisce SCORTA_MIN
+     // ricalcola sempre STATUS
+
     @PrePersist
     @PreUpdate
     private void applyStockLogic() {
@@ -71,10 +69,9 @@ public class ProdottoMagazzino {
         this.status = StockStatusProdotto.fromQuantita(this.quantita, this.scortaMin);
     }
 
-    /**
-     *  Metodo di dominio
-     * (opzionale, ma utile)
-     */
+
+     // Metodo di dominio/ puo' essere non utilizzato
+
     @Transient
     public Integer getSogliaMinima() {
         return scortaMin;

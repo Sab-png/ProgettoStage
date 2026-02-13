@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.Converter;
+package it.spindox.stagelab.magazzino.converter;
 import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

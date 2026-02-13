@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.JobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.SJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
@@ -21,19 +21,19 @@ public interface JobExecutionService {
     Page<JobExecutionResponse> search(JobExecutionRequest request);
 
 
-    /**
-     * Crea un nuovo JobExecution con status RUNNING
-     */
+
+      // Crea un nuovo JobExecution con status RUNNING
+
     JobExecution start();
 
-    /**
-     * Marca il job come completato con successo
-     */
+
+     // Segna il job come completato con successo
+
     void success(JobExecution job);
 
-    /**
-     * Marca il job come fallito (VERSIONE CORRETTA)
-     */
+
+      // Segna il job come fallito (VERSIONE CORRETTA)
+
     void failed(JobExecution job, SJobErrorType errorType, Exception e);
 
     @Transactional(readOnly = true)
@@ -42,9 +42,9 @@ public interface JobExecutionService {
     @Transactional(readOnly = true)
     Optional<JobExecution> findRunning();
 
-    /**
-     * Ricerca interna (non per controller)
-     */
+
+     // Ricerca di Page Job execution
+
     @Transactional(readOnly = true)
     Page<JobExecution> search(
             StatusJob status,

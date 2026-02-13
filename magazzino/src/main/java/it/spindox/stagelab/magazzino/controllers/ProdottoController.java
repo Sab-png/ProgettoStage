@@ -22,6 +22,7 @@ public class ProdottoController {
     private final ProdottoService service;
 
     // GET ALL solo ID
+
     @GetMapping
     public ResponseEntity<Page<Long>> getIds(
             @RequestParam(required = false) String nome,
@@ -43,6 +44,7 @@ public class ProdottoController {
     }
 
     // GET ALL paged + stream
+
     @GetMapping("/list")
     public ResponseEntity<Page<ProdottoResponse>> getAllPaged(
             @RequestParam(defaultValue = "0") int page,

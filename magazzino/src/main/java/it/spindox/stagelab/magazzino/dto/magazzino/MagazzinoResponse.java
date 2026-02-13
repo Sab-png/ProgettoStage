@@ -19,6 +19,8 @@ public class MagazzinoResponse {
     private String indirizzo;
     private Integer capacita;
 
+    // Campi SEARCH
+
     private Integer quantitaTotale;
     private Double percentuale;
 

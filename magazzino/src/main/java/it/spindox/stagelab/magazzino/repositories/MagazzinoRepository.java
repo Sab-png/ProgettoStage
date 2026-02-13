@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
 
     // SEARCH COMPLETA
+
     @Query("""
         SELECT DISTINCT m
         FROM Magazzino m
@@ -30,6 +31,7 @@ public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
     );
 
     // GET ALL SOLO ID
+
     @Query("""
         SELECT m.id
         FROM Magazzino m

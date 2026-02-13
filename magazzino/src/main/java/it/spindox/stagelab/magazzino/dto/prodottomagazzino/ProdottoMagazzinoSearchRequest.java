@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.dto.ProdottoMagazzino;
+package it.spindox.stagelab.magazzino.dto.prodottomagazzino;
 import lombok.*;
 
 @Data
@@ -20,6 +20,7 @@ public class ProdottoMagazzinoSearchRequest {
     private String nomeMagazzino;
 
     // Paging (facoltativo: default nel service se null)
+
     private Integer page;
     private Integer size;
 }
