@@ -4,6 +4,7 @@ import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.Magazzino;import jakarta.validation.Valid;
 
+
 public interface MagazzinoMapper {
 
     Magazzino toEntity(MagazzinoRequest request);
@@ -11,4 +12,6 @@ public interface MagazzinoMapper {
     MagazzinoResponse toResponse(Magazzino entity);
 
     void updateEntity(Magazzino magazzino, @Valid MagazzinoRequest request);
+
+    Magazzino fromRequest(MagazzinoRequest request);
 }
