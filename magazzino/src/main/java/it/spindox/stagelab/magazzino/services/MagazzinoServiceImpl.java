@@ -2,6 +2,7 @@ package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.*;
+import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.InvalidCapacityException;
 import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.MagazzinoException;
 import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.ProductQuantityException;
@@ -17,7 +18,6 @@ import java.util.List;
 
 
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,40 +26,128 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     private final MagazzinoRepository repository;
     private final MagazzinoMapper mapper;
 
+
+    // GET BY ID → GET /magazzino/{id}
+
     @Override
+    @Transactional(readOnly = true)
     public MagazzinoResponse getById(Long id) {
-        return null;
+        Magazzino entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Magazzino non trovato"));
+        return mapper.toResponse(entity);
     }
+
 
     // CREATE
 
     @Override
+    @Transactional
     public void create(MagazzinoRequest request) {
-
+        Magazzino entity = mapper.fromRequest(request);
+        repository.save(entity);
     }
 
-// UPDATE
+
+    // UPDATE (PATCH)
 
     @Override
+    @Transactional
     public void update(Long id, MagazzinoRequest request) {
+        Magazzino entity = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Magazzino non trovato"));
 
+        mapper.updateEntity(entity, request);
+        repository.save(entity);
     }
 
-// SEARCH
-
-    @Override
-    public Page<MagazzinoResponse> search(MagazzinoRequest request) {
-        return null;
-    }
 
     // DELETE
 
     @Override
+    @Transactional
     public void delete(Long id) {
-
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Magazzino non trovato");
+        }
+        repository.deleteById(id);
     }
 
-    // METODO PRINCIPAL: CHECK STOCK LEVEL
+
+    // GET LISTA COMPLETA → GET /magazzino/list
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MagazzinoResponse> getAllPaged(int page, int size) {
+
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.max(size, 1),
+                Sort.by(Sort.Direction.DESC, "id")
+        );
+
+        Page<Magazzino> pageEntities = repository.findAll(pageable);
+
+        List<MagazzinoResponse> content = pageEntities.getContent()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        return new PageImpl<>(content, pageable, pageEntities.getTotalElements());
+    }
+
+
+
+    // GET SOLO ID → GET /magazzino
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Long> searchIds(MagazzinoRequest req) {
+
+        Pageable pageable = PageRequest.of(
+                req.getPage(),
+                req.getSize(),
+                Sort.by(Sort.Direction.DESC, "id")
+        );
+
+        return repository.searchIds(
+                req.getNome(),
+                req.getIndirizzo(),
+                req.getCapacitaMin(),
+                req.getCapacitaMax(),
+                pageable
+        );
+    }
+
+
+
+    // SEARCH COMPLETA → POST /magazzino/search
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MagazzinoResponse> search(MagazzinoRequest request) {
+
+        Pageable pageable = PageRequest.of(
+                request.getPage(),
+                request.getSize(),
+                Sort.by(Sort.Direction.DESC, "id")
+        );
+
+        Page<Magazzino> page = repository.search(
+                request.getNome(),
+                request.getIndirizzo(),
+                request.getCapacitaMin(),
+                request.getCapacitaMax(),
+                pageable
+        );
+
+        return page.map(mapper::toResponse);
+    }
+
+
+
+    // CHECK STOCK LEVELS
 
     @Override
     @Transactional
@@ -69,90 +157,48 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
         for (Magazzino m : magazzini) {
 
-
-            // 1) VALIDAZIONE CAPACITÀ
-
             Integer cap = m.getCapacita();
             if (cap == null || cap <= 0) {
                 throw new InvalidCapacityException(m.getNome(), cap);
             }
 
-
-            // 2) VALIDAZIONE QUANTITÀ PRODOTTI
-
             int totaleProdotti = getTotaleProdotti(m);
 
-
-            // 3) CALCOLO PERCENTUALE E STATO ( LOGICA PER DETERMINARE L' ENUMERATION)
-
             double percentuale;
-
             try {
                 percentuale = (totaleProdotti * 100.0) / cap;
             } catch (Exception e) {
                 throw new StockCalculationException(
-                        "Errore nel calcolo della percentuale per magazzino " + m.getNome(),
-                        e
+                        "Errore nel calcolo percentuale per " + m.getNome(), e
                 );
             }
 
+            StockStatusMagazzino status = StockStatusMagazzino.fromPercentuale(percentuale);
 
-            // 4) DETERMINAZIONE STATUS DALLE REGOLE DI BUSINESS
-
-            StockStatusMagazzino stato = StockStatusMagazzino.fromPercentuale(percentuale);
-
-
-            // 5) SALVATAGGIO STATO MAGAZZINO
-
-            m.setStockStatus(stato);
+            m.setStockStatus(status);
             repository.save(m);
 
             log.info("[CHECK] Magazzino={} Totale={} Percentuale={} Stato={}",
                     m.getNome(),
                     totaleProdotti,
                     String.format("%.2f", percentuale),
-                    stato
+                    status
             );
         }
     }
 
-    // GET TOTAL PRODUCTS
 
     private static int getTotaleProdotti(Magazzino m) {
-        int totaleProdotti = 0;
-        try {
-            for (ProdottoMagazzino p : m.getProdottiMagazzino()) {
-
-                Integer qta = p.getQuantita();
-
-                if (qta == null || qta < 0) {
-                    throw new ProductQuantityException(
-                            p.getId(), m.getNome(), qta
-                    );
-                }
-
-                totaleProdotti += qta;
+        int tot = 0;
+        for (ProdottoMagazzino p : m.getProdottiMagazzino()) {
+            Integer qta = p.getQuantita();
+            if (qta == null || qta < 0) {
+                throw new ProductQuantityException(
+                        p.getId(), m.getNome(), qta
+                );
             }
-        } catch (MagazzinoException e) {
-
-            throw e;
-        } catch (Exception e) {
-            throw new StockCalculationException(
-                    "Errore durante il calcolo delle quantità del magazzino " + m.getNome(),
-                    e
-            );
+            tot += qta;
         }
-        return totaleProdotti;
+        return tot;
     }
-
-    @Override
-    public Page<Long> searchIds(MagazzinoRequest req) {
-        return null;
-    }
-
-    @Override
-    public Page<MagazzinoResponse> getAllPaged(int page, int size) {
-        return null;
-    }
-
 }

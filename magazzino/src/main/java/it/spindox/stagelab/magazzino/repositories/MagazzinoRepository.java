@@ -23,7 +23,6 @@ public interface MagazzinoRepository extends JpaRepository<Magazzino, Long> {
           AND (:capacitaMax IS NULL OR m.capacita <= :capacitaMax)
     """)
     Page<Magazzino> search(
-            @Param("id") Long id,
             @Param("nome") String nome,
             @Param("indirizzo") String indirizzo,
             @Param("capacitaMin") Integer capacitaMin,
