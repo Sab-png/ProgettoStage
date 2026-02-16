@@ -40,10 +40,11 @@ public class FatturaServiceImpl implements FatturaService {
     //  Usato da GET /fatture/list
 
     @Override
-    @Transactional(readOnly = true) // Solo lettura -> più efficiente
+    @Transactional(readOnly = true) // Solo lettura
     public Page<FatturaResponse> getAllPaged(int page, int size) {
 
-        // Costruisce un Pageable, proteggendo da page < 0 o size <= 0
+        // Costruisce un Pageable, evitando che page < 0 o size <= 0
+
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 Math.max(size, 1),
@@ -51,10 +52,11 @@ public class FatturaServiceImpl implements FatturaService {
         );
 
         // Recupera page di Fattura dal DB
+
         Page<Fattura> fatturePage = fatturaRepository.findAll(pageable);
 
         // STREAM:
-        // Mappa ogni entity Fattura -> FatturaResponse DTO
+        // Mappa ogni entity Fattura in  FatturaResponse DTO
 
         List<FatturaResponse> content = fatturePage.getContent()
                 .stream()
@@ -62,6 +64,7 @@ public class FatturaServiceImpl implements FatturaService {
                 .toList();
 
         // Ritorna una PageImpl mantenendo numero pagina / totale elementi
+
         return new PageImpl<>(content, pageable, fatturePage.getTotalElements());
     }
 
@@ -80,7 +83,6 @@ public class FatturaServiceImpl implements FatturaService {
                 Sort.by(Sort.Direction.DESC, "dataFattura")
         );
 
-        // Query JPQL custom definita nella repository
 
         Page<Fattura> page = fatturaRepository.search(
                 request.getNumero(),
@@ -92,7 +94,7 @@ public class FatturaServiceImpl implements FatturaService {
                 pageable
         );
 
-        // Page.map() converte automaticamente entity -> DTO
+        // Page.map() converte automaticamente entity in  DTO
 
         return page.map(fatturaMapper::toResponse);
     }
@@ -104,7 +106,7 @@ public class FatturaServiceImpl implements FatturaService {
     @Override
     public FatturaResponse create(FatturaRequest request) {
 
-        // Deve esserci un prodotto per la fattura
+        // Deve esserci per forza un prodotto per la fattura
 
         if (request.getIdProdotto() == null) {
             throw new IllegalArgumentException("Id prodotto obbligatorio");
@@ -115,11 +117,11 @@ public class FatturaServiceImpl implements FatturaService {
         Prodotto prodotto = prodottoRepository.findById(request.getIdProdotto())
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
 
-        // Converte DTO -> Entity
+        // Converte DTO in  Entity
 
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
 
-        // Genera numero fattura: es. FAT-12
+        // Genera numero fattura:  es. FAT-12
 
         Long nextVal = fatturaRepository.nextNumeroSeq();
         entity.setNumero("FAT-" + nextVal);
@@ -173,6 +175,7 @@ public class FatturaServiceImpl implements FatturaService {
     public FatturaResponse getById(Long id) throws Throwable {
 
         // Cerca oppure errore 404
+
         Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
@@ -187,6 +190,7 @@ public class FatturaServiceImpl implements FatturaService {
     public PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size) {
 
         // Verifica che il prodotto esista
+
         if (!prodottoRepository.existsById(idProdotto)) {
             throw new ResourceNotFoundException("Prodotto non trovato");
         }
@@ -198,17 +202,20 @@ public class FatturaServiceImpl implements FatturaService {
         );
 
         // Riutilizza query di ricerca fatture filtrate per prodotto
+
         Page<Fattura> fatture = fatturaRepository.search(
                 null, idProdotto, null, null, null, null, pageable
         );
 
         // STREAM: conversione in DTO
+
         List<FatturaResponse> content = fatture.getContent()
                 .stream()
                 .map(fatturaMapper::toResponse)
                 .toList();
 
         // Ricompone la PageImpl
+
         return new PageImpl<>(content, pageable, fatture.getTotalElements());
     }
 
@@ -218,12 +225,13 @@ public class FatturaServiceImpl implements FatturaService {
     @Override
     public void delete(Long id) {
 
-        // Se la fattura non esiste -> errore
+        // Se la fattura non esiste segna  errore
         if (!fatturaRepository.existsById(id)) {
             throw new ResourceNotFoundException("Fattura non trovata");
         }
 
         // Cancellazione
+
         fatturaRepository.deleteById(id);
     }
 

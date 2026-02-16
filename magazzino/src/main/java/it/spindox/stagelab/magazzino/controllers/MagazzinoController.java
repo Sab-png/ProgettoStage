@@ -59,11 +59,15 @@ public class MagazzinoController {
         return ResponseEntity.ok(magazzinoService.getById(id));
     }
 
+    // CREATE
+
     @PostMapping
     public ResponseEntity<Void> create(@Valid @RequestBody MagazzinoRequest request) {
         magazzinoService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // UPDATE
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable Long id,
@@ -71,6 +75,8 @@ public class MagazzinoController {
         magazzinoService.update(id, request);
         return ResponseEntity.noContent().build();
     }
+
+    // DELETE
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

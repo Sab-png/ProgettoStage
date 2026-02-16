@@ -4,6 +4,8 @@ import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoRequest;
 import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoResponse;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
+import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuantityException;
+import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidScortaMinimaException;
 import it.spindox.stagelab.magazzino.mappers.ProdottoMapper;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +13,6 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-
 
 
 @Slf4j
@@ -22,45 +22,41 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     private final ProdottoRepository repo;
     private final ProdottoMapper mapper;
+    private String message;
 
 
-    // GET ALL PAGED + STREAM (GET /prodotti/list)
-
+    //  (GET /prodotti/list)
 
     @Override
     @Transactional(readOnly = true)
     public Page<ProdottoResponse> getAllPaged(int page, int size) {
 
-        // Costruzione pageable con ordinamento per nome
+        if (page < 0 || size <= 0) {
+            throw new InvalidQuantityException(null, size);
+        }
 
-       Pageable pageable = PageRequest.of(page, size, Sort.by("nome"));
-
-        // Recupero paginato dal repository
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nome"));
 
         Page<Prodotto> result = repo.findAll(pageable);
 
-        // STREAM: Entity -> DTO
-
-        List<ProdottoResponse> list = result.getContent()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
-
-        // Ritorno il risultato paginato
-
-        return new PageImpl<>(list, pageable, result.getTotalElements());
+        return new PageImpl<>(
+                result.getContent().stream()
+                        .map(mapper::toResponse)
+                        .toList(),
+                pageable,
+                result.getTotalElements()
+        );
     }
 
 
-    // GET SOLO ID FILTRATI (GET /prodotti)
-
+    // SEARCH ONLY IDS : GET /prodotti
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Long> searchIds(ProdottoRequest r) {
 
         Pageable pageable = PageRequest.of(r.getPage(), r.getSize());
 
-        // JPQL custom nel repository che restituisce solo gli ID
         return repo.searchIds(
                 r.getNome(),
                 r.getDescrizione(),
@@ -70,46 +66,67 @@ public class ProdottoServiceImpl implements ProdottoService {
         );
     }
 
-
-    // GET BY ID (GET /prodotti/{id})
-
+    // GET BY ID : GET /prodotti/{id}
 
     @Override
+    @Transactional(readOnly = true)
     public ProdottoResponse getById(Long id) {
 
-        Prodotto entity = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
+        if (id == null || id <= 0) {
+            throw new InvalidQuantityException(id, null);
+        }
 
-        return mapper.toResponse(entity);
+        Prodotto p = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato: " + id));
+
+        return mapper.toResponse(p);
     }
 
     // CREATE (POST /prodotti)
 
 
     @Override
+    @Transactional
     public void create(ProdottoRequest req) {
+
+        if (req.getQuantita() != null && req.getQuantita() < 0) {
+            throw new InvalidQuantityException(null, req.getQuantita());
+        }
+
+        if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
+            throw new InvalidScortaMinimaException(null, req.getScortaMinima(), message);
+        }
+
         repo.save(mapper.toEntity(req));
     }
 
+
     // UPDATE (PATCH /prodotti/{id})
 
-
     @Override
+    @Transactional
     public void update(Long id, ProdottoRequest req) {
 
         Prodotto p = repo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato: " + id));
+
+        if (req.getQuantita() != null && req.getQuantita() < 0) {
+            throw new InvalidQuantityException(id, req.getQuantita());
+        }
+
+        if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
+            throw new InvalidScortaMinimaException(id, req.getScortaMinima(), message);
+        }
 
         mapper.updateEntity(p, req);
-
         repo.save(p);
     }
 
 
     // DELETE (DELETE /prodotti/{id})
 
-
     @Override
+    @Transactional
     public void delete(Long id) {
         repo.deleteById(id);
     }
@@ -117,13 +134,12 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     // SEARCH COMPLETA (POST /prodotti/search)
 
-
     @Override
+    @Transactional(readOnly = true)
     public Page<ProdottoResponse> search(ProdottoRequest r) {
 
         Pageable pageable = PageRequest.of(r.getPage(), r.getSize());
 
-        // JPQL search + mapping a DTO
         return repo.search(
                 r.getNome(),
                 r.getDescrizione(),

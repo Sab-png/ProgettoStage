@@ -19,7 +19,7 @@ public class ProdottoMagazzinoSearchRequest {
     private String nomeProdotto;
     private String nomeMagazzino;
 
-    // Paging (facoltativo: default nel service se null)
+    // Paging facoltativo
 
     private Integer page;
     private Integer size;

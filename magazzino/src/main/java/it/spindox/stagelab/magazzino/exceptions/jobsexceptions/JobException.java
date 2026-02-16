@@ -28,14 +28,7 @@ public abstract class JobException extends RuntimeException {
 
      // Restituisce la tipologia di errore associata all'eccezione
 
-    public StatusJobErrorType getErrorType() {
-        return errorType;
-    }
 
+    // Restituisce lo status HTTP che rappresenta questo errore
 
-      // Restituisce lo status HTTP che rappresenta questo errore
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
 }

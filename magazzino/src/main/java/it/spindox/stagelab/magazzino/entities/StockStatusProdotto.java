@@ -1,43 +1,33 @@
 package it.spindox.stagelab.magazzino.entities;
 import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidStockStatusValueException;
+import lombok.Getter;
 import java.util.Arrays;
+
 
 public enum StockStatusProdotto {
 
-    VERDE("GREEN", "Stock nella norma", Severity.OK),
-    GIALLO("YELLOW", "Sotto la scorta minima", Severity.WARN),
-    ROSSO("RED", "Esaurito", Severity.ERROR);
+    VERDE("GREEN", "Stock nella norma"),
+    GIALLO("YELLOW", "Sotto la scorta minima"),
+    ROSSO("RED", "Esaurito");
 
+    private static String message;
+    @Getter
     private final String dbValue;
+    @Getter
     private final String description;
-    private final Severity severity;
 
-    StockStatusProdotto(String dbValue, String description, Severity severity) {
+    StockStatusProdotto(String dbValue, String description) {
         this.dbValue = dbValue;
         this.description = description;
-        this.severity = severity;
     }
-
-    public String getDbValue() {
-        return dbValue;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Severity getSeverity() {
-        return severity;
-    }
-
-    public enum Severity { OK, WARN, ERROR }
 
     // Stato ottenuto dal DB
+
     public static StockStatusProdotto fromDbValue(String dbValue) {
         return Arrays.stream(values())
                 .filter(s -> s.getDbValue().equalsIgnoreCase(dbValue))
                 .findFirst()
-                .orElseThrow(() -> new InvalidStockStatusValueException(dbValue));
+                .orElseThrow(() -> new InvalidStockStatusValueException(dbValue, message));
     }
 
     // Stato calcolato da quantità e scorta minima

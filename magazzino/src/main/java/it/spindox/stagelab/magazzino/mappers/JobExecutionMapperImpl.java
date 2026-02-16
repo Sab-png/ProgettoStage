@@ -8,16 +8,17 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 
+
 @Slf4j
 @Component
 public class JobExecutionMapperImpl implements JobExecutionMapper {
 
 
-     // Converte un nome job + stato in una entity JobExecution “nuova”.
+     // Converte un job in una entity JobExecution “nuova”.
 
      // Viene usato in:
-     // create() / start() di un job
 
+     // create() / start() di un job
      // startTime viene impostata al momento della creazione
      // L'ID è generato dal DB
 
@@ -41,13 +42,11 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
      // GET /jobs/{id}
       // GET /jobs/list
        // POST /jobs/search
-
       // Protegge da null su entity
 
-     // startTime / endTime potrebbero essere null (job non terminato)
-     // Se i campi temporeali sono già LocalDateTime, NON serve .toLocalDateTime()
 
 
+// TO RESPONSE
 
     @Override
     public JobExecutionResponse toResponse(JobExecution entity) {
@@ -75,6 +74,8 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
       // endTime viene impostato ad ora/adesso
      // errorMessage opzional (utile in caso di errori)
 
+
+    // UPDATE ENTITY
 
     @Override
     public void updateEntity(JobExecution target, StatusJob status, String errorMessage) {

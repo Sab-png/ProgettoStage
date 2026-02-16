@@ -28,6 +28,8 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
         return m;
     }
 
+    // RESPONSE
+
     @Override
     public MagazzinoResponse toResponse(Magazzino entity) {
         if (entity == null) return null;
@@ -64,6 +66,8 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
 
         return r;
     }
+
+    // UPDATE ENTITY
 
     @Override
     public void updateEntity(Magazzino m, @Valid MagazzinoRequest request) {

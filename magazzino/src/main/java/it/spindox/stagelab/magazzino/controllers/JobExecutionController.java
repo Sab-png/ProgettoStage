@@ -1,5 +1,4 @@
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
@@ -29,7 +28,7 @@ public class JobExecutionController {
 
 
       // GET /jobs
-     // Restituisce SOLO gli ID dei job filtrati (Page<Long>)
+     // Restituisce SOLO gli ID dei job filtrati : Page<Long>
 
     @GetMapping
     public ResponseEntity<Page<Long>> getJobIds(
@@ -63,6 +62,7 @@ public class JobExecutionController {
     public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(jobExecutionService.getById(id));
     }
+
 // GET LIST JOB
 
     @GetMapping("/list")

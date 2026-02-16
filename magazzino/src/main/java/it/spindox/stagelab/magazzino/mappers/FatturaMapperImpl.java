@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 
 
+
 @Slf4j
 @Component
 public class FatturaMapperImpl implements FatturaMapper {
@@ -40,7 +41,6 @@ public class FatturaMapperImpl implements FatturaMapper {
       // POST /fatture/search
      // UPDATE
 
-      // Protegge da NullPointer per entity.getProdotto()
 
 
     @Override
@@ -52,7 +52,7 @@ public class FatturaMapperImpl implements FatturaMapper {
         r.setImporto(entity.getImporto());
         r.setQuantita(entity.getQuantita());
 
-        // Evita NPE: il prodotto potrebbe essere null
+        // Evita  il prodotto potrebbe essere null
 
         if (entity.getProdotto() != null) {
             r.setIdProdotto(entity.getProdotto().getId());
@@ -67,10 +67,11 @@ public class FatturaMapperImpl implements FatturaMapper {
 
      // Questo metodo viene chiamato da: update()
 
-     // @param target   entity già salvata nel DB da aggiornare
+     // @param target   entity già salvata nel DB
      // @param request  DTO contenente solo i campi aggiornati
      // @param prodotto opzional/ nuovo prodotto associato, se fornito nella request
 
+    // UPDATE ENTITY
 
     @Override
     public void updateEntity(Fattura target, FatturaRequest request, Prodotto prodotto) {
@@ -93,7 +94,7 @@ public class FatturaMapperImpl implements FatturaMapper {
             target.setQuantita(request.getQuantita());
         }
 
-        // Aggiorna relazione Prodotto -> Fattura se fornito
+        // Aggiorna relazione Prodotto : Fattura se fornito
 
         if (prodotto != null) {
             target.setProdotto(prodotto);

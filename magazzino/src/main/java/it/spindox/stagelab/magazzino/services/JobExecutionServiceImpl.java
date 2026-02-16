@@ -21,6 +21,7 @@ import org.springframework.data.domain.*;
 
 
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,9 +30,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     private final JobExecutionRepository jobExecutionRepository;
     private final JobExecutionMapper jobExecutionMapper;
 
-    // --------------------------
+
     // GET BY ID
-    // --------------------------
+
     @Override
     @Transactional(readOnly = true)
     public JobExecutionResponse getById(Long id) {
@@ -41,9 +42,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return jobExecutionMapper.toResponse(job);
     }
 
-    // --------------------------
+
     // SEARCH con DTO
-    // --------------------------
+
     @Override
     @Transactional(readOnly = true)
     public Page<JobExecutionResponse> search(JobExecutionRequest request) {
@@ -66,9 +67,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return result.map(jobExecutionMapper::toResponse);
     }
 
-    // --------------------------
-    // START JOB (REQUIRES_NEW)
-    // --------------------------
+
+    // START JOB
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public JobExecution start() {
@@ -82,9 +83,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return job;
     }
 
-    // --------------------------
+
     // SUCCESS
-    // --------------------------
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void success(JobExecution job) {
@@ -93,9 +94,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         jobExecutionRepository.save(job);
     }
 
-    // --------------------------
+
     // FAILED con tipo errore esplicito
-    // --------------------------
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(JobExecution job, StatusJobErrorType errorType, Exception e) {
@@ -106,35 +107,35 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         jobExecutionRepository.save(job);
     }
 
-    // --------------------------
-    // FAILED fallback → UNKNOWN
-    // --------------------------
+
+    // FAILED fallback :  UNKNOWN
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(JobExecution job, Exception e) {
         failed(job, StatusJobErrorType.UNKNOWN, e);
     }
 
-    // --------------------------
-    // FIND LAST
-    // --------------------------
+
+    // FIND LAST JOB
+
     @Override
     @Transactional(readOnly = true)
     public Optional<JobExecution> findLast() {
         return jobExecutionRepository.findFirstByOrderByStartTimeDesc();
     }
 
-    // --------------------------
-    // FIND RUNNING
-    // --------------------------
+
+    // FIND RUNNING JOB
+
     @Override
     @Transactional(readOnly = true)
     public Optional<JobExecution> findRunning() {
         return jobExecutionRepository.findFirstByStatus(StatusJob.RUNNING);
     }
 
-    // --------------------------
-    // SEARCH “interno” (entity-based, NON DTO)
+
+    // SEARCH “interno” :  NON DTO
     // --------------------------
     @Override
     @Transactional(readOnly = true)
@@ -157,9 +158,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         );
     }
 
-    // --------------------------
+
     // SEARCH IDs (USATO DA GET /jobs)
-    // --------------------------
+
     @Override
     @Transactional(readOnly = true)
     public Page<Long> searchIds(JobExecutionRequest req) {
@@ -183,9 +184,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         );
     }
 
-    // --------------------------
-    // GET ALL PAGED (USATO DA /jobs/list)
-    // --------------------------
+
+    // GET ALL PAGED : UTILIZZATO  DA /jobs/list
+
     @Override
     @Transactional(readOnly = true)
     public Page<JobExecutionResponse> getAllPaged(int page, int size) {
@@ -197,9 +198,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return result.map(jobExecutionMapper::toResponse);
     }
 
-    // -------------------------------------------------
-    // HELPER PRIVATI (conversioni sicure)
-    // -------------------------------------------------
+
+    // HELPER PER LE CONVERSIONI
+
 
     private static LocalDateTime safeToLocalDateTime(LocalDateTime dt) {
         return dt != null ? dt : null;
@@ -214,7 +215,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         try {
             return StatusJob.valueOf(stato.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return null; // oppure lancia new ValidationException(...)
+            return null; // oppure puo' lanciare un new ValidationException
         }
     }
 }

@@ -1,5 +1,7 @@
 package it.spindox.stagelab.magazzino.entities;
+import lombok.Getter;
 
+@Getter
 public enum StockStatusMagazzino {
 
     VERDE("GREEN", "Magazzino con scorte sufficienti", Severity.OK),
@@ -14,18 +16,6 @@ public enum StockStatusMagazzino {
         this.dbValue = dbValue;
         this.description = description;
         this.severity = severity;
-    }
-
-    public String getDbValue() {
-        return dbValue;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Severity getSeverity() {
-        return severity;
     }
 
     public enum Severity { OK, WARN, ERROR }

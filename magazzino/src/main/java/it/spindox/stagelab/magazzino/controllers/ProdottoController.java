@@ -58,11 +58,15 @@ public class ProdottoController {
         return ResponseEntity.ok(service.getById(id));
     }
 
+    // CREATE
+
     @PostMapping
     public ResponseEntity<Void> create(@Valid @RequestBody ProdottoRequest request) {
         service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // UPDATE
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable Long id,
@@ -71,11 +75,15 @@ public class ProdottoController {
         return ResponseEntity.noContent().build();
     }
 
+    // DELETE
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    // SEARCH
 
     @PostMapping("/search")
     public ResponseEntity<Page<ProdottoResponse>> search(@RequestBody @Valid ProdottoRequest r) {

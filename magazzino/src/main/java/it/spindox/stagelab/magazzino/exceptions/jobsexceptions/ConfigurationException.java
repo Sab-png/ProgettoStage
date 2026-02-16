@@ -2,9 +2,9 @@ package it.spindox.stagelab.magazzino.exceptions.jobsexceptions;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 
 @Slf4j
@@ -14,6 +14,7 @@ public class ConfigurationException extends JobException {
 
     public ConfigurationException(String message) {
         super(message, StatusJobErrorType.CONFIGURATION_ERROR, HttpStatus.BAD_REQUEST);
-        LOGGER.error("[THIS IS A CONFIGURATION_ERROR] {}", message);
+        LOGGER.error("[CONFIGURATION_ERROR] {}", message);
     }
 }
+

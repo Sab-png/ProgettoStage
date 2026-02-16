@@ -11,10 +11,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
+
 @Repository
 public interface FatturaRepository extends JpaRepository<Fattura, Long> {
 
     // SEARCH COMPLETA
+
     @Query("""
         SELECT DISTINCT f
         FROM Fattura f

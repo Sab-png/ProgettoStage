@@ -92,6 +92,8 @@ public class FatturaController {
         return ResponseEntity.ok(result);
     }
 
+    // SAVE FATTURA
+
     @PostMapping
     public ResponseEntity<FatturaResponse> saveFattura(
             @Valid @RequestBody FatturaRequest request,
@@ -104,6 +106,8 @@ public class FatturaController {
         return ResponseEntity.created(location).body(created);
     }
 
+    // EDIT FATTURA
+
     @PatchMapping("/{id}")
     public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
@@ -113,6 +117,8 @@ public class FatturaController {
         return ResponseEntity.ok(updated);
     }
 
+    // SEARCH FATTURA
+
     @PostMapping("/search")
     public ResponseEntity<Page<FatturaResponse>> searchFattura(
             @Valid @RequestBody FatturaSearchRequest searchRequest
@@ -120,6 +126,8 @@ public class FatturaController {
         Page<FatturaResponse> page = fatturaService.search(searchRequest);
         return ResponseEntity.ok(page);
     }
+
+    // DELETE FATTURA
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {

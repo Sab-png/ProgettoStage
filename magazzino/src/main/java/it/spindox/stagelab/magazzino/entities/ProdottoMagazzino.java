@@ -66,14 +66,7 @@ public class ProdottoMagazzino {
         }
 
         //  Calcolo STATUS tramite enum
+
         this.status = StockStatusProdotto.fromQuantita(this.quantita, this.scortaMin);
-    }
-
-
-     // Metodo di dominio/ puo' essere non utilizzato
-
-    @Transient
-    public Integer getSogliaMinima() {
-        return scortaMin;
     }
 }

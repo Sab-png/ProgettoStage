@@ -2,7 +2,10 @@ package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.*;
+import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.InvalidCapacityException;
 import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.MagazzinoException;
+import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.ProductQuantityException;
+import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.StockCalculationException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +14,6 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Objects;
 
 
 
@@ -29,25 +31,35 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         return null;
     }
 
+    // CREATE
+
     @Override
     public void create(MagazzinoRequest request) {
 
     }
+
+// UPDATE
 
     @Override
     public void update(Long id, MagazzinoRequest request) {
 
     }
 
+// SEARCH
+
     @Override
     public Page<MagazzinoResponse> search(MagazzinoRequest request) {
         return null;
     }
 
+    // DELETE
+
     @Override
     public void delete(Long id) {
 
     }
+
+    // METODO PRINCIPAL: CHECK STOCK LEVEL
 
     @Override
     @Transactional
@@ -57,39 +69,80 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
         for (Magazzino m : magazzini) {
 
-            int totale = 0;
-            if (m.getProdottiMagazzino() != null) {
-                totale = m.getProdottiMagazzino().stream()
-                        .map(ProdottoMagazzino::getQuantita)
-                        .filter(Objects::nonNull)
-                        .mapToInt(Integer::intValue)
-                        .sum();
+
+            // 1) VALIDAZIONE CAPACITÀ
+
+            Integer cap = m.getCapacita();
+            if (cap == null || cap <= 0) {
+                throw new InvalidCapacityException(m.getNome(), cap);
             }
 
 
+            // 2) VALIDAZIONE QUANTITÀ PRODOTTI
 
-            Integer cap = m.getCapacita();
+            int totaleProdotti = getTotaleProdotti(m);
 
-            if (cap == null || cap == 0) {
-                throw new MagazzinoException(
-                        "Capacità non valida per il magazzino '" + m.getNome() + "': " + cap
+
+            // 3) CALCOLO PERCENTUALE E STATO ( LOGICA PER DETERMINARE L' ENUMERATION)
+
+            double percentuale;
+
+            try {
+                percentuale = (totaleProdotti * 100.0) / cap;
+            } catch (Exception e) {
+                throw new StockCalculationException(
+                        "Errore nel calcolo della percentuale per magazzino " + m.getNome(),
+                        e
                 );
             }
 
-                int capacita = (m.getCapacita() != null && m.getCapacita() > 0)
-                    ? m.getCapacita()
-                    : 1;
 
-            double percentuale = (totale * 100.0) / capacita;
+            // 4) DETERMINAZIONE STATUS DALLE REGOLE DI BUSINESS
 
             StockStatusMagazzino stato = StockStatusMagazzino.fromPercentuale(percentuale);
+
+
+            // 5) SALVATAGGIO STATO MAGAZZINO
 
             m.setStockStatus(stato);
             repository.save(m);
 
-            log.info("Magazzino {} → Totale: {} | {}% → Stato: {}",
-                    m.getNome(), totale, String.format("%.2f", percentuale), stato);
+            log.info("[CHECK] Magazzino={} Totale={} Percentuale={} Stato={}",
+                    m.getNome(),
+                    totaleProdotti,
+                    String.format("%.2f", percentuale),
+                    stato
+            );
         }
+    }
+
+    // GET TOTAL PRODUCTS
+
+    private static int getTotaleProdotti(Magazzino m) {
+        int totaleProdotti = 0;
+        try {
+            for (ProdottoMagazzino p : m.getProdottiMagazzino()) {
+
+                Integer qta = p.getQuantita();
+
+                if (qta == null || qta < 0) {
+                    throw new ProductQuantityException(
+                            p.getId(), m.getNome(), qta
+                    );
+                }
+
+                totaleProdotti += qta;
+            }
+        } catch (MagazzinoException e) {
+
+            throw e;
+        } catch (Exception e) {
+            throw new StockCalculationException(
+                    "Errore durante il calcolo delle quantità del magazzino " + m.getNome(),
+                    e
+            );
+        }
+        return totaleProdotti;
     }
 
     @Override
@@ -101,4 +154,5 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     public Page<MagazzinoResponse> getAllPaged(int page, int size) {
         return null;
     }
+
 }

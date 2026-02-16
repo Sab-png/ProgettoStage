@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class FatturaRequest {
     @NotNull(message = "La data fattura è obbligatoria")
     private LocalDate dataFattura;

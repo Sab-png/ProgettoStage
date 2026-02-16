@@ -1,7 +1,9 @@
 package it.spindox.stagelab.magazzino.entities;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 
+@Getter
 public enum StatusJobErrorType {
 
     VALIDATION_ERROR("Dati non validi", HttpStatus.BAD_REQUEST),
@@ -27,13 +29,6 @@ public enum StatusJobErrorType {
 
     // torna un  messaggio di default per la  tipologia di errore
 
-    public String getDefaultMessage() {
-        return defaultMessage;
-    }
-
     // torna un status HTTP per tipologia di errore
 
-    public HttpStatus getDefaultHttpStatus() {
-        return defaultHttpStatus;
-    }
 }

@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;import lombok.Data;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;import java.util.List;
 
@@ -27,14 +27,14 @@ public class Prodotto {
     @Column(name = "PREZZO", precision = 10, scale = 2)
     private BigDecimal prezzo;
 
-     // 1 prodotto → molte fatture
+     // 1 prodotto : molte fatture
 
     @OneToMany(mappedBy = "prodotto")
     private List<Fattura> fatture;
 
-    // 1 prodotto → molti magazzini
+    // 1 prodotto : molti magazzini
 
     @OneToMany(mappedBy = "prodotto")
     private List<ProdottoMagazzino> prodottoMagazzino;
-public void setPrezzo(BigDecimal prezzo) {}
-    public void setPrezzo(@Positive(message = "Il prezzo deve essere maggiore di zero") Double prezzo) {}}
+public void setPrezzo() {}
+}

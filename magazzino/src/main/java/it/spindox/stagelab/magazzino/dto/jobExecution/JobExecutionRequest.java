@@ -1,5 +1,4 @@
 package it.spindox.stagelab.magazzino.dto.jobExecution;
-import it.spindox.stagelab.magazzino.entities.StatusJob;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,18 +7,24 @@ import java.time.LocalDateTime;
 
 
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobExecutionRequest {
 
-    private StatusJob status;
 
-    private LocalDateTime startFrom;
-    private LocalDateTime startTo;
+    // FILTRI
 
-    private Boolean hasError;
+
+    private String nomeJob;            // es. "Inventory Scheduler"
+    private String stato;              // es. "SUCCESS", "FAILED"
+    private LocalDateTime from;        // data inizio filtraggio
+    private LocalDateTime to;          // data fine filtraggio
+    private Boolean hasError;          // serve per filtro errori
+
+
+    // PAGINAZIONE
+
 
     @Min(0)
     private Integer page = 0;
@@ -27,28 +32,5 @@ public class JobExecutionRequest {
     @Min(1)
     private Integer size = 20;
 
-    public void setNomeJob(String nomeJob) {
-    }
 
-    public void setStato(String stato) {
-    }
-
-    public void setFrom(LocalDateTime from) {
-    }
-
-    public void setTo(LocalDateTime to) {
-    }
-
-    public LocalDateTime getTo() {
-        return null;
-    }
-
-    public LocalDateTime getFrom() {
-        return null;
-    }
-
-    public String getStato() {
-        return "";
-    }
 }
-

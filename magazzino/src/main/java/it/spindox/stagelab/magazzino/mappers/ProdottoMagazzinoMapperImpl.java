@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 
+
 @Slf4j
 @Component
 public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
@@ -21,6 +22,8 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
         return pm;
     }
 
+    // UPDATE ENTITY
+
     @Override
     public void updateEntity(ProdottoMagazzino entity, ProdottoMagazzinoRequest request) {
         if (entity == null || request == null) return;
@@ -32,6 +35,8 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
             entity.setScortaMin(request.getScortaMin());
         }
     }
+
+    // RESPONSE
 
     @Override
     public ProdottoMagazzinoResponse toResponse(ProdottoMagazzino entity) {

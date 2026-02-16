@@ -18,7 +18,7 @@ public class ProdottoMapperImpl implements ProdottoMapper {
      // Viene usato in: create()
 
      // L'ID è generato dal DB di default
-     // Prezzo è BigDecimal → assegnazione diretta se presente
+     // Prezzo è BigDecimal
 
     @Override
     public Prodotto toEntity(ProdottoRequest request) {
@@ -30,10 +30,10 @@ public class ProdottoMapperImpl implements ProdottoMapper {
         p.setNome(request.getNome());
         p.setDescrizione(request.getDescrizione());
 
-        // request.getPrezzo() è già BigDecimal :  assegnazione diretta se non null
+        // request.getPrezzo() è BigDecimal :  assegnazione diretta se non null
 
         if (request.getPrezzo() != null) {
-            p.setPrezzo(request.getPrezzo());
+            p.setPrezzo();
         }
 
         return p;
@@ -72,7 +72,7 @@ public class ProdottoMapperImpl implements ProdottoMapper {
      // Viene usato in: update()
 
 
-    // Prezzo è BigDecimal :  assegnazione diretta se non null
+    // UPDATE ENTITY
 
 
     @Override
@@ -88,7 +88,7 @@ public class ProdottoMapperImpl implements ProdottoMapper {
             p.setDescrizione(request.getDescrizione());
         }
         if (request.getPrezzo() != null) {
-            p.setPrezzo(request.getPrezzo()); // BigDecimal → assegnazione diretta
+            p.setPrezzo(); // BigDecimal : assegnazione diretta
         }
     }
 }

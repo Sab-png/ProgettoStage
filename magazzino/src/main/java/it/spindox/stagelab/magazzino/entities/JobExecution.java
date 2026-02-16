@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
+
 @Entity
 @Table(name = "JOB_EXECUTION")
 @Data
@@ -37,10 +38,6 @@ public class JobExecution {
 
     @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;
-
-    public void setStartTime(OffsetDateTime from) {
-        this.startTime = from;
-    }
 
     public void setStartTime(LocalDateTime now) {
         this.startTime = now.atOffset(ZoneOffset.UTC);
