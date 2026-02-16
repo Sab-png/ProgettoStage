@@ -1,5 +1,5 @@
 
-package it.spindox.stagelab.magazzino.dto.jobExecution.controllers;
+package it.spindox.stagelab.magazzino.controllers;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.services.MagazzinoService;

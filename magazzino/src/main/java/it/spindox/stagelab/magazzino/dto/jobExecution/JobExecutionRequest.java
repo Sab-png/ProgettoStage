@@ -38,5 +38,17 @@ public class JobExecutionRequest {
 
     public void setTo(LocalDateTime to) {
     }
+
+    public LocalDateTime getTo() {
+        return null;
+    }
+
+    public LocalDateTime getFrom() {
+        return null;
+    }
+
+    public String getStato() {
+        return "";
+    }
 }
 

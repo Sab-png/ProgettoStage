@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.dto.jobExecution.controllers;
+package it.spindox.stagelab.magazzino.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

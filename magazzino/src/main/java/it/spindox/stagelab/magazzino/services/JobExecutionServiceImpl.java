@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import org.springframework.data.domain.*;
+
 
 
 @Slf4j
@@ -27,10 +29,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     private final JobExecutionRepository jobExecutionRepository;
     private final JobExecutionMapper jobExecutionMapper;
 
-
-     // Recupera un JobExecution dal DB tramite ID.
-     // Usa readOnly perché è una semplice operazione di lettura.
-
+    // --------------------------
+    // GET BY ID
+    // --------------------------
     @Override
     @Transactional(readOnly = true)
     public JobExecutionResponse getById(Long id) {
@@ -40,97 +41,101 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return jobExecutionMapper.toResponse(job);
     }
 
-
-     // Ricerca con filtro avanzato via DTO (status, date, errori, paginazione).
-    // solo lettura
-
+    // --------------------------
+    // SEARCH con DTO
+    // --------------------------
     @Override
     @Transactional(readOnly = true)
     public Page<JobExecutionResponse> search(JobExecutionRequest request) {
 
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
 
+        StatusJob status = parseStatus(request.getStato());
+        LocalDateTime from = safeToLocalDateTime(request.getFrom());
+        LocalDateTime to   = safeToLocalDateTime(request.getTo());
+        Boolean hasError   = request.getHasError();
+
         Page<JobExecution> result = jobExecutionRepository.search(
-                request.getStatus(),
-                request.getStartFrom(),
-                request.getStartTo(),
-                request.getHasError(),
+                status,
+                from,
+                to,
+                hasError,
                 pageable
         );
 
         return result.map(jobExecutionMapper::toResponse);
     }
 
-
-     // CREA un nuovo job in stato RUNNING.
-     // Propagation = REQUIRES_NEW : va a creare sempre una nuova transazione indipendente
-    // Questo garantisce che il record venga salvato anche se la logica schedule fallisce.
-
+    // --------------------------
+    // START JOB (REQUIRES_NEW)
+    // --------------------------
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public JobExecution start() {
         JobExecution job = new JobExecution();
-        job.setStatus(StatusJob.RUNNING);                   // il job parte in RUNNING
-        job.setStartTime(LocalDateTime.now());              // timestamp inizio
+        job.setStatus(StatusJob.RUNNING);
+        job.setStartTime(LocalDateTime.now());
 
-        jobExecutionRepository.save(job);                   // salvataggio nel DB
+        jobExecutionRepository.save(job);
+
         log.info("JOB START | id={}", job.getId());
         return job;
     }
 
-
-     // Segna un job come SUCCESS.
-     // Per evitare rollback: si usa  REQUIRES_NEW.
-
-
+    // --------------------------
+    // SUCCESS
+    // --------------------------
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void success(JobExecution job) {
         job.setStatus(StatusJob.SUCCESS);
-        job.setEndTime(LocalDateTime.now());                // timestamp fine
+        job.setEndTime(LocalDateTime.now());
         jobExecutionRepository.save(job);
     }
 
-
-     // Segna un job come FAILED con un tipo errore specifico.
-     // Registra: stato, data fine, tipo errore, messaggio.
-
-
+    // --------------------------
+    // FAILED con tipo errore esplicito
+    // --------------------------
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(JobExecution job, StatusJobErrorType errorType, Exception e) {
         job.setStatus(StatusJob.FAILED);
-        job.setEndTime(LocalDateTime.now());                // timestamp fine
+        job.setEndTime(LocalDateTime.now());
         job.setErrorType(errorType);
         job.setErrorMessage(e != null ? e.getMessage() : null);
         jobExecutionRepository.save(job);
     }
 
+    // --------------------------
+    // FAILED fallback → UNKNOWN
+    // --------------------------
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void failed(JobExecution job, Exception e) {
+        failed(job, StatusJobErrorType.UNKNOWN, e);
+    }
 
-     //  Ritorna l'ultimo job ordinato per start time (il più recente)
-
+    // --------------------------
+    // FIND LAST
+    // --------------------------
     @Override
     @Transactional(readOnly = true)
     public Optional<JobExecution> findLast() {
         return jobExecutionRepository.findFirstByOrderByStartTimeDesc();
     }
 
-
-     // Ritorna eventuale job ancora in RUNNING
-      // Serve allo scheduler per evitare esecuzioni parallele
-
-
+    // --------------------------
+    // FIND RUNNING
+    // --------------------------
     @Override
     @Transactional(readOnly = true)
     public Optional<JobExecution> findRunning() {
         return jobExecutionRepository.findFirstByStatus(StatusJob.RUNNING);
     }
 
-
-      // Versione interna della ricerca (non via DTO).
-     // Delegata al repository con conversione delle date.
-
-
+    // --------------------------
+    // SEARCH “interno” (entity-based, NON DTO)
+    // --------------------------
     @Override
     @Transactional(readOnly = true)
     public Page<JobExecution> search(
@@ -140,30 +145,76 @@ public class JobExecutionServiceImpl implements JobExecutionService {
             Boolean hasError,
             Pageable pageable) {
 
+        LocalDateTime from = safeToLocalDateTime(startFrom);
+        LocalDateTime to   = safeToLocalDateTime(startTo);
+
         return jobExecutionRepository.search(
                 status,
-                startFrom.toLocalDateTime(),
-                startTo.toLocalDateTime(),
+                from,
+                to,
                 hasError,
                 pageable
         );
     }
 
-
-     // Gestione fallback del failed SENZA tipo errore esplicito.
-     // Mappa automaticamente l'errore come UNKNOWN.
-      // fallback = meccanismo tolleranza degli errori, che esegue un azione alternativa quando un operazione fallisce
-      // per evitare di crashare il sistema
-
-
+    // --------------------------
+    // SEARCH IDs (USATO DA GET /jobs)
+    // --------------------------
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void failed(JobExecution job, Exception e) {
-        failed(job, StatusJobErrorType.UNKNOWN, e);
+    @Transactional(readOnly = true)
+    public Page<Long> searchIds(JobExecutionRequest req) {
+
+        Pageable pageable = PageRequest.of(
+                req.getPage() != null ? req.getPage() : 0,
+                req.getSize() != null ? req.getSize() : 10
+        );
+
+        StatusJob status = parseStatus(req.getStato());
+        LocalDateTime from = safeToLocalDateTime(req.getFrom());
+        LocalDateTime to   = safeToLocalDateTime(req.getTo());
+        Boolean hasError   = req.getHasError();
+
+        return jobExecutionRepository.searchIds(
+                status,
+                from,
+                to,
+                hasError,
+                pageable
+        );
     }
 
+    // --------------------------
+    // GET ALL PAGED (USATO DA /jobs/list)
+    // --------------------------
     @Override
-    public Page<Long> searchIds(JobExecutionRequest req) {
-        return null;
+    @Transactional(readOnly = true)
+    public Page<JobExecutionResponse> getAllPaged(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<JobExecution> result = jobExecutionRepository.findAll(pageable);
+
+        return result.map(jobExecutionMapper::toResponse);
+    }
+
+    // -------------------------------------------------
+    // HELPER PRIVATI (conversioni sicure)
+    // -------------------------------------------------
+
+    private static LocalDateTime safeToLocalDateTime(LocalDateTime dt) {
+        return dt != null ? dt : null;
+    }
+
+    private static LocalDateTime safeToLocalDateTime(OffsetDateTime dt) {
+        return dt != null ? dt.toLocalDateTime() : null;
+    }
+
+    private static StatusJob parseStatus(String stato) {
+        if (stato == null || stato.isBlank()) return null;
+        try {
+            return StatusJob.valueOf(stato.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null; // oppure lancia new ValidationException(...)
+        }
     }
 }

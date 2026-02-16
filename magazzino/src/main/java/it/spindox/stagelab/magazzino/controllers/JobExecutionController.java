@@ -1,10 +1,12 @@
-package it.spindox.stagelab.magazzino.dto.jobExecution.controllers;
+package it.spindox.stagelab.magazzino.controllers;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.mappers.JobExecutionMapper;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -61,7 +63,15 @@ public class JobExecutionController {
     public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(jobExecutionService.getById(id));
     }
+// GET LIST JOB
 
+    @GetMapping("/list")
+    public ResponseEntity<Page<JobExecutionResponse>> getAllFatturePaged(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size
+    ) {
+        return ResponseEntity.ok(jobExecutionService.getAllPaged(page, size));
+    }
 
       // Ricerca completa/search con DTO
 

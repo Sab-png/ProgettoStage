@@ -1,5 +1,5 @@
 
-package it.spindox.stagelab.magazzino.dto.jobExecution.controllers;
+package it.spindox.stagelab.magazzino.controllers;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;

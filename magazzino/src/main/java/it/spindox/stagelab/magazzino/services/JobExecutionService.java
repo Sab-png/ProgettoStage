@@ -4,6 +4,7 @@ import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,4 +59,6 @@ public interface JobExecutionService {
     void failed(JobExecution job, Exception e);
 
     Page<Long> searchIds(JobExecutionRequest req);
+
+    Page<JobExecutionResponse> getAllPaged(@Min(0) int page, @Min(1) int size);
 }
