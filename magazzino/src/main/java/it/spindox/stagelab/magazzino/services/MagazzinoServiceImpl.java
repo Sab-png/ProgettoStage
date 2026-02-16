@@ -72,8 +72,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
             if (cap == null || cap == 0) {
                 throw new MagazzinoException(
-                        "Capacità non valida per il magazzino '" + m.getNome() + "': " + cap,
-                        StatusJob.FAILED
+                        "Capacità non valida per il magazzino '" + m.getNome() + "': " + cap
                 );
             }
 

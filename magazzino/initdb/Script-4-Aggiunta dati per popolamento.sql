@@ -108,7 +108,7 @@ INSERT INTO magazzino.MAGAZZINO (ID, NOME, INDIRIZZO, CAPACITA)
 VALUES (magazzino.SEQ_MAGAZZINO.NEXTVAL, 'Magazzino Tirreno', 'Piazza Dante 12, Genova', 1300);
 
 INSERT INTO magazzino.MAGAZZINO (ID, NOME, INDIRIZZO, CAPACITA)
-VALUES (magazzino.SEQ_MAGAZZINO.NEXTVAL, 'Magazzino Isole', 'Via Garibaldi 3, Palermo', 2000);
+VALUES (magazzino.SEQ_MAGAZZINO.NEXTVAL, 'Magazzino Isole', 'Via Garibaldi 3, Palermo', 3000);
 
 
 

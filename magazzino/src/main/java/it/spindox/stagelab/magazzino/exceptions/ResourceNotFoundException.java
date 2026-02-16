@@ -1,7 +1,6 @@
 
 package it.spindox.stagelab.magazzino.exceptions;
 
-
   // Eccezione utilizzata quando
  // una risorsa richiestA
   // non viene trovata a database.

@@ -1,10 +1,14 @@
 package it.spindox.stagelab.magazzino.exceptions.jobsexceptions;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
+
 
 
  // Tutte le eccezioni  erediteranno da questa classe
 // Run time exception non sono obbligato a dichiararla perche' e' gia implementata e dichiarata da java
+
+@Getter
 
 public abstract class JobException extends RuntimeException {
 
