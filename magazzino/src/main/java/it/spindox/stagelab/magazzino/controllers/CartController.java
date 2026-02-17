@@ -12,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/cart")
 public class CartController {
@@ -24,68 +22,44 @@ public class CartController {
         this.service = service;
     }
 
-    private static String resolveCartId(String headerCartId) {
-        if (headerCartId == null || headerCartId.isBlank()) {
-            return UUID.randomUUID().toString();
-        }
-        return headerCartId.trim();
-    }
-
-    // POST addToCart   --> complicazione inutile, semplifichiamo!!
+    // POST addToCart
     @PostMapping("/add")
     public ResponseEntity<CartItemResponse> addToCart(
-            @RequestHeader(value = "X-Cart-Id", required = false) String cartId,
+            @RequestParam("cartId") String cartId,
             @Valid @RequestBody AddToCartRequest request) {
-        String resolvedCartId = resolveCartId(cartId);
-        return ResponseEntity
-                .ok()
-                .header("X-Cart-Id", resolvedCartId)
-                .body(service.addToCart(resolvedCartId, request));
+        return ResponseEntity.ok(service.addToCart(cartId, request));
     }
 
     // GET getCart
     @GetMapping
     public ResponseEntity<CartResponse> getCart(
-            @RequestHeader(value = "X-Cart-Id", required = false) String cartId) {
-        String resolvedCartId = resolveCartId(cartId);
-        return ResponseEntity
-                .ok()
-                .header("X-Cart-Id", resolvedCartId)
-                .body(service.getCart(resolvedCartId));
+            @RequestParam("cartId") String cartId) {
+        return ResponseEntity.ok(service.getCart(cartId));
     }
 
     // PATCH updateCartItem
     @PatchMapping("/items/{itemId}")
     public ResponseEntity<CartItemResponse> updateCartItem(
-            @RequestHeader("X-Cart-Id") String cartId,
+            @RequestParam("cartId") String cartId,
             @PathVariable Long itemId,
             @Valid @RequestBody UpdateCartItemRequest request) {
-        return ResponseEntity
-                .ok()
-                .header("X-Cart-Id", cartId)
-                .body(service.updateCartItem(cartId, itemId, request));
+        return ResponseEntity.ok(service.updateCartItem(cartId, itemId, request));
     }
 
     // DELETE removeFromCart
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<Void> removeFromCart(
-            @RequestHeader("X-Cart-Id") String cartId,
+            @RequestParam("cartId") String cartId,
             @PathVariable Long itemId) {
         service.removeFromCart(cartId, itemId);
-        return ResponseEntity
-                .noContent()
-                .header("X-Cart-Id", cartId)
-                .build();
+        return ResponseEntity.noContent().build();
     }
 
     // POST checkout
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponse> checkout(
-            @RequestHeader("X-Cart-Id") String cartId,
+            @RequestParam("cartId") String cartId,
             @Valid @RequestBody CheckoutRequest request) {
-        return ResponseEntity
-                .ok()
-                .header("X-Cart-Id", cartId)
-                .body(service.checkout(cartId, request));
+        return ResponseEntity.ok(service.checkout(cartId, request));
     }
 }
