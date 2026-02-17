@@ -62,4 +62,5 @@ public class CartController {
             @Valid @RequestBody CheckoutRequest request) {
         return ResponseEntity.ok(service.checkout(cartId, request));
     }
+
 }
