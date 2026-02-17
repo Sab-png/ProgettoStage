@@ -18,7 +18,7 @@ public class Magazzino {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "_seq_magazzino_gen"
+            generator = "magazzino_seq_gen"
     )
     @Column(name = "ID")
     private Long id;

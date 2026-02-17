@@ -39,16 +39,16 @@ CREATE INDEX idx_cart_status_expires
 CREATE INDEX idx_cart_prodotto
     ON CART_ITEM(ID_PRODOTTO);
 
--- 4. Aggiunta campi alla tabella PRODOTTO
+-- 4. Aggiunta campi alla tabella PRODOTTO (sintassi Oracle)
 ALTER TABLE PRODOTTO
-    ADD COLUMN TOTAL_STOCK INT NOT NULL DEFAULT 0;
+    ADD (TOTAL_STOCK NUMBER(10) DEFAULT 0 NOT NULL);
 
 ALTER TABLE PRODOTTO
-    ADD COLUMN AVAILABLE_STOCK INT NOT NULL DEFAULT 0;
+    ADD (AVAILABLE_STOCK NUMBER(10) DEFAULT 0 NOT NULL);
 
 -- 5. Aggiunta commenti alle colonne per documentazione
 COMMENT ON TABLE CART_ITEM IS 'Gestisce il carrello con prenotazione temporanea dello stock';
-COMMENT ON COLUMN CART_ITEM.CART_ID IS 'ID della sessione HTTP dell''utente';
+COMMENT ON COLUMN CART_ITEM.CART_ID IS 'Identificativo logico del carrello';
 COMMENT ON COLUMN CART_ITEM.ID_PRODOTTO IS 'Riferimento al prodotto nel carrello';
 COMMENT ON COLUMN CART_ITEM.QUANTITY IS 'Quantità riservata del prodotto';
 COMMENT ON COLUMN CART_ITEM.RESERVED_AT IS 'Timestamp di inizio prenotazione';
