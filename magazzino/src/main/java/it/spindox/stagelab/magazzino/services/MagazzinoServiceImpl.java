@@ -4,9 +4,7 @@ import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.*;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.InvalidCapacityException;
-import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.MagazzinoException;
-import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.ProductQuantityException;
-import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.StockCalculationException;
+import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuantityException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +13,10 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+
+
+
+
 
 
 
@@ -27,16 +29,18 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     private final MagazzinoMapper mapper;
 
 
-    // GET BY ID → GET /magazzino/{id}
+
+    // GET BY ID :  GET /magazzino/{id}
 
     @Override
     @Transactional(readOnly = true)
     public MagazzinoResponse getById(Long id) {
         Magazzino entity = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Magazzino non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
+
         return mapper.toResponse(entity);
     }
+
 
 
     // CREATE
@@ -49,14 +53,14 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
 
+
     // UPDATE (PATCH)
 
     @Override
     @Transactional
     public void update(Long id, MagazzinoRequest request) {
         Magazzino entity = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Magazzino non trovato"));
+                .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
 
         mapper.updateEntity(entity, request);
         repository.save(entity);
@@ -75,7 +79,8 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
 
-    // GET LISTA COMPLETA → GET /magazzino/list
+
+    // LIST PAGINATA : GET /magazzino/list
 
     @Override
     @Transactional(readOnly = true)
@@ -89,17 +94,18 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
         Page<Magazzino> pageEntities = repository.findAll(pageable);
 
-        List<MagazzinoResponse> content = pageEntities.getContent()
-                .stream()
-                .map(mapper::toResponse)
-                .toList();
-
-        return new PageImpl<>(content, pageable, pageEntities.getTotalElements());
+        return new PageImpl<>(
+                pageEntities.getContent().stream()
+                        .map(mapper::toResponse)
+                        .toList(),
+                pageable,
+                pageEntities.getTotalElements()
+        );
     }
 
 
 
-    // GET SOLO ID → GET /magazzino
+    // SOLO ID : GET /magazzino
 
     @Override
     @Transactional(readOnly = true)
@@ -122,7 +128,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
 
 
-    // SEARCH COMPLETA → POST /magazzino/search
+    // SEARCH COMPLETA : POST /magazzino/search
 
     @Override
     @Transactional(readOnly = true)
@@ -134,20 +140,17 @@ public class MagazzinoServiceImpl implements MagazzinoService {
                 Sort.by(Sort.Direction.DESC, "id")
         );
 
-        Page<Magazzino> page = repository.search(
+        return repository.search(
                 request.getNome(),
                 request.getIndirizzo(),
                 request.getCapacitaMin(),
                 request.getCapacitaMax(),
                 pageable
-        );
-
-        return page.map(mapper::toResponse);
+        ).map(mapper::toResponse);
     }
 
 
-
-    // CHECK STOCK LEVELS
+    // CHECK STOCK LEVELS : usato dallo scheduler
 
     @Override
     @Transactional
@@ -164,14 +167,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
             int totaleProdotti = getTotaleProdotti(m);
 
-            double percentuale;
-            try {
-                percentuale = (totaleProdotti * 100.0) / cap;
-            } catch (Exception e) {
-                throw new StockCalculationException(
-                        "Errore nel calcolo percentuale per " + m.getNome(), e
-                );
-            }
+            double percentuale = (totaleProdotti * 100.0) / cap;
 
             StockStatusMagazzino status = StockStatusMagazzino.fromPercentuale(percentuale);
 
@@ -188,13 +184,17 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
 
+    // Calcolo totale prodotti + validazione quantità
+
     private static int getTotaleProdotti(Magazzino m) {
         int tot = 0;
         for (ProdottoMagazzino p : m.getProdottiMagazzino()) {
             Integer qta = p.getQuantita();
             if (qta == null || qta < 0) {
-                throw new ProductQuantityException(
-                        p.getId(), m.getNome(), qta
+                throw new InvalidQuantityException(
+                        p.getId(),
+                        qta,
+                        m.getNome()
                 );
             }
             tot += qta;

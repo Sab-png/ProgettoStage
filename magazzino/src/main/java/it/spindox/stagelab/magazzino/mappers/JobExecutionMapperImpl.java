@@ -1,11 +1,14 @@
 package it.spindox.stagelab.magazzino.mappers;
+import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
-import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 
 
@@ -13,40 +16,27 @@ import java.time.LocalDateTime;
 @Component
 public class JobExecutionMapperImpl implements JobExecutionMapper {
 
+    //
+    // OFFSET : LOCAL
 
-     // Converte un job in una entity JobExecution “nuova”.
-
-     // Viene usato in:
-
-     // create() / start() di un job
-     // startTime viene impostata al momento della creazione
-     // L'ID è generato dal DB
-
-    @Override
-    public JobExecution toEntity(String jobName, StatusJob status) {
-        JobExecution job = new JobExecution();
-        job.setStatus(status);
-
-        // startTime: impostata ora
-
-        job.setStartTime(LocalDateTime.now());
-
-        return job;
+    private LocalDateTime toLocal(OffsetDateTime odt) {
+        return (odt != null) ? odt.toLocalDateTime() : null;
     }
 
 
-      // Converte una entity JobExecution in DTO JobExecutionResponse.
+    // LOCAL :  OFFSET
 
-     // Viene usato quando si espone lo stato di esecuzione verso il client:
+    private OffsetDateTime toUtc(LocalDateTime ldt) {
+        return (ldt != null) ? ldt.atOffset(ZoneOffset.UTC) : null;
+    }
 
-     // GET /jobs/{id}
-      // GET /jobs/list
-       // POST /jobs/search
-      // Protegge da null su entity
+    @Override
+    public JobExecution toEntity(String jobName, StatusJob status) {
+        return null;
+    }
 
 
-
-// TO RESPONSE
+    // ENTITY :  RESPONSE DTO
 
     @Override
     public JobExecutionResponse toResponse(JobExecution entity) {
@@ -55,48 +45,33 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
         return JobExecutionResponse.builder()
                 .id(entity.getId())
                 .status(entity.getStatus())
-
-                // Se entity.getStartTime() è già LocalDateTime, si  usa:
-
-                .startTime(entity.getStartTime().toLocalDateTime() /* != null ? entity.getStartTime() : null */)
-                .endTime(entity.getEndTime().toLocalDateTime() /* != null ? entity.getEndTime() : null */)
+                .startTime(toLocal(entity.getStartTime())) // FIX
+                .endTime(toLocal(entity.getEndTime()))     // FIX
                 .errorType(entity.getErrorType())
                 .errorMessage(entity.getErrorMessage())
                 .build();
     }
 
-
-      // Aggiorna lo stato e chiude il job impostando endTime ora.
-
-     // Viene usato in:
-     // complete() / fail() / cancel()
-
-      // endTime viene impostato ad ora/adesso
-     // errorMessage opzional (utile in caso di errori)
-
-
-    // UPDATE ENTITY
-
     @Override
     public void updateEntity(JobExecution target, StatusJob status, String errorMessage) {
-        target.setStatus(status);
-        target.setEndTime(LocalDateTime.now());
-        target.setErrorMessage(errorMessage);
+
     }
-
-
-     // Aggiorna lo stato, chiude il job, e valorizza l’errore tipizzato.
-     // Viene usato in:
-      // fail() / error()
-      // endTime viene impostato a now
-      // errorType + errorMessage forniscono dettagli diagnostici
-
 
     @Override
     public void updateEntity(JobExecution target, StatusJob status, StatusJobErrorType errorType, String errorMessage) {
-        target.setStatus(status);
-        target.setEndTime(LocalDateTime.now());
-        target.setErrorType(errorType);
-        target.setErrorMessage(errorMessage);
+
+    }
+
+
+    // REQUEST DTO → ENTITY : solo per filtri
+
+    @Override
+    public JobExecution toEntity(JobExecutionRequest req) {
+        if (req == null) return null;
+
+        JobExecution e = new JobExecution();
+        e.setStartTime(toUtc(req.getFrom()));  // FIX
+        e.setEndTime(toUtc(req.getTo()));      // FIX
+        return e;
     }
 }

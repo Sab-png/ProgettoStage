@@ -12,3 +12,4 @@ public class InvalidCapacityException extends MagazzinoException {
                 StatusJob.FAILED);
     }
 }
+

@@ -27,4 +27,8 @@ public class FatturaRequest {
     @NotNull(message = "L'importo è obbligatorio")
     @Positive(message = "L'importo deve essere maggiore di zero")
     private BigDecimal importo;
+
+    public LocalDate getDataScadenza() {
+        return null;
+    }
 }

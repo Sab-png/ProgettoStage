@@ -5,7 +5,6 @@ import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoResponse;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuantityException;
-import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidScortaMinimaException;
 import it.spindox.stagelab.magazzino.mappers.ProdottoMapper;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,21 +17,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class ProdottoServiceImpl implements ProdottoService {
 
     private final ProdottoRepository repo;
     private final ProdottoMapper mapper;
-    private String message;
 
+    //   GET /prodotti/list (paginazione)
 
-    //  (GET /prodotti/list)
 
     @Override
     @Transactional(readOnly = true)
     public Page<ProdottoResponse> getAllPaged(int page, int size) {
 
         if (page < 0 || size <= 0) {
-            throw new InvalidQuantityException(null, size);
+            throw new InvalidQuantityException(null, size, null);
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("nome"));
@@ -49,12 +48,13 @@ public class ProdottoServiceImpl implements ProdottoService {
     }
 
 
-    // SEARCH ONLY IDS : GET /prodotti
+
+    //   SEARCH ONLY IDS (GET /prodotti)
+
 
     @Override
     @Transactional(readOnly = true)
     public Page<Long> searchIds(ProdottoRequest r) {
-
         Pageable pageable = PageRequest.of(r.getPage(), r.getSize());
 
         return repo.searchIds(
@@ -66,14 +66,17 @@ public class ProdottoServiceImpl implements ProdottoService {
         );
     }
 
-    // GET BY ID : GET /prodotti/{id}
+
+
+    //   GET BY ID (GET /prodotti/{id})
+
 
     @Override
     @Transactional(readOnly = true)
     public ProdottoResponse getById(Long id) {
 
         if (id == null || id <= 0) {
-            throw new InvalidQuantityException(id, null);
+            throw new InvalidQuantityException(id, null, null);
         }
 
         Prodotto p = repo.findById(id)
@@ -82,7 +85,9 @@ public class ProdottoServiceImpl implements ProdottoService {
         return mapper.toResponse(p);
     }
 
-    // CREATE (POST /prodotti)
+
+
+    //   CREATE (POST /prodotti)
 
 
     @Override
@@ -90,18 +95,20 @@ public class ProdottoServiceImpl implements ProdottoService {
     public void create(ProdottoRequest req) {
 
         if (req.getQuantita() != null && req.getQuantita() < 0) {
-            throw new InvalidQuantityException(null, req.getQuantita());
+            throw new InvalidQuantityException(null, req.getQuantita(), null);
         }
 
         if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
-            throw new InvalidScortaMinimaException(null, req.getScortaMinima(), message);
+            throw new InvalidQuantityException(null, req.getScortaMinima(), null);
         }
 
         repo.save(mapper.toEntity(req));
     }
 
 
-    // UPDATE (PATCH /prodotti/{id})
+
+    //   UPDATE (PATCH /prodotti/{id})
+
 
     @Override
     @Transactional
@@ -111,11 +118,11 @@ public class ProdottoServiceImpl implements ProdottoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato: " + id));
 
         if (req.getQuantita() != null && req.getQuantita() < 0) {
-            throw new InvalidQuantityException(id, req.getQuantita());
+            throw new InvalidQuantityException(id, req.getQuantita(), null);
         }
 
         if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
-            throw new InvalidScortaMinimaException(id, req.getScortaMinima(), message);
+            throw new InvalidQuantityException(id, req.getScortaMinima(), null);
         }
 
         mapper.updateEntity(p, req);
@@ -123,7 +130,9 @@ public class ProdottoServiceImpl implements ProdottoService {
     }
 
 
-    // DELETE (DELETE /prodotti/{id})
+
+    //   DELETE (DELETE /prodotti/{id})
+
 
     @Override
     @Transactional
@@ -132,7 +141,9 @@ public class ProdottoServiceImpl implements ProdottoService {
     }
 
 
-    // SEARCH COMPLETA (POST /prodotti/search)
+
+    //   SEARCH COMPLETA (POST /prodotti/search)
+
 
     @Override
     @Transactional(readOnly = true)

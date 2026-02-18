@@ -8,17 +8,19 @@ import org.springframework.stereotype.Component;
 
 
 
+//  Converte un DTO ProdottoRequest : entity Prodotto
+//   • Usato in: create()
+//   • L'ID NON viene impostato (lo genera il DB)
+//   • Prezzo è BigDecimal :assegnazione diretta se presente
+//   • request può essere null : ritorna null
+
+
+
 
 @Slf4j
 @Component
+
 public class ProdottoMapperImpl implements ProdottoMapper {
-
-
-      // Converte un DTO ProdottoRequest in entity Prodotto.
-     // Viene usato in: create()
-
-     // L'ID è generato dal DB di default
-     // Prezzo è BigDecimal
 
     @Override
     public Prodotto toEntity(ProdottoRequest request) {
@@ -30,26 +32,15 @@ public class ProdottoMapperImpl implements ProdottoMapper {
         p.setNome(request.getNome());
         p.setDescrizione(request.getDescrizione());
 
-        // request.getPrezzo() è BigDecimal :  assegnazione diretta se non null
-
+        // Prezzo BigDecimal: copia diretta
         if (request.getPrezzo() != null) {
-            p.setPrezzo();
+            p.setPrezzo(request.getPrezzo());
         }
 
         return p;
     }
 
-
-     // Converte una entity Prodotto in DTO ProdottoResponse
-
-      // Viene usato quando si restituisce il prodotto al client:
-
-      // GET /prodotti/{id}
-     // GET /prodotti/list
-      // POST /prodotti/search
-
-     // Protegge da null su entity
-     // Prezzo (BigDecimal) viene passato così com'è
+// RESPONSE
 
     @Override
     public ProdottoResponse toResponse(Prodotto entity) {
@@ -61,19 +52,12 @@ public class ProdottoMapperImpl implements ProdottoMapper {
         r.setId(entity.getId());
         r.setNome(entity.getNome());
         r.setDescrizione(entity.getDescrizione());
-        r.setPrezzo(entity.getPrezzo()); // BigDecimal → pass-through
+        r.setPrezzo(entity.getPrezzo()); // BigDecimal
 
         return r;
     }
 
-
-     // Aggiorna una entity esistente in modalità "PATCH":
-     // modifica solo i campi NON NULL presenti nella request.
-     // Viene usato in: update()
-
-
-    // UPDATE ENTITY
-
+// UPDATE
 
     @Override
     public void updateEntity(Prodotto p, ProdottoRequest request) {
@@ -88,7 +72,7 @@ public class ProdottoMapperImpl implements ProdottoMapper {
             p.setDescrizione(request.getDescrizione());
         }
         if (request.getPrezzo() != null) {
-            p.setPrezzo(); // BigDecimal : assegnazione diretta
+            p.setPrezzo(request.getPrezzo());
         }
     }
 }

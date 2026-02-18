@@ -1,5 +1,6 @@
 
 package it.spindox.stagelab.magazzino.dto.fattura;
+import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,4 +23,16 @@ public class FatturaResponse {
     private BigDecimal importo;
     private Integer quantita;
     private Long idProdotto;
+
+    public void setDataScadenza(Object dataScadenza) {
+    }
+
+    public void setPagato(Object pagato) {
+    }
+
+    public void setStatus(SXFatturaStatus status) {
+    }
+
+    public void setStatusDescription(String description) {
+    }
 }

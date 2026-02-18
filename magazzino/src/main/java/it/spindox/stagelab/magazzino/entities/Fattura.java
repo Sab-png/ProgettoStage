@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
-
 @Slf4j
 @Data
 @Entity
@@ -31,6 +30,9 @@ public class Fattura {
     @Column(name = "DATA_FATTURA", nullable = false)
     private LocalDate dataFattura;
 
+    @Column(name = "DATA_SCADENZA")
+    private LocalDate dataScadenza;
+
     @Positive
     @Column(name = "IMPORTO", nullable = false, precision = 15, scale = 2)
     private BigDecimal importo;
@@ -39,7 +41,14 @@ public class Fattura {
     @Column(name = "QUANTITA", nullable = false)
     private Integer quantita;
 
+    @Column(name = "PAGATO", precision = 15, scale = 2)
+    private BigDecimal pagato = BigDecimal.ZERO;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_PRODOTTO", nullable = false)
     private Prodotto prodotto;
+
+    @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
+    private SXFatturaStatus status;
 }

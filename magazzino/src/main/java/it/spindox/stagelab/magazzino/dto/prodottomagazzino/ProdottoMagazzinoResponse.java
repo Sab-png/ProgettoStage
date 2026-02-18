@@ -2,6 +2,9 @@ package it.spindox.stagelab.magazzino.dto.prodottomagazzino;
 import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
 import lombok.*;
 
+
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

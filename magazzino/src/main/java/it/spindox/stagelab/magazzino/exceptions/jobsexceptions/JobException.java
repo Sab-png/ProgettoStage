@@ -20,15 +20,15 @@ public abstract class JobException extends RuntimeException {
 
     private final HttpStatus httpStatus;
 
+    // Restituisce la tipologia di errore associata all'eccezione
+    // Restituisce lo status HTTP che rappresenta questo errore
+
     protected JobException(String message, StatusJobErrorType errorType, HttpStatus httpStatus) {
         super(message);
         this.errorType = errorType;
         this.httpStatus = httpStatus;
     }
 
-     // Restituisce la tipologia di errore associata all'eccezione
 
-
-    // Restituisce lo status HTTP che rappresenta questo errore
 
 }

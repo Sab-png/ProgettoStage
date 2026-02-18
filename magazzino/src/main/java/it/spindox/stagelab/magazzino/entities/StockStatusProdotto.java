@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.entities;
-import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidStockStatusValueException;
+import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuantityException;
 import lombok.Getter;
 import java.util.Arrays;
 
@@ -27,7 +27,7 @@ public enum StockStatusProdotto {
         return Arrays.stream(values())
                 .filter(s -> s.getDbValue().equalsIgnoreCase(dbValue))
                 .findFirst()
-                .orElseThrow(() -> new InvalidStockStatusValueException(dbValue, message));
+                .orElseThrow(() -> new InvalidQuantityException(dbValue, message));
     }
 
     // Stato calcolato da quantità e scorta minima

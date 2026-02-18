@@ -37,13 +37,4 @@ public class JobExecution {
     private StatusJobErrorType errorType;
 
     @Column(name = "ERROR_MESSAGE", length = 1000)
-    private String errorMessage;
-
-    public void setStartTime(LocalDateTime now) {
-        this.startTime = now.atOffset(ZoneOffset.UTC);
-    }
-
-    public void setEndTime(LocalDateTime now) {
-        this.endTime = now.atOffset(ZoneOffset.UTC);
-    }
-}
+    private String errorMessage; }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 @Slf4j
 @Getter
+
 public class SystemException extends JobException {
     private static final Logger LOGGER = LoggerFactory.getLogger(SystemException.class);
 

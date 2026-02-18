@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 
 @Slf4j
 @Getter
+
+// FALLBACK
+
 public class UnknownJobException extends JobException {
     private static final Logger LOGGER = LoggerFactory.getLogger(UnknownJobException.class);
 

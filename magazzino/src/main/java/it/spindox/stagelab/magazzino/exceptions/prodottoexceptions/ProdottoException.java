@@ -1,25 +1,18 @@
 package it.spindox.stagelab.magazzino.exceptions.prodottoexceptions;
-import it.spindox.stagelab.magazzino.entities.StatusJob;
 import lombok.Getter;
 import java.io.Serial;
 
 
+
 @Getter
 public class ProdottoException extends RuntimeException {
+
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public ProdottoException(String message) {
-        super(message);
-    }
+    private static final String DEFAULT_MESSAGE = "Errore generico sul prodotto.";
 
-    public ProdottoException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ProdottoException(String message, StatusJob statusJob) {
-    }
-
-    public ProdottoException(String message, StatusJob statusJob, Throwable cause) {
+    public ProdottoException() {
+        super(DEFAULT_MESSAGE);
     }
 }
