@@ -5,25 +5,33 @@
 -- 1. Sequence per gli ID
 CREATE SEQUENCE CART_ITEM_SEQ
     START WITH 1
-    INCREMENT BY 1
+    INCREMENT BY 1;
+
+-- Sequence per JPA (allineate alle sequence esistenti del DB)
+-- Le entity JPA cercano questi nomi (PRODOTTO_SEQ, MAGAZZINO_SEQ, FATTURA_SEQ, PRODOTTO_MAGAZZINO_SEQ)
+-- mentre il DB esistente usa SEQ_PRODOTTO, SEQ_MAGAZZINO, SEQ_FATTURA
+--CREATE SEQUENCE magazzino.PRODOTTO_SEQ START WITH 1 INCREMENT BY 1;
+--CREATE SEQUENCE magazzino.MAGAZZINO_SEQ START WITH 1 INCREMENT BY 1;
+--CREATE SEQUENCE magazzino.FATTURA_SEQ START WITH 1 INCREMENT BY 1;
+--CREATE SEQUENCE magazzino.PRODOTTO_MAGAZZINO_SEQ START WITH 1 INCREMENT BY 1;
 
 
--- 2. Tabella CART_ITEM
+-- 2. Tabella CART_ITEM (sintassi Oracle)
 CREATE TABLE CART_ITEM (
-                           ID BIGINT NOT NULL,
-                           CART_ID VARCHAR(255) NOT NULL,
-                           ID_PRODOTTO BIGINT NOT NULL,
-                           QUANTITY INT NOT NULL,
-                           RESERVED_AT TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                           EXPIRES_AT TIMESTAMP NOT NULL,
-                           STATUS VARCHAR(20) NOT NULL DEFAULT 'RESERVED',
+    ID           NUMBER(19)        NOT NULL,
+    CART_ID      VARCHAR2(255)     NOT NULL,
+    ID_PRODOTTO  NUMBER(19)        NOT NULL,
+    QUANTITY     NUMBER(10)        NOT NULL,
+    RESERVED_AT  TIMESTAMP         DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    EXPIRES_AT   TIMESTAMP         NOT NULL,
+    STATUS       VARCHAR2(20)      DEFAULT 'RESERVED' NOT NULL,
 
     -- Vincoli
-                           CONSTRAINT pk_cart_item PRIMARY KEY (ID),
-                           CONSTRAINT fk_cart_item_prodotto FOREIGN KEY (ID_PRODOTTO)
-                               REFERENCES PRODOTTO(ID) ON DELETE CASCADE,
-                           CONSTRAINT chk_cart_quantity CHECK (QUANTITY > 0),
-                           CONSTRAINT chk_cart_status CHECK (STATUS IN ('RESERVED', 'EXPIRED', 'COMPLETED'))
+    CONSTRAINT pk_cart_item PRIMARY KEY (ID),
+    CONSTRAINT fk_cart_item_prodotto FOREIGN KEY (ID_PRODOTTO)
+        REFERENCES PRODOTTO(ID) ON DELETE CASCADE,
+    CONSTRAINT chk_cart_quantity CHECK (QUANTITY > 0),
+    CONSTRAINT chk_cart_status CHECK (STATUS IN ('RESERVED', 'EXPIRED', 'COMPLETED'))
 );
 
 -- 3. Indici per ottimizzare le query
@@ -54,3 +62,17 @@ COMMENT ON COLUMN CART_ITEM.QUANTITY IS 'Quantità riservata del prodotto';
 COMMENT ON COLUMN CART_ITEM.RESERVED_AT IS 'Timestamp di inizio prenotazione';
 COMMENT ON COLUMN CART_ITEM.EXPIRES_AT IS 'Timestamp di scadenza prenotazione (20 minuti)';
 COMMENT ON COLUMN CART_ITEM.STATUS IS 'Stato: RESERVED, EXPIRED, COMPLETED';
+
+-- 6. Inizializzazione stock prodotto in base alle quantità a magazzino
+--    TOTAL_STOCK = somma delle quantità in PRODOTTO_MAGAZZINO
+--    AVAILABLE_STOCK = TOTAL_STOCK (tutto disponibile all'avvio)
+
+UPDATE PRODOTTO p
+SET TOTAL_STOCK = (
+    SELECT NVL(SUM(pm.QUANTITA), 0)
+    FROM PRODOTTO_MAGAZZINO pm
+    WHERE pm.ID_PRODOTTO = p.ID
+);
+
+UPDATE PRODOTTO
+SET AVAILABLE_STOCK = TOTAL_STOCK;
