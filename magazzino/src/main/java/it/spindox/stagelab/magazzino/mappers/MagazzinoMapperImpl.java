@@ -112,4 +112,9 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
         if (request.getIndirizzo() != null) m.setIndirizzo(request.getIndirizzo());
         if (request.getCapacita() != null) m.setCapacita(request.getCapacita());
     }
+
+    @Override
+    public Magazzino fromRequest(MagazzinoRequest request) {
+        return null;
+    }
 }
