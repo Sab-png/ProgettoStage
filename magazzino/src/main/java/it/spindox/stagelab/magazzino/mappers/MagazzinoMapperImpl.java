@@ -46,10 +46,6 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
 
 
     // ENTITY → DTO (RESPONSE)
-    // Usato in:
-    // • GET /magazzino/{id}
-    // • GET /magazzino/list
-    // • POST /magazzino/search
 
     // Comprende il calcolo:
     // • totale prodotti

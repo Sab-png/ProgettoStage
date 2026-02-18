@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;import java.util.List;
 
 
-
 @Slf4j
 @Data
 @Entity
@@ -36,5 +35,9 @@ public class Prodotto {
 
     @OneToMany(mappedBy = "prodotto")
     private List<ProdottoMagazzino> prodottoMagazzino;
-public void setPrezzo() {}
+
+    public void setPrezzo(BigDecimal prezzo) {
+        log.info("Impostazione prezzo prodotto: {} -> {}", this.prezzo, prezzo);
+        this.prezzo = prezzo;
+    }
 }

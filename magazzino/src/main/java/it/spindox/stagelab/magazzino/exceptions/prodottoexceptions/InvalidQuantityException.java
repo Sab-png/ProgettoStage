@@ -7,12 +7,26 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class InvalidQuantityException extends ProdottoException {
 
+    private final Long prodottoId;
+    private final Integer quantita;
+    private final String dbValue;   // opzionale
+
     public InvalidQuantityException(Long prodottoId, Integer quantita, String message) {
-        super();
-        log.error("[InvalidQuantityException] prodottoId={}, quantita={}", prodottoId, quantita);
+        super(message);
+        this.prodottoId = prodottoId;
+        this.quantita = quantita;
+        this.dbValue = null;
+
+        log.error("[InvalidQuantityException] prodottoId={}, quantita={}, msg={}",
+                prodottoId, quantita, message);
     }
 
     public InvalidQuantityException(String dbValue, String message) {
-        super();
+        super(message);
+        this.prodottoId = null;
+        this.quantita = null;
+        this.dbValue = dbValue;
+
+        log.error("[InvalidQuantityException] dbValue={}, msg={}", dbValue, message);
     }
 }

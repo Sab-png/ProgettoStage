@@ -12,7 +12,7 @@ public class ProdottoException extends RuntimeException {
 
     private static final String DEFAULT_MESSAGE = "Errore generico sul prodotto.";
 
-    public ProdottoException() {
+    public ProdottoException(String message) {
         super(DEFAULT_MESSAGE);
     }
 }

@@ -29,8 +29,7 @@ public interface JobExecutionMapper {
                       StatusJobErrorType errorType,
                       String errorMessage);
 
-    // ===========================================
     // REQUEST DTO → ENTITY (solo per filtri)
-    // ===========================================
+
     JobExecution toEntity(JobExecutionRequest req);
 }

@@ -30,7 +30,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
 
 
-    // GET BY ID :  GET /magazzino/{id}
+    // GET BY ID
 
     @Override
     @Transactional(readOnly = true)

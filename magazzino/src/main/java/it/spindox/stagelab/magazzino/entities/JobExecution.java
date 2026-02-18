@@ -1,9 +1,8 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+
 
 
 @Entity
@@ -37,4 +36,13 @@ public class JobExecution {
     private StatusJobErrorType errorType;
 
     @Column(name = "ERROR_MESSAGE", length = 1000)
-    private String errorMessage; }
+    private String errorMessage;
+
+    public void setUpdateDate(OffsetDateTime utc) {
+
+    }
+
+    public void setJobName(String jobName) {
+
+    }
+}

@@ -3,8 +3,6 @@ import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
 import lombok.*;
 
 
-
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

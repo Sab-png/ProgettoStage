@@ -113,7 +113,7 @@ public class InventoryScheduler {
     }
 
 
-    //         LOG DELLA FINE JOB
+    //   LOG DELLA FINE JOB
 
     private void logJobEnd(Instant startInstant, JobExecution job) {
         Instant endInstant = Instant.now();

@@ -2,9 +2,9 @@ package it.spindox.stagelab.magazzino.entities;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 
 
 @Getter
@@ -14,6 +14,9 @@ public enum SXFatturaStatus {
     SCADUTA("OVERDUE", "Fattura non saldata entro la data di scadenza"),
     PAGATA("PAID", "Fattura completamente saldata");
 
+    @Getter
+    private static BigDecimal importo;
+    private static LocalDate dataScadenza;
     private final String dbValue;
     private final String description;
 
@@ -39,7 +42,18 @@ public enum SXFatturaStatus {
         return EMESSA;
     }
 
-    public static SXFatturaStatus fromDati(@NotNull(message = "L'importo è obbligatorio") @Positive(message = "L'importo deve essere maggiore di zero") BigDecimal importo, double pagato, LocalDate dataScadenza) {
+    public static SXFatturaStatus fromDati(@NotNull(message = "L'importo è obbligatorio") @Positive(message = "L'importo deve essere maggiore di zero") BigDecimal importo) {
+        SXFatturaStatus.importo = importo;
+        return null;
+    }
+
+        public static void setImporto(BigDecimal importo) {
+        SXFatturaStatus.importo = importo;
+    }
+
+    public static SXFatturaStatus fromDati(@NotNull(message = "L'importo è obbligatorio") @Positive(message = "L'importo deve essere maggiore di zero") BigDecimal importo, LocalDate dataScadenza) {
+        SXFatturaStatus.importo = importo;
+        SXFatturaStatus.dataScadenza = dataScadenza;
         return null;
     }
 }

@@ -1,9 +1,11 @@
 package it.spindox.stagelab.magazzino.dto.jobExecution;
+import io.micrometer.common.util.internal.logging.InternalLogger;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+
 
 
 
@@ -31,6 +33,13 @@ public class JobExecutionRequest {
 
     @Min(1)
     private Integer size = 20;
+    private InternalLogger log;
 
 
+    public Object getStatus() {
+        log.info("getStatus() chiamato");
+        log.debug("getStatus() attualmente ritorna NULL (metodo non implementato)");
+
+        return null;
+    }
 }

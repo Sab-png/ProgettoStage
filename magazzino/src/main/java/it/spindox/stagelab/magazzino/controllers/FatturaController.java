@@ -14,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
@@ -74,8 +73,7 @@ public class FatturaController {
         return ResponseEntity.ok(fatturaService.getAllPaged(page, size));
     }
 
-
-     // GET /fatture/{id}
+    // GET FATTURE ID
 
     @GetMapping("/{id}")
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) throws Throwable {

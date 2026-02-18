@@ -55,8 +55,7 @@ public class JobExecutionController {
     }
 
 
-     // GET BY ID: /jobs/{id}
-
+     // GET BY ID
 
     @GetMapping("/{id}")
     public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {

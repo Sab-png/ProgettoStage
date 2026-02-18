@@ -26,12 +26,10 @@ public class FatturaMapperImpl implements FatturaMapper {
         f.setQuantita(request.getQuantita());
         f.setProdotto(prodotto);
 
-        // Calcolo automatico dello stato
 
-        double pagato = 0; // in CREATE è sempre non pagata
+        // in CREATE è sempre non pagata
         SXFatturaStatus status = SXFatturaStatus.fromDati(
                 request.getImporto(),
-                pagato,
                 request.getDataScadenza()
         );
 

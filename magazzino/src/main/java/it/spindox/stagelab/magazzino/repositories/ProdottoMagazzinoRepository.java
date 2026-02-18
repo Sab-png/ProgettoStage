@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 public interface ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagazzino, Long> {
 
     // SEARCH COMPLETA
+
+    @SuppressWarnings("java:S107")
     @Query("""
         SELECT DISTINCT pm
         FROM ProdottoMagazzino pm

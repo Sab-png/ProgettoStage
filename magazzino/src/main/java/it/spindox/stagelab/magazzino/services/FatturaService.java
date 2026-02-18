@@ -7,41 +7,37 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-
 public interface FatturaService {
 
-
-      // Ricerca paginata con filtri opzional
+    // Ricerca paginata con filtri opzionali
 
     Page<FatturaResponse> search(@Valid FatturaSearchRequest request);
 
-
-     // Crea una nuova fattura.
+    // Crea una nuova fattura
 
     FatturaResponse create(FatturaRequest request);
 
+    // PATCH: Aggiorna parzialmente una fattura
 
-      // Aggiorna parzialmente una fattura (patch)
+    FatturaResponse update(Long id, FatturaRequest request);
 
-    FatturaResponse update(Long id, FatturaRequest request) throws Throwable;
+    // Recupera dettaglio fattura per id
 
+    FatturaResponse getById(Long id);
 
-    // Dettaglio fattura per id
-
-    FatturaResponse getById(Long id) throws Throwable;
-
-
-      // Elenco fatture per prodotto (paginato).
-      // Il sort è opzionale, es. "dataFattura,desc"
+    // Elenco fatture per prodotto (paginato)
 
     PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size);
 
-
-      // Cancella una fattura.
+    // Cancella una fattura
 
     void delete(Long id);
 
+    // Ricerca solo ID
+
     Page<Long> searchIds(FatturaSearchRequest req);
+
+    // Recupero paginazione completo
 
     Page<FatturaResponse> getAllPaged(@Min(0) int page, @Min(1) int size);
 }
