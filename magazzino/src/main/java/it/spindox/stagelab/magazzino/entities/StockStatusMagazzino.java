@@ -2,6 +2,7 @@ package it.spindox.stagelab.magazzino.entities;
 import lombok.Getter;
 
 @Getter
+
 public enum StockStatusMagazzino {
 
     VERDE("GREEN", "Magazzino con scorte sufficienti", Severity.OK),

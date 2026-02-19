@@ -8,6 +8,7 @@ import java.time.LocalDate;
 
 
 @Getter
+
 public enum SXFatturaStatus {
 
     EMESSA("ISSUED", "Fattura emessa e non ancora saldata"),

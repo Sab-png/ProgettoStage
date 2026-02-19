@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 
 
 @RestControllerAdvice
+
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -21,6 +22,7 @@ public class GlobalExceptionHandler {
     // 404 : RESOURCE NOT FOUND
 
     @ExceptionHandler(ResourceNotFoundException.class)
+
     public ProblemDetail handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
 
         log.warn("Pagina/Risorsa non trovata: {}", ex.getMessage());
@@ -37,6 +39,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(JobException.class)
+
     public ProblemDetail handleJobException(JobException ex, HttpServletRequest request) {
 
         log.error("JOB ERROR — type={}, status={}, msg={}",
@@ -63,6 +66,7 @@ public class GlobalExceptionHandler {
     // 500 - ERRORI GENERICI : FALLBACK
 
     @ExceptionHandler(Exception.class)
+
     public ProblemDetail handleGenericError(Exception ex, HttpServletRequest request) {
 
         log.error("Errore inatteso", ex);

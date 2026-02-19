@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 
 
 @Getter
+
 public enum StatusJobErrorType {
 
     SYSTEM_ERROR("Errore di sistema imprevisto", HttpStatus.INTERNAL_SERVER_ERROR),

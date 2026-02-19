@@ -5,6 +5,7 @@ import java.io.Serial;
 
 
 @Getter
+
 public class ProdottoException extends RuntimeException {
 
     @Serial

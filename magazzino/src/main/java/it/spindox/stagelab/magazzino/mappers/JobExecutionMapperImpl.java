@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 
 @Slf4j
 @Component
+
 public class JobExecutionMapperImpl implements JobExecutionMapper {
 
     // OFFSET :  LOCAL
@@ -29,6 +30,7 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     //  FACTORY: crea una nuova entity da nome job e stato
 
     @Override
+
     public JobExecution toEntity(String jobName, StatusJob status) {
         if (jobName == null && status == null) {
             log.warn("toEntity(jobName, status) chiamato con entrambi i parametri NULL");
@@ -46,6 +48,7 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     //  ENTITY : RESPONSE DTO
 
     @Override
+
     public JobExecutionResponse toResponse(JobExecution entity) {
         if (entity == null) return null;
 
@@ -62,13 +65,15 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     // UPDATE : senza errorType
 
     @Override
+
     public void updateEntity(JobExecution target, StatusJob status, String errorMessage) {
         update(target, status, null, errorMessage);
     }
 
-    // --- UPDATE : con errorType
+    // UPDATE : con errorType
 
     @Override
+
     public void updateEntity(JobExecution target, StatusJob status, StatusJobErrorType errorType, String errorMessage) {
         update(target, status, errorType, errorMessage);
     }
@@ -97,6 +102,7 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     // REQUEST DTO : ENTITY
 
     @Override
+
     public JobExecution toEntity(JobExecutionRequest req) {
         if (req == null) return null;
 

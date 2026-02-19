@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 @Component
 @EnableScheduling
 @RequiredArgsConstructor
+
 public class InventoryScheduler {
 
 
@@ -50,6 +51,7 @@ public class InventoryScheduler {
     //  1) ENTRY POINT SCHEDULER - intervallo: inventory.check.rate
 
     @Scheduled(fixedRateString = "${inventory.check.rate}")
+
     public void runCheck() {
 
         // 2) TIMESTAMP DI INIZIO (UTC → Europe/Rome)

@@ -28,6 +28,7 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<ProdottoResponse> getAllPaged(int page, int size) {
 
         if (page < 0 || size <= 0) {
@@ -54,6 +55,7 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<Long> searchIds(ProdottoRequest r) {
         Pageable pageable = PageRequest.of(r.getPage(), r.getSize());
 
@@ -73,6 +75,7 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public ProdottoResponse getById(Long id) {
 
         if (id == null || id <= 0) {
@@ -92,6 +95,7 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional
+
     public void create(ProdottoRequest req) {
 
         if (req.getQuantita() != null && req.getQuantita() < 0) {
@@ -112,6 +116,7 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional
+
     public void update(Long id, ProdottoRequest req) {
 
         Prodotto p = repo.findById(id)
@@ -136,6 +141,7 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional
+
     public void delete(Long id) {
         repo.deleteById(id);
     }
@@ -147,6 +153,7 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<ProdottoResponse> search(ProdottoRequest r) {
 
         Pageable pageable = PageRequest.of(r.getPage(), r.getSize());

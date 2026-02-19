@@ -20,6 +20,7 @@ import org.springframework.data.domain.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class JobExecutionServiceImpl implements JobExecutionService {
 
     private final JobExecutionRepository repository;
@@ -36,6 +37,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // GET BY ID
 
     @Override
+
     public JobExecutionResponse getById(Long id) {
         log.info("Richiesta JobExecution per id={}", id);
 
@@ -50,6 +52,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // SEARCH
 
     @Override
+
     public Page<JobExecutionResponse> search(JobExecutionRequest request) {
         log.info("Ricerca JobExecution avviata");
 
@@ -72,6 +75,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // CREATE NEW JOB
     @Override
     @Transactional
+
     public JobExecution start() {
 
         JobExecution job = new JobExecution();
@@ -90,6 +94,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // JOB SUCCESS
     @Override
     @Transactional
+
     public void success(JobExecution job) {
 
         job.setStatus(StatusJob.SUCCESS);
@@ -105,6 +110,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // JOB FAILED (con error type)
     @Override
     @Transactional
+
     public void failed(JobExecution job, StatusJobErrorType type, Exception e) {
 
         job.setStatus(StatusJob.FAILED);
@@ -119,7 +125,10 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     }
 
     // FIND LAST
+
     @Override
+    @Transactional
+
     public Optional<JobExecution> findLast() {
         log.info("Richiesta ultimo JobExecution");
 
@@ -127,7 +136,10 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     }
 
     // FIND RUNNING
+
     @Override
+    @Transactional
+
     public Optional<JobExecution> findRunning() {
         log.info("Ricerca JobExecution in stato RUNNING");
 
@@ -136,6 +148,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
     // SEARCH ENTITY (no DTO)
     @Override
+    @Transactional
+
     public Page<JobExecution> search(StatusJob status, OffsetDateTime startFrom, OffsetDateTime startTo, Boolean hasError, Pageable pageable) {
         log.info("Ricerca JobExecution con parametri raw");
 
@@ -145,8 +159,10 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return null;
     }
 
-    // FAILED (semplice)
+    // FAILED
     @Override
+    @Transactional
+
     public void failed(JobExecution job, Exception e) {
         if (job == null) {
             log.error("JobExecution è NULL durante failed(...). Eccezione: {}",
@@ -162,6 +178,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
     // SEARCH IDS
     @Override
+    @Transactional
+
     public Page<Long> searchIds(JobExecutionRequest req) {
         log.info("Ricerca ID JobExecution avviata");
 
@@ -182,6 +200,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
     // GET ALL PAGED
     @Override
+    @Transactional
+
     public Page<JobExecutionResponse> getAllPaged(int page, int size) {
         log.info("getAllPaged: page={}, size={}", page, size);
 

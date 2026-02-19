@@ -9,6 +9,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/home")
+
 public class HomeController {
 
 
@@ -16,6 +17,7 @@ public class HomeController {
      //URL: GET /home
 
     @GetMapping
+
     public ResponseEntity<String> home() {
         return ResponseEntity.ok("Magazzino API Running ☻");
     }
@@ -26,6 +28,7 @@ public class HomeController {
       // URL: GET /home/health
 
     @GetMapping("/health")
+
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> response = Map.of(
                 "status", "UP",
@@ -39,6 +42,7 @@ public class HomeController {
      // URL: GET /home/info
 
     @GetMapping("/info")
+
     public ResponseEntity<Map<String, Object>> info() {
         Map<String, Object> response = Map.of(
                 "app", "Magazzino API",

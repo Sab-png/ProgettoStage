@@ -7,6 +7,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class ProdottoMagazzinoRequest {
 
     @NotNull

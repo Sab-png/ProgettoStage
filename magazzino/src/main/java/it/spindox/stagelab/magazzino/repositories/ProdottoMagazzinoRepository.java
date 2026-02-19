@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
+
 public interface ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagazzino, Long> {
 
     // SEARCH COMPLETA

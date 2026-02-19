@@ -7,15 +7,18 @@ import jakarta.persistence.Converter;
 
 
 @Converter(autoApply = true)
+
 public class StockStatusConverter
         implements AttributeConverter<StockStatusProdotto, String> {
 
     @Override
+
     public String convertToDatabaseColumn(StockStatusProdotto status) {
         return status != null ? status.getDbValue() : null;
     }
 
     @Override
+
     public StockStatusProdotto convertToEntityAttribute(String dbValue) {
         return StockStatusProdotto.fromDbValue(dbValue);
     }

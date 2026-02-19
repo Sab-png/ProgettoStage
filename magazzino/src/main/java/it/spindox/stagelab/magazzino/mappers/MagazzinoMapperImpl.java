@@ -15,6 +15,7 @@ import java.util.Objects;
 
 @Slf4j
 @Component
+
 public class MagazzinoMapperImpl implements MagazzinoMapper {
 
 
@@ -24,6 +25,7 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
     // • ID non Impostato (lo genera il DB)
 
     @Override
+
     public Magazzino fromRequest(MagazzinoRequest request) {
         if (request == null) return null;
 
@@ -40,6 +42,7 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
 
 
     @Override
+
     public Magazzino toEntity(MagazzinoRequest request) {
         return fromRequest(request);
     }
@@ -53,6 +56,7 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
     // • stato stock
 
     @Override
+
     public MagazzinoResponse toResponse(Magazzino entity) {
         if (entity == null) return null;
 
@@ -99,22 +103,17 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
     }
 
 
-
     // PATCH UPDATE
     // Aggiorna solo i campi NON NULL
     // Usato in: update()
 
     @Override
+
     public void updateEntity(Magazzino m, @Valid MagazzinoRequest request) {
         if (m == null || request == null) return;
 
         if (request.getNome() != null) m.setNome(request.getNome());
         if (request.getIndirizzo() != null) m.setIndirizzo(request.getIndirizzo());
         if (request.getCapacita() != null) m.setCapacita(request.getCapacita());
-    }
-
-    @Override
-    public Magazzino fromRequest(MagazzinoRequest request) {
-        return null;
     }
 }

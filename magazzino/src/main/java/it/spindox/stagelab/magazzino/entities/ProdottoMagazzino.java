@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Entity
 @Table(name = "PRODOTTO_MAGAZZINO")
+
 public class ProdottoMagazzino {
 
     private static final int DEFAULT_SCORTA_MIN = 5;

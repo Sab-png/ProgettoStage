@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 
 @Slf4j
 @Getter
+
 public class InvalidImportoFatturaException extends SXFatturaException {
 
     private final Long id;

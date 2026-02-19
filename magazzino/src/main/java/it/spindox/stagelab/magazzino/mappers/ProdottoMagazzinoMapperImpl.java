@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+
 public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
 
     @Override
+
     public ProdottoMagazzino toEntity(ProdottoMagazzinoRequest request) {
         if (request == null) return null;
 
@@ -25,6 +27,7 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
     // UPDATE ENTITY
 
     @Override
+
     public void updateEntity(ProdottoMagazzino entity, ProdottoMagazzinoRequest request) {
         if (entity == null || request == null) return;
 
@@ -39,6 +42,7 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
     // RESPONSE
 
     @Override
+
     public ProdottoMagazzinoResponse toResponse(ProdottoMagazzino entity) {
         if (entity == null) return null;
 

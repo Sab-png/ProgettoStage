@@ -8,6 +8,7 @@ import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.exceptions.fatturaexceptions.InvalidDataFatturaException;
+import it.spindox.stagelab.magazzino.exceptions.fatturaexceptions.InvalidFatturaStatusException;
 import it.spindox.stagelab.magazzino.exceptions.fatturaexceptions.InvalidImportoFatturaException;
 import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
 import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
@@ -23,6 +24,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class FatturaServiceImpl implements FatturaService {
 
     private final FatturaRepository fatturaRepository;
@@ -30,6 +32,7 @@ public class FatturaServiceImpl implements FatturaService {
     private final FatturaMapper fatturaMapper;
 
     @Override
+
     public Page<FatturaResponse> search(FatturaSearchRequest request) {
         log.info("Ricerca fatture avviata");
         if (request == null) {
@@ -54,6 +57,7 @@ public class FatturaServiceImpl implements FatturaService {
     // CREATE
 
     @Override
+
     public FatturaResponse create(FatturaRequest request) {
         if (request.getIdProdotto() == null) {
             throw new InvalidImportoFatturaException(null, request.getImporto(), request.getQuantita());
@@ -86,12 +90,13 @@ public class FatturaServiceImpl implements FatturaService {
     // UPDATE (PATCH)
 
     @Override
+
     public FatturaResponse update(Long id, FatturaRequest request) {
         Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
         if (entity.getStatus() == SXFatturaStatus.PAGATA) {
-            throw new FatturaAlreadyPaidException(id);
+            throw new InvalidFatturaStatusException(id);
         }
 
         if (request.getDataFattura() != null &&
@@ -121,6 +126,7 @@ public class FatturaServiceImpl implements FatturaService {
     // GET BY ID
 
     @Override
+
     public FatturaResponse getById(Long id) {
         Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
@@ -130,6 +136,7 @@ public class FatturaServiceImpl implements FatturaService {
 // GET BY PRODOTTO
 
     @Override
+
     public PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size) {
         log.info("Recupero fatture per prodotto: idProdotto={}, page={}, size={}", idProdotto, page, size);
 
@@ -143,6 +150,7 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
     @Override
+
     public void delete(Long id) {
         log.info("Richiesta cancellazione fattura id={}", id);
 
@@ -153,6 +161,7 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
     @Override
+
     public Page<Long> searchIds(FatturaSearchRequest req) {
         log.info("Ricerca ID fatture avviata");
         if (req == null) {
@@ -174,6 +183,7 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
     @Override
+
     public Page<FatturaResponse> getAllPaged(int page, int size) {
         log.info("Recupero paginato di tutte le fatture: page={}, size={}", page, size);
         PageRequest pr = PageRequest.of(page, size);

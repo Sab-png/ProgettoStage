@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+
 public class FatturaMapperImpl implements FatturaMapper {
 
 
     // CREATE: DTO : Entity
 
     @Override
+
     public Fattura toEntity(FatturaRequest request, Prodotto prodotto) {
 
         Fattura f = new Fattura();
@@ -42,6 +44,7 @@ public class FatturaMapperImpl implements FatturaMapper {
     // Entity : DTO RESPONSE
 
     @Override
+
     public FatturaResponse toResponse(Fattura entity) {
 
         FatturaResponse r = new FatturaResponse();
@@ -69,6 +72,7 @@ public class FatturaMapperImpl implements FatturaMapper {
     // UPDATE (PATCH)
 
     @Override
+
     public void updateEntity(Fattura target, FatturaRequest request, Prodotto prodotto) {
 
         if (request.getDataFattura() != null) {

@@ -2,6 +2,7 @@ package it.spindox.stagelab.magazzino.entities;
 import lombok.Getter;
 
 @Getter
+
 public enum StatusJob {
 
     // Job in esecuzione

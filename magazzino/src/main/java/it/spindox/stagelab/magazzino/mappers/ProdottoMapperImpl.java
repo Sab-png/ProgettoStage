@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 public class ProdottoMapperImpl implements ProdottoMapper {
 
     @Override
+
     public Prodotto toEntity(ProdottoRequest request) {
         if (request == null) {
             return null;
@@ -43,6 +44,7 @@ public class ProdottoMapperImpl implements ProdottoMapper {
 // RESPONSE
 
     @Override
+
     public ProdottoResponse toResponse(Prodotto entity) {
         if (entity == null) {
             return null;
@@ -60,6 +62,7 @@ public class ProdottoMapperImpl implements ProdottoMapper {
 // UPDATE
 
     @Override
+
     public void updateEntity(Prodotto p, ProdottoRequest request) {
         if (p == null || request == null) {
             return;

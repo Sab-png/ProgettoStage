@@ -3,6 +3,7 @@ import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuanti
 import lombok.Getter;
 import java.util.Arrays;
 
+@Getter
 
 public enum StockStatusProdotto {
 

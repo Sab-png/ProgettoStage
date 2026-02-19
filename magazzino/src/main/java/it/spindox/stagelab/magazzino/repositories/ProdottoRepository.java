@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 
 
 @Repository
+
 public interface ProdottoRepository extends JpaRepository<Prodotto, Long> {
 
     // SEARCH COMPLETA

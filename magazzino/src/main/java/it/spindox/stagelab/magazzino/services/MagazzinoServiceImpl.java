@@ -16,13 +16,10 @@ import java.util.List;
 
 
 
-
-
-
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class MagazzinoServiceImpl implements MagazzinoService {
 
     private final MagazzinoRepository repository;
@@ -34,6 +31,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public MagazzinoResponse getById(Long id) {
         Magazzino entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
@@ -47,6 +45,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional
+
     public void create(MagazzinoRequest request) {
         Magazzino entity = mapper.fromRequest(request);
         repository.save(entity);
@@ -58,6 +57,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional
+
     public void update(Long id, MagazzinoRequest request) {
         Magazzino entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
@@ -71,6 +71,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional
+
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Magazzino non trovato");
@@ -84,6 +85,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<MagazzinoResponse> getAllPaged(int page, int size) {
 
         Pageable pageable = PageRequest.of(
@@ -109,6 +111,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<Long> searchIds(MagazzinoRequest req) {
 
         Pageable pageable = PageRequest.of(
@@ -132,6 +135,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<MagazzinoResponse> search(MagazzinoRequest request) {
 
         Pageable pageable = PageRequest.of(
@@ -154,6 +158,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     @Override
     @Transactional
+
     public void checkStockLevels() {
 
         List<Magazzino> magazzini = repository.findAll();

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 
 
 @Repository
+
 public interface FatturaRepository extends JpaRepository<Fattura, Long> {
 
     // SEARCH COMPLETA

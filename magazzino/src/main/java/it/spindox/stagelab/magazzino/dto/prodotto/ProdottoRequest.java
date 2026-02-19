@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class ProdottoRequest {
 
     private String nome;

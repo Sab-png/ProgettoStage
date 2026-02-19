@@ -22,6 +22,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+
 public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     private final ProdottoMagazzinoRepository repo;
@@ -34,6 +35,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<ProdottoMagazzinoResponse> getAllPaged(int page, int size) {
 
         int safePage = Math.max(page, 0);
@@ -56,6 +58,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<Long> searchIds(ProdottoMagazzinoSearchRequest r) {
 
         int safePage = (r.getPage() == null || r.getPage() < 0) ? 0 : r.getPage();
@@ -76,6 +79,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public ProdottoMagazzinoResponse getById(Long id) {
 
         ProdottoMagazzino entity = repo.findById(id)
@@ -90,6 +94,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     @Override
     @Transactional
+
     public void create(ProdottoMagazzinoRequest r) {
 
         Prodotto prodotto = prodottoRepo.findById(r.getProdottoId())
@@ -110,6 +115,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     @Override
     @Transactional
+
     public void update(Long id, ProdottoMagazzinoRequest r) {
 
         ProdottoMagazzino entity = repo.findById(id)
@@ -126,6 +132,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     @Override
     @Transactional
+
     public void delete(Long id) {
         if (!repo.existsById(id)) {
             throw new ResourceNotFoundException("Record non trovato");
@@ -137,6 +144,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
 
     @Override
     @Transactional(readOnly = true)
+
     public Page<ProdottoMagazzinoResponse> search(ProdottoMagazzinoSearchRequest r) {
 
         int safePage = (r.getPage() == null || r.getPage() < 0) ? 0 : r.getPage();

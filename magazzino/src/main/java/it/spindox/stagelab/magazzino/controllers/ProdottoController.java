@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 @RequestMapping("/prodotti")
 @RequiredArgsConstructor
 @Validated
+
 public class ProdottoController {
 
     private final ProdottoService service;
@@ -24,6 +25,7 @@ public class ProdottoController {
     // GET ALL solo ID
 
     @GetMapping
+
     public ResponseEntity<Page<Long>> getIds(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String descrizione,
@@ -46,6 +48,7 @@ public class ProdottoController {
     // GET ALL paged + stream
 
     @GetMapping("/list")
+
     public ResponseEntity<Page<ProdottoResponse>> getAllPaged(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -54,6 +57,7 @@ public class ProdottoController {
     }
 
     @GetMapping("/{id}")
+
     public ResponseEntity<ProdottoResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
@@ -61,6 +65,7 @@ public class ProdottoController {
     // CREATE
 
     @PostMapping
+
     public ResponseEntity<Void> create(@Valid @RequestBody ProdottoRequest request) {
         service.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -69,6 +74,7 @@ public class ProdottoController {
     // UPDATE
 
     @PatchMapping("/{id}")
+
     public ResponseEntity<Void> update(@PathVariable Long id,
                                        @Valid @RequestBody ProdottoRequest request) {
         service.update(id, request);
@@ -78,6 +84,7 @@ public class ProdottoController {
     // DELETE
 
     @DeleteMapping("/{id}")
+
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
@@ -86,6 +93,7 @@ public class ProdottoController {
     // SEARCH
 
     @PostMapping("/search")
+
     public ResponseEntity<Page<ProdottoResponse>> search(@RequestBody @Valid ProdottoRequest r) {
         return ResponseEntity.ok(service.search(r));
     }

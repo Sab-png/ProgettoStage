@@ -24,6 +24,7 @@ import java.time.LocalDate;
 @RequestMapping("/fatture")
 @RequiredArgsConstructor
 @Validated
+
 public class FatturaController {
 
     private final FatturaService fatturaService;
@@ -33,6 +34,7 @@ public class FatturaController {
 
 
     @GetMapping
+
     public ResponseEntity<Page<Long>> getFattureIds(
             @RequestParam(required = false) String numero,
             @RequestParam(required = false) Long idProdotto,
@@ -66,6 +68,7 @@ public class FatturaController {
 
 
     @GetMapping("/list")
+
     public ResponseEntity<Page<FatturaResponse>> getAllFatturePaged(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
@@ -76,11 +79,13 @@ public class FatturaController {
     // GET FATTURE ID
 
     @GetMapping("/{id}")
+
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) throws Throwable {
         return ResponseEntity.ok(fatturaService.getById(id));
     }
 
     @GetMapping("/prodotto/{idProdotto}")
+
     public ResponseEntity<PageImpl<FatturaResponse>> getFattureByProdotto(
             @PathVariable Long idProdotto,
             @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -93,6 +98,7 @@ public class FatturaController {
     // SAVE FATTURA
 
     @PostMapping
+
     public ResponseEntity<FatturaResponse> saveFattura(
             @Valid @RequestBody FatturaRequest request,
             UriComponentsBuilder uriBuilder
@@ -107,6 +113,7 @@ public class FatturaController {
     // EDIT FATTURA
 
     @PatchMapping("/{id}")
+
     public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
             @Valid @RequestBody FatturaRequest request
@@ -118,6 +125,7 @@ public class FatturaController {
     // SEARCH FATTURA
 
     @PostMapping("/search")
+
     public ResponseEntity<Page<FatturaResponse>> searchFattura(
             @Valid @RequestBody FatturaSearchRequest searchRequest
     ) {
@@ -128,6 +136,7 @@ public class FatturaController {
     // DELETE FATTURA
 
     @DeleteMapping("/{id}")
+
     public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {
         fatturaService.delete(id);
         return ResponseEntity.noContent().build();

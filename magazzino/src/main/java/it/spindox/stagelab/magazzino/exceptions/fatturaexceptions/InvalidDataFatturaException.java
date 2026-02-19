@@ -10,6 +10,7 @@ import java.time.LocalDate;
 
 @Slf4j
 @Getter
+
 public class InvalidDataFatturaException extends SXFatturaException {
 
   private final Long id;

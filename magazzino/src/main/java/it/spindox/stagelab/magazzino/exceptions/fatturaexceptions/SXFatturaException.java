@@ -4,6 +4,7 @@ import lombok.Getter;
 
 
 @Getter
+
 public class SXFatturaException extends RuntimeException {
 
     private final StatusJob errorType;

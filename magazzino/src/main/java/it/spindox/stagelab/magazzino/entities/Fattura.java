@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table(name = "FATTURA")
+
 public class Fattura {
 
     @Id

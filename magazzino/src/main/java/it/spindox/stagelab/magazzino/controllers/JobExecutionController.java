@@ -21,6 +21,7 @@ import java.util.Optional;
 @RequestMapping("/jobs")
 @RequiredArgsConstructor
 @Validated
+
 public class JobExecutionController {
 
     private final JobExecutionService jobExecutionService;
@@ -31,6 +32,7 @@ public class JobExecutionController {
      // Restituisce SOLO gli ID dei job filtrati : Page<Long>
 
     @GetMapping
+
     public ResponseEntity<Page<Long>> getJobIds(
             @RequestParam(required = false) String nomeJob,
             @RequestParam(required = false) String stato,
@@ -58,6 +60,7 @@ public class JobExecutionController {
      // GET BY ID
 
     @GetMapping("/{id}")
+
     public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(jobExecutionService.getById(id));
     }
@@ -65,6 +68,7 @@ public class JobExecutionController {
 // GET LIST JOB
 
     @GetMapping("/list")
+
     public ResponseEntity<Page<JobExecutionResponse>> getAllFatturePaged(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
@@ -75,6 +79,7 @@ public class JobExecutionController {
       // Ricerca completa/search con DTO
 
     @PostMapping("/search")
+
     public ResponseEntity<Page<JobExecutionResponse>> search(
             @Valid @RequestBody JobExecutionRequest request
     ) {
@@ -86,6 +91,7 @@ public class JobExecutionController {
       // Ritorna l'ultimo job che ha generato un errore
 
     @GetMapping("/errors/last")
+
     public ResponseEntity<JobExecutionResponse> getLastError() {
 
         Optional<JobExecution> last = jobExecutionService.findLast();

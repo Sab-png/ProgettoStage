@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/magazzino")
 @RequiredArgsConstructor
 @Validated
+
 public class MagazzinoController {
 
     private final MagazzinoService magazzinoService;
@@ -25,6 +26,7 @@ public class MagazzinoController {
     // GET ALL → solo ID
 
     @GetMapping
+
     public ResponseEntity<Page<Long>> getIds(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String indirizzo,
@@ -47,6 +49,7 @@ public class MagazzinoController {
     // GET ALL DTO COMPLETI + stream
 
     @GetMapping("/list")
+
     public ResponseEntity<Page<MagazzinoResponse>> getAllPaged(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size
@@ -55,6 +58,7 @@ public class MagazzinoController {
     }
 
     @GetMapping("/{id}")
+
     public ResponseEntity<MagazzinoResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(magazzinoService.getById(id));
     }
@@ -62,6 +66,7 @@ public class MagazzinoController {
     // CREATE
 
     @PostMapping
+
     public ResponseEntity<Void> create(@Valid @RequestBody MagazzinoRequest request) {
         magazzinoService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -70,6 +75,7 @@ public class MagazzinoController {
     // UPDATE
 
     @PatchMapping("/{id}")
+
     public ResponseEntity<Void> update(@PathVariable Long id,
                                        @Valid @RequestBody MagazzinoRequest request) {
         magazzinoService.update(id, request);
@@ -79,12 +85,14 @@ public class MagazzinoController {
     // DELETE
 
     @DeleteMapping("/{id}")
+
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         magazzinoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/search")
+
     public ResponseEntity<Page<MagazzinoResponse>> search(
             @Valid @RequestBody MagazzinoRequest request) {
         return ResponseEntity.ok(magazzinoService.search(request));

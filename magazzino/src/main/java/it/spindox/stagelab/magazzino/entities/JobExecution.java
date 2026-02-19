@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "JOB_EXECUTION")
 @Data
+
 public class JobExecution {
 
     @Id
@@ -39,10 +40,10 @@ public class JobExecution {
     private String errorMessage;
 
     public void setUpdateDate(OffsetDateTime utc) {
-
+        // TODO document why this method is empty
     }
 
     public void setJobName(String jobName) {
-
+        // TODO document why this method is empty
     }
 }
