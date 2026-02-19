@@ -5,12 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
-
 public class InvalidQuantityException extends ProdottoException {
 
     private final Long prodottoId;
     private final Integer quantita;
-    private final String dbValue;   // opzionale
+    private final String dbValue;   // puo' essere facoltativo
 
     public InvalidQuantityException(Long prodottoId, Integer quantita, String message) {
         super(message);

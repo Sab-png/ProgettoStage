@@ -3,9 +3,7 @@ import lombok.Getter;
 import java.io.Serial;
 
 
-
 @Getter
-
 public class ProdottoException extends RuntimeException {
 
     @Serial
@@ -14,6 +12,6 @@ public class ProdottoException extends RuntimeException {
     private static final String DEFAULT_MESSAGE = "Errore generico sul prodotto.";
 
     public ProdottoException(String message) {
-        super(DEFAULT_MESSAGE);
+        super(message == null || message.isBlank() ? DEFAULT_MESSAGE : message);
     }
 }

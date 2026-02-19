@@ -14,29 +14,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
-
 public class ProdottoServiceImpl implements ProdottoService {
 
     private final ProdottoRepository repo;
     private final ProdottoMapper mapper;
 
-    //   GET /prodotti/list (paginazione)
-
+    // GET /prodotti/list (paginazione)
 
     @Override
     @Transactional(readOnly = true)
-
     public Page<ProdottoResponse> getAllPaged(int page, int size) {
 
         if (page < 0 || size <= 0) {
-            throw new InvalidQuantityException(null, size, null);
+            throw new IllegalArgumentException("Parametri di paginazione non validi: page=" + page + ", size=" + size);
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("nome"));
-
         Page<Prodotto> result = repo.findAll(pageable);
 
         return new PageImpl<>(
@@ -48,14 +45,10 @@ public class ProdottoServiceImpl implements ProdottoService {
         );
     }
 
-
-
-    //   SEARCH ONLY IDS (GET /prodotti)
-
+    // GET /prodotti (solo ID)
 
     @Override
     @Transactional(readOnly = true)
-
     public Page<Long> searchIds(ProdottoRequest r) {
         Pageable pageable = PageRequest.of(r.getPage(), r.getSize());
 
@@ -68,18 +61,14 @@ public class ProdottoServiceImpl implements ProdottoService {
         );
     }
 
-
-
-    //   GET BY ID (GET /prodotti/{id})
-
+    // GET /prodotti
 
     @Override
     @Transactional(readOnly = true)
-
     public ProdottoResponse getById(Long id) {
 
         if (id == null || id <= 0) {
-            throw new InvalidQuantityException(id, null, null);
+            throw new IllegalArgumentException("ID prodotto non valido: " + id);
         }
 
         Prodotto p = repo.findById(id)
@@ -88,72 +77,59 @@ public class ProdottoServiceImpl implements ProdottoService {
         return mapper.toResponse(p);
     }
 
-
-
-    //   CREATE (POST /prodotti)
-
+    // POST /prodotti
 
     @Override
     @Transactional
-
     public void create(ProdottoRequest req) {
 
         if (req.getQuantita() != null && req.getQuantita() < 0) {
-            throw new InvalidQuantityException(null, req.getQuantita(), null);
+            throw new InvalidQuantityException(null, req.getQuantita(), "Quantità non può essere negativa");
         }
 
         if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
-            throw new InvalidQuantityException(null, req.getScortaMinima(), null);
+            throw new InvalidQuantityException(null, req.getScortaMinima(), "Scorta minima non può essere negativa");
         }
 
         repo.save(mapper.toEntity(req));
     }
 
-
-
-    //   UPDATE (PATCH /prodotti/{id})
-
+    // PATCH /prodotti
 
     @Override
     @Transactional
-
     public void update(Long id, ProdottoRequest req) {
 
         Prodotto p = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato: " + id));
 
         if (req.getQuantita() != null && req.getQuantita() < 0) {
-            throw new InvalidQuantityException(id, req.getQuantita(), null);
+            throw new InvalidQuantityException(id, req.getQuantita(), "Quantità non può essere negativa");
         }
 
         if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
-            throw new InvalidQuantityException(id, req.getScortaMinima(), null);
+            throw new InvalidQuantityException(id, req.getScortaMinima(), "Scorta minima non può essere negativa");
         }
 
         mapper.updateEntity(p, req);
         repo.save(p);
     }
 
-
-
-    //   DELETE (DELETE /prodotti/{id})
-
+    // DELETE /prodotti
 
     @Override
     @Transactional
-
     public void delete(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("ID prodotto non valido: " + id);
+        }
         repo.deleteById(id);
     }
 
-
-
-    //   SEARCH COMPLETA (POST /prodotti/search)
-
+    // POST /prodotti/search
 
     @Override
     @Transactional(readOnly = true)
-
     public Page<ProdottoResponse> search(ProdottoRequest r) {
 
         Pageable pageable = PageRequest.of(r.getPage(), r.getSize());

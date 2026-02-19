@@ -1,26 +1,31 @@
 
 package it.spindox.stagelab.magazzino.exceptions;
 
-  // Eccezione utilizzata quando
- // una risorsa richiesta
-  // non viene trovata a database.
 
- // Viene lanciata tipicamente nel Service layer
- // e intercettata dal GlobalExceptionHandler per
-  // restituire un HTTP 404 (Not Found).
+//  Eccezione usata quando una risorsa richiesta non viene trovata a database.
+ // Tipicamente lanciata nel Service layer e mappata a HTTP 404 dal GlobalExceptionHandler.
 
 public class ResourceNotFoundException extends RuntimeException {
 
-
-      // Costruttore che accetta un messaggio descrittivo
-      // dell'errore (es. "Prodotto non trovato").
-    // param message:  messaggio nel dettaglio dell'eccezione
-
     public ResourceNotFoundException(String message) {
-
-        // Richiama il costruttore della RuntimeException
-        // per impostare il messaggio dell'errore
-
         super(message);
+    }
+
+    public ResourceNotFoundException(String resourceName, Object id) {
+        super(resourceName + " non trovata: id=" + id);
+    }
+
+    public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue) {
+        super(resourceName + " non trovata: " + fieldName + "=" + fieldValue);
+    }
+
+    // Factory methods per leggibilità nei service
+
+    public static ResourceNotFoundException byId(String resourceName, Object id) {
+        return new ResourceNotFoundException(resourceName, id);
+    }
+
+    public static ResourceNotFoundException byField(String resourceName, String fieldName, Object fieldValue) {
+        return new ResourceNotFoundException(resourceName, fieldName, fieldValue);
     }
 }
