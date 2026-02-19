@@ -3,16 +3,19 @@ import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.*;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.SystemException;
 import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.InvalidCapacityException;
 import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuantityException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+
 
 
 
@@ -25,8 +28,6 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     private final MagazzinoRepository repository;
     private final MagazzinoMapper mapper;
 
-
-
     // GET BY ID
 
     @Override
@@ -35,11 +36,8 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     public MagazzinoResponse getById(Long id) {
         Magazzino entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
-
         return mapper.toResponse(entity);
     }
-
-
 
     // CREATE
 
@@ -51,9 +49,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.save(entity);
     }
 
-
-
-    // UPDATE (PATCH)
+    // UPDATE
 
     @Override
     @Transactional
@@ -61,11 +57,9 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     public void update(Long id, MagazzinoRequest request) {
         Magazzino entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
-
         mapper.updateEntity(entity, request);
         repository.save(entity);
     }
-
 
     // DELETE
 
@@ -79,9 +73,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.deleteById(id);
     }
 
-
-
-    // LIST PAGINATA : GET /magazzino/list
+    // PAGINAZIONE LIST
 
     @Override
     @Transactional(readOnly = true)
@@ -105,9 +97,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         );
     }
 
-
-
-    // SOLO ID : GET /magazzino
+    // SOLO ID
 
     @Override
     @Transactional(readOnly = true)
@@ -129,9 +119,7 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         );
     }
 
-
-
-    // SEARCH COMPLETA : POST /magazzino/search
+    // SEARCH COMPLETA
 
     @Override
     @Transactional(readOnly = true)
@@ -154,7 +142,8 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
 
-    // CHECK STOCK LEVELS : usato dallo scheduler
+    //   LOGICA BUSINESS DEL JOB
+
 
     @Override
     @Transactional
@@ -165,14 +154,20 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
         for (Magazzino m : magazzini) {
 
-            Integer cap = m.getCapacita();
-            if (cap == null || cap <= 0) {
-                throw new InvalidCapacityException(m.getNome(), cap);
+            Integer cap = getInteger(m);
+
+            // ZERO : SUCCESS con WARNING
+
+            if (cap == 0) {
+                log.warn("[CAPACITY WARNING] Magazzino={} ha capacità = 0 (successo con warning)",
+                        m.getNome());
             }
+
+            // POSITIVO : IT IS OK
 
             int totaleProdotti = getTotaleProdotti(m);
 
-            double percentuale = (totaleProdotti * 100.0) / cap;
+            double percentuale = (totaleProdotti * 100.0) / Math.max(cap, 1);
 
             StockStatusMagazzino status = StockStatusMagazzino.fromPercentuale(percentuale);
 
@@ -188,20 +183,43 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         }
     }
 
+    private static @NonNull Integer getInteger(Magazzino m) {
+        Integer cap = m.getCapacita();
 
-    // Calcolo totale prodotti + validazione quantità
+        // NULL : FAILED
+
+        if (cap == null) {
+            throw new SystemException(
+                    "Capacità NULL per il magazzino '" + m.getNome() + "' (ID=" + m.getId() + ")"
+            );
+        }
+
+        // NEGATIVO : FAILED
+
+        if (cap < 0) {
+            throw new SystemException(
+                    "Capacità NEGATIVA (" + cap + ") per il magazzino '" + m.getNome() + "' (ID=" + m.getId() + ")"
+            );
+        }
+        return cap;
+    }
+
+    // Validazione quantità prodotti
 
     private static int getTotaleProdotti(Magazzino m) {
         int tot = 0;
         for (ProdottoMagazzino p : m.getProdottiMagazzino()) {
+
             Integer qta = p.getQuantita();
+
             if (qta == null || qta < 0) {
                 throw new InvalidQuantityException(
                         p.getId(),
                         qta,
-                        m.getNome()
+                        "Quantità non valida nel magazzino " + m.getNome()
                 );
             }
+
             tot += qta;
         }
         return tot;
