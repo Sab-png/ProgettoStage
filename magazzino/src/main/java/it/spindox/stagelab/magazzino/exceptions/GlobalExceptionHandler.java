@@ -1,7 +1,9 @@
 
 package it.spindox.stagelab.magazzino.exceptions;
+import it.spindox.stagelab.magazzino.exceptions.fatturaexceptions.SXFatturaException;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.JobException;
 import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.ProdottoException;
+import it.spindox.stagelab.magazzino.exceptions.prodottomagazzinoexceptions.ProdottoMagazzinoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -113,6 +115,40 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Si è verificato un errore interno. Riprova più tardi."
+        );
+
+        pd.setProperty(PATH, request.getRequestURI());
+        pd.setProperty(TIMESTAMP, OffsetDateTime.now().toString());
+
+        return pd;
+    }
+    // ECCEZZIONI FATTURA ERRORE 400 : BAD REQUEST
+
+    @ExceptionHandler(SXFatturaException.class)
+    public ProblemDetail handleFatturaException(SXFatturaException ex, HttpServletRequest request) {
+
+        log.warn("Errore fattura su path {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+
+        pd.setProperty("path", request.getRequestURI());
+        pd.setProperty(TIMESTAMP, OffsetDateTime.now().toString());
+
+        return pd;
+    }
+    // 400 - ERRORI DI BUSINESS PRODOTTO-MAGAZZINO
+
+    @ExceptionHandler(ProdottoMagazzinoException.class)
+    public ProblemDetail handleProdottoMagazzinoException(ProdottoMagazzinoException ex, HttpServletRequest request) {
+
+        log.warn("Errore Prodotto-Magazzino su path {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
         );
 
         pd.setProperty(PATH, request.getRequestURI());

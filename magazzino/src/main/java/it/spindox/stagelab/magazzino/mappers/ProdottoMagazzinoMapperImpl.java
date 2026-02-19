@@ -10,48 +10,65 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-
 public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
 
+    // ==========================================================
+    // DTO → ENTITY (CREATE)
+    // ==========================================================
     @Override
-
     public ProdottoMagazzino toEntity(ProdottoMagazzinoRequest request) {
-        if (request == null) return null;
+        if (request == null) {
+            log.warn("toEntity chiamato con request NULL");
+            return null;
+        }
 
         ProdottoMagazzino pm = new ProdottoMagazzino();
         pm.setQuantita(request.getQuantita());
         pm.setScortaMin(request.getScortaMin());
+
+        log.debug("[PM-MAPPER] toEntity -> quantita={}, scortaMin={}",
+                request.getQuantita(), request.getScortaMin());
+
         return pm;
     }
 
-    // UPDATE ENTITY
-
+    // ==========================================================
+    // UPDATE PATCH
+    // ==========================================================
     @Override
-
     public void updateEntity(ProdottoMagazzino entity, ProdottoMagazzinoRequest request) {
-        if (entity == null || request == null) return;
+        if (entity == null || request == null) {
+            log.warn("updateEntity chiamato con entity={} request={}", entity, request);
+            return;
+        }
 
         if (request.getQuantita() != null) {
             entity.setQuantita(request.getQuantita());
+            log.debug("[PM-MAPPER] update quantita -> {}", request.getQuantita());
         }
+
         if (request.getScortaMin() != null) {
             entity.setScortaMin(request.getScortaMin());
+            log.debug("[PM-MAPPER] update scortaMin -> {}", request.getScortaMin());
         }
     }
 
-    // RESPONSE
-
+    // ==========================================================
+    // ENTITY → DTO RESPONSE
+    // ==========================================================
     @Override
-
     public ProdottoMagazzinoResponse toResponse(ProdottoMagazzino entity) {
-        if (entity == null) return null;
+        if (entity == null) {
+            log.warn("toResponse chiamato con entity NULL");
+            return null;
+        }
 
         StockStatusProdotto status = StockStatusProdotto.fromQuantita(
                 entity.getQuantita(),
                 entity.getScortaMin()
         );
 
-        return ProdottoMagazzinoResponse.builder()
+        ProdottoMagazzinoResponse res = ProdottoMagazzinoResponse.builder()
                 .id(entity.getId())
                 .prodottoId(entity.getProdotto() != null ? entity.getProdotto().getId() : null)
                 .nomeProdotto(entity.getProdotto() != null ? entity.getProdotto().getNome() : null)
@@ -63,5 +80,10 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
                 .statusColor(status.getDbValue())
                 .statusDescription(status.getDescription())
                 .build();
+
+        log.debug("[PM-MAPPER] toResponse -> id={} status={}",
+                res.getId(), status);
+
+        return res;
     }
 }

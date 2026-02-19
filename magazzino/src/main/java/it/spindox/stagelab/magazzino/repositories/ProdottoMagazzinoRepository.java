@@ -8,12 +8,22 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 
-@Repository
 
+@Repository
 public interface ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagazzino, Long> {
 
-    // SEARCH COMPLETA
+    // Verifica se esiste già una relazione Prodotto - Magazzino
+    boolean existsByProdottoIdAndMagazzinoId(Long prodottoId, Long magazzinoId);
 
+    // Somma della quantità totale in un magazzino (mai NULL)
+    @Query("""
+        SELECT COALESCE(SUM(pm.quantita), 0)
+        FROM ProdottoMagazzino pm
+        WHERE pm.magazzino.id = :magazzinoId
+    """)
+    Integer sumQuantitaInMagazzino(@Param("magazzinoId") Long magazzinoId);
+
+    // SEARCH COMPLETA
     @SuppressWarnings("java:S107")
     @Query("""
         SELECT DISTINCT pm
@@ -39,8 +49,7 @@ public interface ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagaz
             Pageable pageable
     );
 
-    // GET ALL SOLO ID
-
+    // SEARCH solo ID
     @Query("""
         SELECT pm.id
         FROM ProdottoMagazzino pm
