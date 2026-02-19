@@ -5,21 +5,33 @@ import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 
 
-// IMPORTI  NON VALIDI
+// REGOLE SU IMPORTI/QUANTITA' : NON NEGATIVI, NON NULL QUINDI UN TOTAL CON UN MINIMO DI SENSO
+
 
 @Slf4j
 @Getter
 public class InvalidImportoFatturaException extends SXFatturaException {
 
+    private final Long id;
+    private final BigDecimal importo;
+    private final Integer quantita;
+
     public InvalidImportoFatturaException(Long id, BigDecimal importo, Integer quantita) {
         super(
-                "Importi fattura non validi (ID=" + id +
-                        ", importo=" + importo +
-                        ", quantità=" + quantita + ")",
+                String.format(
+                        "Importi fattura non validi (ID=%d, importo=%s, quantità=%d)",
+                        id, importo, quantita
+                ),
                 StatusJob.FAILED
         );
 
-        log.error("[InvalidImportoFatturaException] id={} importo={} quantità={}",
-                id, importo, quantita);
+        this.id = id;
+        this.importo = importo;
+        this.quantita = quantita;
+
+        log.error(
+                "[InvalidImportoFatturaException] id={} importo={} quantità={}",
+                id, importo, quantita
+        );
     }
 }

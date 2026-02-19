@@ -7,7 +7,6 @@ import it.spindox.stagelab.magazzino.entities.Fattura;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
-import it.spindox.stagelab.magazzino.exceptions.fatturaexceptions.FatturaAlreadyPaidException;
 import it.spindox.stagelab.magazzino.exceptions.fatturaexceptions.InvalidDataFatturaException;
 import it.spindox.stagelab.magazzino.exceptions.fatturaexceptions.InvalidImportoFatturaException;
 import it.spindox.stagelab.magazzino.mappers.FatturaMapper;

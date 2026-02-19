@@ -12,15 +12,26 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class InvalidFatturaStatusException extends SXFatturaException {
 
+    private final Long id;
+    private final SXFatturaStatus current;
+    private final SXFatturaStatus expected;
+
     public InvalidFatturaStatusException(Long id, SXFatturaStatus current, SXFatturaStatus expected) {
         super(
-                "Stato fattura non valido (ID=" + id +
-                        ", attuale=" + current +
-                        ", richiesto=" + expected + ")",
+                String.format(
+                        "Stato fattura non valido (ID=%d, attuale=%s, richiesto=%s)",
+                        id, current, expected
+                ),
                 StatusJob.FAILED
         );
 
-        log.error("[InvalidFatturaStatusException] id={} current={} expected={}",
-                id, current, expected);
+        this.id = id;
+        this.current = current;
+        this.expected = expected;
+
+        log.error(
+                "[InvalidFatturaStatusException] id={} current={} expected={}",
+                id, current, expected
+        );
     }
 }
