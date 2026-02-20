@@ -1,24 +1,24 @@
 package it.spindox.stagelab.magazzino.entities;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
+// Enum che rappresenta lo stato della fattura
+// Metodo determine():  responsabile della logica
+
 
 @Getter
-
 public enum SXFatturaStatus {
 
     EMESSA("ISSUED", "Fattura emessa e non ancora saldata"),
     SCADUTA("OVERDUE", "Fattura non saldata entro la data di scadenza"),
     PAGATA("PAID", "Fattura completamente saldata");
 
-    @Getter
-    private static BigDecimal importo;
-    private static LocalDate dataScadenza;
+    // Valore da salvare in DB se in futuro userai converter custom
     private final String dbValue;
+
+    // Descrizione umana
     private final String description;
 
     SXFatturaStatus(String dbValue, String description) {
@@ -26,35 +26,32 @@ public enum SXFatturaStatus {
         this.description = description;
     }
 
+    // Metodo statico per determinare lo stato della fattura in base a importo, pagato e dataScadenza
 
-    // Logica  basata sull ' importo :  pagato, scadenza
-
-    public static SXFatturaStatus fromDati(
-            double importo,
-            double pagato,
-            LocalDate scadenza
+    public static SXFatturaStatus determine(
+            BigDecimal importo,
+            BigDecimal pagato,
+            LocalDate dataScadenza
     ) {
-        if (pagato >= importo) return PAGATA;
+        if (importo == null) {
+            throw new IllegalArgumentException("Importo nullo!");
+        }
 
-        if (scadenza != null && LocalDate.now().isAfter(scadenza)) {
+        // Caso 1 : fattura pagata
+
+        if (pagato != null && pagato.compareTo(importo) >= 0) {
+            return PAGATA;
+        }
+
+        // Caso 2 : fattura scaduta
+
+        if (dataScadenza != null && LocalDate.now().isAfter(dataScadenza)) {
             return SCADUTA;
         }
+
+        // Caso 3 : stato Emessa
 
         return EMESSA;
     }
 
-    public static SXFatturaStatus fromDati(@NotNull(message = "L'importo è obbligatorio") @Positive(message = "L'importo deve essere maggiore di zero") BigDecimal importo) {
-        SXFatturaStatus.importo = importo;
-        return null;
-    }
-
-        public static void setImporto(BigDecimal importo) {
-        SXFatturaStatus.importo = importo;
-    }
-
-    public static SXFatturaStatus fromDati(@NotNull(message = "L'importo è obbligatorio") @Positive(message = "L'importo deve essere maggiore di zero") BigDecimal importo, LocalDate dataScadenza) {
-        SXFatturaStatus.importo = importo;
-        SXFatturaStatus.dataScadenza = dataScadenza;
-        return null;
-    }
 }

@@ -7,18 +7,16 @@ import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import java.math.BigDecimal;
 
 
 @Slf4j
 @Component
-
 public class FatturaMapperImpl implements FatturaMapper {
 
-
-    // CREATE: DTO : Entity
+    // CREATE: DTO :Entity
 
     @Override
-
     public Fattura toEntity(FatturaRequest request, Prodotto prodotto) {
 
         Fattura f = new Fattura();
@@ -28,11 +26,14 @@ public class FatturaMapperImpl implements FatturaMapper {
         f.setQuantita(request.getQuantita());
         f.setProdotto(prodotto);
 
-
-        // in CREATE è sempre non pagata
-        SXFatturaStatus status = SXFatturaStatus.fromDati(
-                request.getImporto(),
-                request.getDataScadenza()
+        // In fase di creazione, la fattura è:
+        // - importo come richiesto
+        // - pagato = 0
+        // - scadenza
+        SXFatturaStatus status = SXFatturaStatus.determine(
+                request.getImporto(),      // importo totale
+                BigDecimal.ZERO,           // non ancora pagata
+                request.getDataScadenza()  // data scadenza
         );
 
         f.setStatus(status);
@@ -40,9 +41,7 @@ public class FatturaMapperImpl implements FatturaMapper {
         return f;
     }
 
-
-    // Entity : DTO RESPONSE
-
+    // Entity :  DTO Response
     @Override
 
     public FatturaResponse toResponse(Fattura entity) {
@@ -60,14 +59,12 @@ public class FatturaMapperImpl implements FatturaMapper {
             r.setIdProdotto(entity.getProdotto().getId());
         }
 
-        // Stato fattura
-
+        // Stato
         r.setStatus(entity.getStatus());
         r.setStatusDescription(entity.getStatus().getDescription());
 
         return r;
     }
-
 
     // UPDATE (PATCH)
 
@@ -95,13 +92,14 @@ public class FatturaMapperImpl implements FatturaMapper {
             target.setProdotto(prodotto);
         }
 
-        // Ricalcola lo stato dopo l’aggiornamento
+        // Ricalcolo dello stato ogni volta che la fattura cambia
 
-        SXFatturaStatus status = SXFatturaStatus.fromDati(
-                target.getImporto().doubleValue(),
-                target.getPagato().doubleValue(),
-                target.getDataScadenza()
+        SXFatturaStatus status = SXFatturaStatus.determine(
+                target.getImporto(),        // importo aggiornato
+                target.getPagato(),         // quanto è stato pagato
+                target.getDataScadenza()    // scadenza attuale
         );
+
         target.setStatus(status);
     }
 }
