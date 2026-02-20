@@ -6,10 +6,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//oracle-xe:1521/XEPDB1
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@host.docker.internal:1521/XE
       SPRING_DATASOURCE_USERNAME: magazzino
       SPRING_DATASOURCE_PASSWORD: magazzino_pwd
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none
     depends_on:
       - oracle-db
 
@@ -21,7 +20,7 @@ services:
       - "5500:5500"
     environment:
       ORACLE_PASSWORD: password
-      TZ: Europe/Rome
+      TZ: Europe/Rome   # FUSO ORARIO PER ROMA
     volumes:
       - oracle_data:/opt/oracle/oradata
       - ./initdb:/container-entrypoint-initdb.d

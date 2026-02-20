@@ -9,8 +9,7 @@ import java.util.List;
 @Slf4j
 @Data
 @Entity
-@Table(name = "MAGAZZINO")
-
+@Table(name = "MAGAZZINO", schema = "MAGAZZINO")
 public class Magazzino {
 
     @Id

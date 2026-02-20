@@ -5,16 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;import java.util.List;
 
 
+
+
 @Slf4j
 @Data
 @Entity
-@Table(name = "PRODOTTO")
-
+@Table(name = "PRODOTTO", schema = "MAGAZZINO") // schema corretto
 public class Prodotto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prodotto_seq_gen")
-    @SequenceGenerator(name = "prodotto_seq_gen", sequenceName = "PRODOTTO_SEQ", allocationSize = 1)
+    @SequenceGenerator(
+            name = "prodotto_seq_gen",
+            sequenceName = "PRODOTTO_SEQ",
+            allocationSize = 1
+    )
     @Column(name = "ID")
     private Long id;
 
@@ -27,13 +32,11 @@ public class Prodotto {
     @Column(name = "PREZZO", precision = 10, scale = 2)
     private BigDecimal prezzo;
 
-     // 1 prodotto : molte fatture
-
+    // 1 prodotto : molte fatture
     @OneToMany(mappedBy = "prodotto")
     private List<Fattura> fatture;
 
     // 1 prodotto : molti magazzini
-
     @OneToMany(mappedBy = "prodotto")
     private List<ProdottoMagazzino> prodottoMagazzino;
 
