@@ -52,7 +52,7 @@ public class CartController {
             @RequestParam("cartId") String cartId,
             @PathVariable Long itemId) {
         service.removeFromCart(cartId, itemId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     // POST checkout
