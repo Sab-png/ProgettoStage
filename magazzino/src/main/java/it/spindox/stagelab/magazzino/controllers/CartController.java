@@ -48,11 +48,11 @@ public class CartController {
 
     // DELETE removeFromCart
     @DeleteMapping("/items/{itemId}")
-    public ResponseEntity<Void> removeFromCart(
+    public ResponseEntity<CartResponse> removeFromCart(
             @RequestParam("cartId") String cartId,
             @PathVariable Long itemId) {
-        service.removeFromCart(cartId, itemId);
-        return ResponseEntity.ok().build();
+        CartResponse updatedCart = service.removeFromCart(cartId, itemId);
+        return ResponseEntity.ok(updatedCart);
     }
 
     // POST checkout

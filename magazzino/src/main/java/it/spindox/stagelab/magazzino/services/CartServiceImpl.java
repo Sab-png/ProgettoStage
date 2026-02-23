@@ -177,7 +177,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public void removeFromCart(String cartId, Long cartItemId) {
+    public CartResponse removeFromCart(String cartId, Long cartItemId) {
         //log.info("Rimozione elemento carrello {} per carrello {}", cartItemId, cartId);
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
@@ -202,6 +202,12 @@ public class CartServiceImpl implements CartService {
         }
 
         cartItemRepository.delete(cartItem);
+
+        // Ritorna il carrello aggiornato
+        List<CartItem> items = cartItemRepository
+                .findByCartIdAndStatus(cartId, ReservationStatus.RESERVED);
+
+        return CartMapper.toCartResponse(items);
     }
 
     @Override
