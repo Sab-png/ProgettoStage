@@ -2,6 +2,7 @@ package it.spindox.stagelab.magazzino.exceptions.fatturaexceptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+
 // Quando lo stato della fattura non è coerente con : importi, scadenza o se e' gia' stata pagata
 
 // È la versione per SXFatturaStatus di : EMESSA, SCADUTA, PAGATA

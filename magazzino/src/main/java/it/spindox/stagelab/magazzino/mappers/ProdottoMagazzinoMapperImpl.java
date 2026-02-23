@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
 
-    // ==========================================================
-    // DTO → ENTITY (CREATE)
-    // ==========================================================
+
+    // DTO : ENTITY (CREATE)
+
     @Override
     public ProdottoMagazzino toEntity(ProdottoMagazzinoRequest request) {
         if (request == null) {
@@ -32,9 +32,8 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
         return pm;
     }
 
-    // ==========================================================
     // UPDATE PATCH
-    // ==========================================================
+
     @Override
     public void updateEntity(ProdottoMagazzino entity, ProdottoMagazzinoRequest request) {
         if (entity == null || request == null) {
@@ -53,9 +52,9 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
         }
     }
 
-    // ==========================================================
-    // ENTITY → DTO RESPONSE
-    // ==========================================================
+
+    // ENTITY : DTO RESPONSE
+
     @Override
     public ProdottoMagazzinoResponse toResponse(ProdottoMagazzino entity) {
         if (entity == null) {

@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 
 // Enum che rappresenta lo stato della fattura
-// Metodo determine():  responsabile della logica
+// Metodo determine:  responsabile della logica
 
 
 @Getter

@@ -22,7 +22,7 @@ public enum StockStatusMagazzino {
     public enum Severity { OK, WARN, ERROR }
 
 
-      // percentuale capacità = (totale/capacità)*100
+      //Formula e logica per la  percentuale capacità = (totale/capacità)*100
      // Logica:
      // - <= 5%      → ROSSO
      // - 5%–20%     → GIALLO
