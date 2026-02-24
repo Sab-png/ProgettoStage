@@ -18,6 +18,9 @@ public class CartMapper {
         // Assumendo che Prodotto abbia un campo immagine
         //response.setProdottoImmagine(item.getProdotto().getImmagine());
         response.setPrezzoProdotto(item.getProdotto().getPrezzo());
+        if (item.getMagazzino() != null) {
+            response.setMagazzinoId(item.getMagazzino().getId());
+        }
         response.setQuantity(item.getQuantity());
         response.setSubtotale(item.getProdotto().getPrezzo() * item.getQuantity());
         response.setReservedAt(item.getReservedAt());

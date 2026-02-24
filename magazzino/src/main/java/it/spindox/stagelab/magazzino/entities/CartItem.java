@@ -22,12 +22,16 @@ public class CartItem {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "CART_ID", nullable = false, length = 255)
+    @Column(name = "CART_ID", nullable = false)
     private String cartId;
 
     @ManyToOne
     @JoinColumn(name = "ID_PRODOTTO", referencedColumnName = "ID")
     private Prodotto prodotto;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_MAGAZZINO", referencedColumnName = "ID", nullable = false)
+    private Magazzino magazzino;
 
     @Column(name = "QUANTITY", nullable = false)
     private Integer quantity;

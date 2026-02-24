@@ -21,6 +21,7 @@ CREATE TABLE CART_ITEM (
     ID           NUMBER(19)        NOT NULL,
     CART_ID      VARCHAR2(255)     NOT NULL,
     ID_PRODOTTO  NUMBER(19)        NOT NULL,
+    ID_MAGAZZINO NUMBER(19)        NOT NULL,
     QUANTITY     NUMBER(10)        NOT NULL,
     RESERVED_AT  TIMESTAMP         DEFAULT CURRENT_TIMESTAMP NOT NULL,
     EXPIRES_AT   TIMESTAMP         NOT NULL,
@@ -30,6 +31,8 @@ CREATE TABLE CART_ITEM (
     CONSTRAINT pk_cart_item PRIMARY KEY (ID),
     CONSTRAINT fk_cart_item_prodotto FOREIGN KEY (ID_PRODOTTO)
         REFERENCES PRODOTTO(ID) ON DELETE CASCADE,
+    CONSTRAINT fk_cart_item_magazzino FOREIGN KEY (ID_MAGAZZINO)
+        REFERENCES MAGAZZINO(ID),
     CONSTRAINT chk_cart_quantity CHECK (QUANTITY > 0),
     CONSTRAINT chk_cart_status CHECK (STATUS IN ('RESERVED', 'EXPIRED', 'COMPLETED'))
 );
@@ -46,6 +49,9 @@ CREATE INDEX idx_cart_status_expires
 
 CREATE INDEX idx_cart_prodotto
     ON CART_ITEM(ID_PRODOTTO);
+
+CREATE INDEX idx_cart_magazzino
+    ON CART_ITEM(ID_MAGAZZINO);
 
 -- 4. Aggiunta campi alla tabella PRODOTTO (sintassi Oracle)
 ALTER TABLE PRODOTTO

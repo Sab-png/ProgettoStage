@@ -13,9 +13,10 @@ import it.spindox.stagelab.magazzino.exceptions.*;
 import it.spindox.stagelab.magazzino.mappers.CartMapper;
 import it.spindox.stagelab.magazzino.repositories.CartItemRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
+import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
+import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +30,19 @@ public class CartServiceImpl implements CartService {
 
     private final CartItemRepository cartItemRepository;
     private final ProdottoRepository prodottoRepository;
+    private final ProdottoMagazzinoRepository prodottoMagazzinoRepository;
+    private final MagazzinoRepository magazzinoRepository;
 
     private static final int RESERVATION_MINUTES = 20;
 
     public CartServiceImpl(CartItemRepository cartItemRepository,
-                           ProdottoRepository prodottoRepository) {
+                           ProdottoRepository prodottoRepository,
+                           ProdottoMagazzinoRepository prodottoMagazzinoRepository,
+                           MagazzinoRepository magazzinoRepository) {
         this.cartItemRepository = cartItemRepository;
         this.prodottoRepository = prodottoRepository;
+        this.prodottoMagazzinoRepository = prodottoMagazzinoRepository;
+        this.magazzinoRepository = magazzinoRepository;
     }
 
     @Override
@@ -52,12 +59,36 @@ public class CartServiceImpl implements CartService {
                         "Prodotto con ID " + request.getProdottoId() + " non trovato"
                 ));
 
-        // Verifica disponibilità stock
+        // Recupera il magazzino
+        var magazzino = magazzinoRepository.findById(request.getMagazzinoId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Magazzino con ID " + request.getMagazzinoId() + " non trovato"
+                ));
+
+        // Verifica esistenza relazione prodotto-magazzino e quantità
+        var prodottoMagazzino = prodottoMagazzinoRepository
+                .findByProdottoIdAndMagazzinoId(request.getProdottoId(), request.getMagazzinoId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Prodotto %d non presente nel magazzino %d",
+                                request.getProdottoId(), request.getMagazzinoId())
+                ));
+
+        // Verifica disponibilità stock globale
         if (prodotto.getAvailableStock() < request.getQuantity()) {
             throw new InsufficientStockException(
                     String.format("Stock insufficiente per '%s'. Disponibili: %d, Richiesti: %d",
                             prodotto.getNome(),
                             prodotto.getAvailableStock(),
+                            request.getQuantity())
+            );
+        }
+
+        // Verifica disponibilità stock nel magazzino specifico
+        if (prodottoMagazzino.getQuantita() < request.getQuantity()) {
+            throw new InsufficientStockException(
+                    String.format("Stock insufficiente nel magazzino selezionato. " +
+                                    "Quantità magazzino: %d, Richiesti: %d",
+                            prodottoMagazzino.getQuantita(),
                             request.getQuantity())
             );
         }
@@ -83,6 +114,12 @@ public class CartServiceImpl implements CartService {
                 );
             }
 
+            if (!cartItem.getMagazzino().getId().equals(magazzino.getId())) {
+                throw new IllegalStateException(
+                        "Tutti gli articoli del carrello devono appartenere allo stesso magazzino"
+                );
+            }
+
             cartItem.setQuantity(newQuantity);
             cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(RESERVATION_MINUTES));
             prodotto.setAvailableStock(prodotto.getAvailableStock() - request.getQuantity());
@@ -93,6 +130,7 @@ public class CartServiceImpl implements CartService {
             cartItem = new CartItem();
             cartItem.setCartId(cartId);
             cartItem.setProdotto(prodotto);
+            cartItem.setMagazzino(magazzino);
             cartItem.setQuantity(request.getQuantity());
             cartItem.setReservedAt(LocalDateTime.now());
             cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(RESERVATION_MINUTES));
@@ -148,6 +186,15 @@ public class CartServiceImpl implements CartService {
         Prodotto prodotto = prodottoRepository.findByIdWithLock(cartItem.getProdotto().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Prodotto non trovato"));
 
+        var prodottoMagazzino = prodottoMagazzinoRepository
+                .findByProdottoIdAndMagazzinoId(
+                        cartItem.getProdotto().getId(),
+                        cartItem.getMagazzino().getId()
+                )
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Relazione prodotto-magazzino non trovata"
+                ));
+
         int difference = request.getQuantity() - cartItem.getQuantity();
 
         if (difference > 0) {
@@ -156,6 +203,15 @@ public class CartServiceImpl implements CartService {
                 throw new InsufficientStockException(
                         String.format("Stock insufficiente. Disponibili: %d",
                                 prodotto.getAvailableStock())
+                );
+            }
+
+            if (prodottoMagazzino.getQuantita() < request.getQuantity()) {
+                throw new InsufficientStockException(
+                        String.format("Stock insufficiente nel magazzino selezionato. " +
+                                        "Quantità magazzino: %d, Richiesti: %d",
+                                prodottoMagazzino.getQuantita(),
+                                request.getQuantity())
                 );
             }
             prodotto.setAvailableStock(prodotto.getAvailableStock() - difference);
@@ -285,9 +341,10 @@ public class CartServiceImpl implements CartService {
             Prodotto prodotto = item.getProdotto();
             prodotto.setAvailableStock(prodotto.getAvailableStock() + item.getQuantity());
             prodottoRepository.save(prodotto);
-        }
 
-        // Elimina fisicamente tutte le prenotazioni scadute
-        cartItemRepository.deleteAll(expiredItems);
+            // Marca come scaduto ma non elimina il record
+            item.setStatus(ReservationStatus.EXPIRED);
+            cartItemRepository.save(item);
+        }
     }
 }

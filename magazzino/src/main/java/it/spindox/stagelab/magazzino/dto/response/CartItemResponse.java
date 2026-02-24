@@ -11,6 +11,7 @@ public class CartItemResponse {
     private String prodottoNome;
     private String prodottoImmagine;
     private Double prezzoProdotto;
+    private Long magazzinoId;
     private Integer quantity;
     private Double subtotale;
     private LocalDateTime reservedAt;
