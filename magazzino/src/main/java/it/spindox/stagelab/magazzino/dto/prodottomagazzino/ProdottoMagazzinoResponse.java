@@ -7,7 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class ProdottoMagazzinoResponse {
 
     private Long id;
@@ -20,12 +19,5 @@ public class ProdottoMagazzinoResponse {
 
     private Integer quantita;
     private Integer scortaMin;
-
-
-    // Stato basato su scortaMin
-
-    private StockStatusProdotto status;
-    private String statusColor;
-    private String statusDescription;
 
 }

@@ -1,7 +1,9 @@
 package it.spindox.stagelab.magazzino.sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
-import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.InvalidCapacityException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidFatturaException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.UnknownJobException;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import it.spindox.stagelab.magazzino.services.MagazzinoService;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -30,12 +32,10 @@ public class InventoryScheduler {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(ZONE_ROME);
 
 
-
     //  DIPENDENZE
 
     private final MagazzinoService magazzinoService;
     private final JobExecutionService jobExecutionService;
-
 
 
     //     CONFIGURAZIONE
@@ -88,25 +88,35 @@ public class InventoryScheduler {
             log.info("[THE JOB IS SUCCEEDED] id={}", job.getId());
         }
 
+// 6) GESTIONE ECCEZIONI – ordine obbligatorio
 
-        // 6) GESTIONE ECCEZIONI
-
-
-        // 6.1) Errori di sistema
+// 6.1) Errori di capacità / quantità (job)
 
         catch (InvalidCapacityException e) {
-            log.error("[SYSTEM ERROR] {}", e.getMessage(), e);
+            log.error("[INVALID CAPACITY] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
         }
 
-        // 6.2) Fallback generico : errori non previsti
+// 6.2) Errori fattura durante il job (date, stato, importi)
+
+        catch (InvalidFatturaException e) {
+            log.error("[INVALID FATTURA] {}", e.getMessage(), e);
+            handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
+        }
+
+// 6.3) Errore job sconosciuto
+
+        catch (UnknownJobException e) {
+            log.error("[UNKNOWN JOB ERROR] {}", e.getMessage(), e);
+            handleFailure(job, StatusJobErrorType.UNKNOWN, e);
+        }
+
+// 6.4) Fallback generico
 
         catch (Exception e) {
             log.error("[UNKNOWN ERROR] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.UNKNOWN, e);
         }
-
-
         // 7) TIMESTAMP DI FINE + DURATA COMPLETA DEL JOB
 
         finally {

@@ -19,7 +19,7 @@ public class ResourceNotFoundException extends RuntimeException {
         super(resourceName + " non trovata: " + fieldName + "=" + fieldValue);
     }
 
-    // Factory methods per leggibilità nei service
+    //  methods per leggibilità nei service
 
     public static ResourceNotFoundException byId(String resourceName, Object id) {
         return new ResourceNotFoundException(resourceName, id);

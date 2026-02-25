@@ -3,6 +3,7 @@ import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+
 // CONVERTER JPA PER LE ENTITIES
 
 

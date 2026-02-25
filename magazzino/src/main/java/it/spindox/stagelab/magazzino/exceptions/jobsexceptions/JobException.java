@@ -5,30 +5,35 @@ import org.springframework.http.HttpStatus;
 
 
 
- // Tutte le eccezioni  erediteranno da questa classe
-// Run time exception non sono obbligato a dichiararla perche' e' gia implementata e dichiarata da java
+// Base class per tutte le eccezioni dei Job
+// RuntimeException: non obbliga a dichiararle
+// Contiene semantica di errore di job (errorType) e HTTP mapping (httpStatus)
+
 
 @Getter
-
 public abstract class JobException extends RuntimeException {
 
-     // Tipo di errore del job
+    private static final long serialVersionUID = 1L;
+
+    // Tipo di errore del job (es. SYSTEM_ERROR, UNKNOWN)
 
     private final StatusJobErrorType errorType;
 
-     // Lo status HTTP che il GlobalExceptionHandler restituirà al client
-
+    // HTTP status che il GlobalExceptionHandler restituirà al client
     private final HttpStatus httpStatus;
 
-    // Restituisce la tipologia di errore associata all'eccezione
-    // Restituisce lo status HTTP che rappresenta questo errore
 
-    protected JobException(String message, StatusJobErrorType errorType, HttpStatus httpStatus) {
+    // Costruttore principale: TUTTE le sottoclassi devono chiamare questo.
+
+    //  @param message    messaggio dell'errore
+    //  @param errorType  tipo di errore del job
+    // @param httpStatus HTTP status associato all'errore
+
+    protected JobException(String message,
+                           StatusJobErrorType errorType,
+                           HttpStatus httpStatus) {
         super(message);
         this.errorType = errorType;
         this.httpStatus = httpStatus;
     }
-
-
-
 }

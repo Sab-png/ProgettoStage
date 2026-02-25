@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface ProdottoMagazzinoService {
 
-    ProdottoMagazzinoResponse getById(Long id);
+    Object getById(Long id);
 
     void create(@Valid ProdottoMagazzinoRequest request);
 
@@ -18,7 +18,7 @@ public interface ProdottoMagazzinoService {
     void delete(Long id);
 
     @Transactional(readOnly = true)
-    Page<ProdottoMagazzinoResponse> getAllPaged(int page, int size);
+    Object getAllPaged(int page, int size);
 
     Page<Long> searchIds(ProdottoMagazzinoSearchRequest request);
 

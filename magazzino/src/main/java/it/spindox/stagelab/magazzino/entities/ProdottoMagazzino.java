@@ -1,4 +1,5 @@
 package it.spindox.stagelab.magazzino.entities;
+import it.spindox.stagelab.magazzino.converter.StockStatusConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class ProdottoMagazzino {
             sequenceName = "PRODOTTO_MAGAZZINO_SEQ",
             allocationSize = 1
     )
+
     @Column(name = "ID")
     private Long id;
 
@@ -41,11 +43,5 @@ public class ProdottoMagazzino {
     @Column(name = "SCORTA_MIN")
     private Integer scortaMin;
 
-    @Transient
-    public StockStatusProdotto getStatus() {
-        return StockStatusProdotto.fromQuantita(
-                this.quantita,
-                this.scortaMin != null ? this.scortaMin : DEFAULT_SCORTA_MIN
-        );
     }
-}
+

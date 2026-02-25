@@ -80,7 +80,7 @@ public class FatturaController {
 
     @GetMapping("/{id}")
 
-    public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) throws Throwable {
+    public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) {
         return ResponseEntity.ok(fatturaService.getById(id));
     }
 

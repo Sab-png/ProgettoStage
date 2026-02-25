@@ -4,7 +4,7 @@ import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoRequest;
 import it.spindox.stagelab.magazzino.dto.prodotto.ProdottoResponse;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
-import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuantityException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
 import it.spindox.stagelab.magazzino.mappers.ProdottoMapper;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import lombok.RequiredArgsConstructor;
@@ -81,14 +81,15 @@ public class ProdottoServiceImpl implements ProdottoService {
 
     @Override
     @Transactional
+
     public void create(ProdottoRequest req) {
 
         if (req.getQuantita() != null && req.getQuantita() < 0) {
-            throw new InvalidQuantityException(null, req.getQuantita(), "Quantità non può essere negativa");
+            throw new InvalidCapacityException((Long) null, req.getQuantita(), "Quantità non può essere negativa");
         }
 
         if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
-            throw new InvalidQuantityException(null, req.getScortaMinima(), "Scorta minima non può essere negativa");
+            throw new InvalidCapacityException((String) null, req.getScortaMinima(), "Scorta minima non può essere negativa");
         }
 
         repo.save(mapper.toEntity(req));
@@ -103,15 +104,33 @@ public class ProdottoServiceImpl implements ProdottoService {
         Prodotto p = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato: " + id));
 
+        // Validazione quantità
+
         if (req.getQuantita() != null && req.getQuantita() < 0) {
-            throw new InvalidQuantityException(id, req.getQuantita(), "Quantità non può essere negativa");
+
+
+            throw new InvalidCapacityException(
+                    p.getId(),
+                    req.getQuantita(),
+                    "Quantità non può essere negativa"
+            );
         }
+
+        // Validazione scorta minima
 
         if (req.getScortaMinima() != null && req.getScortaMinima() < 0) {
-            throw new InvalidQuantityException(id, req.getScortaMinima(), "Scorta minima non può essere negativa");
+            throw new InvalidCapacityException(
+                    p.getId(),
+                    req.getScortaMinima(),
+                    "Scorta minima non può essere negativa"
+            );
         }
 
+        // Aggiornamento campi
+
         mapper.updateEntity(p, req);
+
+
         repo.save(p);
     }
 

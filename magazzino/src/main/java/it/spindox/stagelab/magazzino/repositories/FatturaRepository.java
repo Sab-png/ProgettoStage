@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
+import java.util.List;
 
 
 @Repository
@@ -62,4 +62,6 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
     // SEQUENCE ORACLE
     @Query(value = "SELECT FATTURA_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
     Long nextNumeroSeq();
+
+    List<Fattura> findByProdottoId(Long idProdotto);
 }

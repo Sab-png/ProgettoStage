@@ -1,16 +1,20 @@
 package it.spindox.stagelab.magazzino.entities;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;import java.util.List;
 
 
 
-
 @Slf4j
-@Data
 @Entity
-@Table(name = "PRODOTTO", schema = "MAGAZZINO") // schema corretto
+@Table(name = "PRODOTTO", schema = "MAGAZZINO")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class Prodotto {
 
     @Id
@@ -32,11 +36,9 @@ public class Prodotto {
     @Column(name = "PREZZO", precision = 10, scale = 2)
     private BigDecimal prezzo;
 
-    // 1 prodotto : molte fatture
     @OneToMany(mappedBy = "prodotto")
     private List<Fattura> fatture;
 
-    // 1 prodotto : molti magazzini
     @OneToMany(mappedBy = "prodotto")
     private List<ProdottoMagazzino> prodottoMagazzino;
 

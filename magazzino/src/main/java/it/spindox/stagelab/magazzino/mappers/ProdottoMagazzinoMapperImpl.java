@@ -54,35 +54,19 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
 
 
     // ENTITY : DTO RESPONSE
-
     @Override
     public ProdottoMagazzinoResponse toResponse(ProdottoMagazzino entity) {
-        if (entity == null) {
-            log.warn("toResponse chiamato con entity NULL");
-            return null;
-        }
 
-        StockStatusProdotto status = StockStatusProdotto.fromQuantita(
-                entity.getQuantita(),
-                entity.getScortaMin()
-        );
+        if (entity == null) return null;
 
-        ProdottoMagazzinoResponse res = ProdottoMagazzinoResponse.builder()
+        return ProdottoMagazzinoResponse.builder()
                 .id(entity.getId())
-                .prodottoId(entity.getProdotto() != null ? entity.getProdotto().getId() : null)
-                .nomeProdotto(entity.getProdotto() != null ? entity.getProdotto().getNome() : null)
-                .magazzinoId(entity.getMagazzino() != null ? entity.getMagazzino().getId() : null)
-                .nomeMagazzino(entity.getMagazzino() != null ? entity.getMagazzino().getNome() : null)
+                .prodottoId(entity.getProdotto().getId())
+                .nomeProdotto(entity.getProdotto().getNome())
+                .magazzinoId(entity.getMagazzino().getId())
+                .nomeMagazzino(entity.getMagazzino().getNome())
                 .quantita(entity.getQuantita())
                 .scortaMin(entity.getScortaMin())
-                .status(status)
-                .statusColor(status.getDbValue())
-                .statusDescription(status.getDescription())
                 .build();
-
-        log.debug("[PM-MAPPER] toResponse -> id={} status={}",
-                res.getId(), status);
-
-        return res;
     }
 }

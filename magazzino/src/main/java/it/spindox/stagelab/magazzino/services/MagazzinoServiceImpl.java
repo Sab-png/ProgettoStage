@@ -3,17 +3,15 @@ import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.*;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
-import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.SystemException;
-import it.spindox.stagelab.magazzino.exceptions.magazzinoexceptions.InvalidCapacityException;
-import it.spindox.stagelab.magazzino.exceptions.prodottoexceptions.InvalidQuantityException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
 import it.spindox.stagelab.magazzino.mappers.MagazzinoMapper;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,6 +25,8 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     private final MagazzinoRepository repository;
     private final MagazzinoMapper mapper;
+    private Integer qta;
+    private Prodotto p;
 
     // GET BY ID
 
@@ -144,79 +144,79 @@ public class MagazzinoServiceImpl implements MagazzinoService {
 
     //   LOGICA BUSINESS DEL JOB
 
-
     @Override
     @Transactional
-
     public void checkStockLevels() {
 
         List<Magazzino> magazzini = repository.findAll();
+        List<String> errori = new ArrayList<>();
 
         for (Magazzino m : magazzini) {
-
-            Integer cap = getInteger(m);
-
-            // ZERO : SUCCESS con WARNING
-
-            if (cap == 0) {
-                log.warn("[CAPACITY WARNING] Magazzino={} ha capacità = 0 (successo con warning)",
-                        m.getNome());
+            try {
+                validaEModificaMagazzino(m);
+            } catch (InvalidCapacityException e) {
+                errori.add("Magazzino " + m.getNome() + " (ID=" + m.getId() + "): " + e.getMessage());
             }
+        }
 
-            // POSITIVO : IT IS OK
-
-            int totaleProdotti = getTotaleProdotti(m);
-
-            double percentuale = (totaleProdotti * 100.0) / Math.max(cap, 1);
-
-            StockStatusMagazzino status = StockStatusMagazzino.fromPercentuale(percentuale);
-
-            m.setStockStatus(status);
-            repository.save(m);
-
-            log.info("[CHECK] Magazzino={} Totale={} Percentuale={} Stato={}",
-                    m.getNome(),
-                    totaleProdotti,
-                    String.format("%.2f", percentuale),
-                    status
+        if (!errori.isEmpty()) {
+            throw new InvalidCapacityException(
+                    (Long) null,
+                    null,
+                    "Rilevate anomalie in più magazzini:\n - " + String.join("\n - ", errori)
             );
         }
     }
 
-    private static @NonNull Integer getInteger(Magazzino m) {
+    private void validaEModificaMagazzino(Magazzino m) {
+
+        Integer cap = getamountcapacity(m);
+
+        if (cap == 0) {
+            log.warn("[CAPACITY WARNING] Magazzino={} ha capacità = 0", m.getNome());
+        }
+
+        int totale = getTotaleProdotti(m);
+        double percentuale = (totale * 100.0) / Math.max(cap, 1);
+
+        StockStatusMagazzino status = StockStatusMagazzino.fromPercentuale(percentuale);
+
+        m.setStockStatus(status);
+        repository.save(m);
+    }
+
+    private Integer getamountcapacity(Magazzino m) {
         Integer cap = m.getCapacita();
 
-        // NULL : FAILED
-
         if (cap == null) {
-            throw new SystemException(
+            throw new InvalidCapacityException(
+                    (Long) null, null,
                     "Capacità NULL per il magazzino '" + m.getNome() + "' (ID=" + m.getId() + ")"
             );
         }
 
-        // NEGATIVO : FAILED
-
         if (cap < 0) {
-            throw new SystemException(
+            throw new InvalidCapacityException(
+                    (Long) null, cap,
                     "Capacità NEGATIVA (" + cap + ") per il magazzino '" + m.getNome() + "' (ID=" + m.getId() + ")"
             );
         }
+
         return cap;
     }
 
-    // Validazione quantità prodotti
-
-    private static int getTotaleProdotti(Magazzino m) {
+    private int getTotaleProdotti(Magazzino m) {
         int tot = 0;
-        for (ProdottoMagazzino p : m.getProdottiMagazzino()) {
 
+        for (ProdottoMagazzino p : m.getProdottiMagazzino()) {
             Integer qta = p.getQuantita();
 
             if (qta == null || qta < 0) {
-                throw new InvalidQuantityException(
+                throw new InvalidCapacityException(
                         p.getId(),
                         qta,
                         "Quantità non valida nel magazzino " + m.getNome()
+                                + " (ID=" + m.getId() + ")"
                 );
             }
 

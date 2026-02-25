@@ -1,6 +1,8 @@
 package it.spindox.stagelab.magazzino.dto.prodottomagazzino;
 import lombok.*;
 
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
