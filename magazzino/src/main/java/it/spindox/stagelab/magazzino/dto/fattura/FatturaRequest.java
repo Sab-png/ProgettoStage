@@ -9,11 +9,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
 public class FatturaRequest {
+
     @NotNull(message = "La data fattura è obbligatoria")
     private LocalDate dataFattura;
 
@@ -28,7 +30,6 @@ public class FatturaRequest {
     @Positive(message = "L'importo deve essere maggiore di zero")
     private BigDecimal importo;
 
-    public LocalDate getDataScadenza() {
-        return null;
-    }
+    // opzionale
+    private LocalDate dataScadenza;
 }

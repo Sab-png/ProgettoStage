@@ -17,6 +17,7 @@ import it.spindox.stagelab.magazzino.dto.prodottomagazzino.ProdottoMagazzinoResp
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
+import it.spindox.stagelab.magazzino.entities.*;
 
 
 
@@ -32,10 +33,40 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
     private final ProdottoMagazzinoMapper mapper;
 
 
+
+    //  VALIDATE + ALIGN
+
+    private void validateAndAlign(ProdottoMagazzino e, boolean isCreate) {
+        Integer q = e.getQuantita();
+
+        // Negativi: errore
+
+        if (q != null && q < 0) {
+            throw new InvalidCapacityException(
+                    e.getProdotto() != null ? e.getProdotto().getId() : null,
+                    q,
+                    "Quantità non può essere negativa"
+            );
+        }
+
+        //  In create quantita non puo' essere NULL
+
+        if (isCreate && q == null) {
+            throw new InvalidCapacityException(
+                    e.getProdotto() != null ? e.getProdotto().getId() : null,
+                    null,
+                    "Quantità non può essere null in creazione"
+            );
+        }
+    }
+
+
+
+    //  GET BY ID
+
     @Override
     @Transactional(readOnly = true)
     public ProdottoMagazzinoResponse getById(Long id) {
-
         ProdottoMagazzino entity = repo.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Record Prodotto-Magazzino non trovato: id=" + id));
@@ -43,7 +74,9 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         return mapper.toResponse(entity);
     }
 
-    // CREATE
+// CRUD
+
+    //  CREATE
 
     @Override
     public void create(ProdottoMagazzinoRequest r) {
@@ -54,19 +87,26 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         Magazzino magazzino = magazzinoRepo.findById(r.getMagazzinoId())
                 .orElseThrow(() -> ResourceNotFoundException.byId("Magazzino", r.getMagazzinoId()));
 
-        if (r.getQuantita() == null || r.getQuantita() < 0)
+        if (r.getQuantita() != null && r.getQuantita() < 0)
             throw new InvalidCapacityException(r.getProdottoId(), r.getQuantita(), "Quantità non valida");
 
         ProdottoMagazzino entity = mapper.toEntity(r);
         entity.setProdotto(prodotto);
         entity.setMagazzino(magazzino);
 
-        repo.save(entity);
+        validateAndAlign(entity, true);
 
+        // CALCOLA E SALVA SCORTA_MIN_STATUS
+
+        ScortaMinPMStatus status = ScortaMinPMStatus.fromQuantita(entity.getQuantita());
+        entity.setScortaMinStatus(status != null ? status.name() : null);
+
+        repo.save(entity);
         updateStockStatus(magazzino.getId());
     }
 
-    // UPDATE
+
+    //  UPDATE
 
     @Override
     public void update(Long id, ProdottoMagazzinoRequest r) {
@@ -74,18 +114,31 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         ProdottoMagazzino entity = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Record non trovato: id=" + id));
 
+        if (r.getQuantita() != null && r.getQuantita() < 0)
+            throw new InvalidCapacityException(
+                    entity.getProdotto() != null ? entity.getProdotto().getId() : null,
+                    r.getQuantita(),
+                    "Quantità non valida"
+            );
+
         mapper.updateEntity(entity, r);
 
-        repo.save(entity);
+        validateAndAlign(entity, false);
 
+        //  AGGIORNA LO STATO
+        ScortaMinPMStatus status = ScortaMinPMStatus.fromQuantita(entity.getQuantita());
+        entity.setScortaMinStatus(status != null ? status.name() : null);
+
+        repo.save(entity);
         updateStockStatus(entity.getMagazzino().getId());
     }
 
-    // DELETE
+
+
+    //  DELETE
 
     @Override
     public void delete(Long id) {
-
         ProdottoMagazzino entity = repo.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Record non trovato: id=" + id));
@@ -97,38 +150,44 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
     }
 
 
-    // GET ALL paged + stream
+
+    //  GET ALL PAGED
 
     @Override
     @Transactional(readOnly = true)
     public Page<ProdottoMagazzinoResponse> getAllPaged(int page, int size) {
-
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
         Page<ProdottoMagazzino> result = repo.findAll(pageable);
-
         return result.map(mapper::toResponse);
     }
 
-    // SEARCH IDS paged + stream
+
+
+    //  SEARCH IDS
+
     @Override
     @Transactional(readOnly = true)
     public Page<Long> searchIds(ProdottoMagazzinoSearchRequest r) {
-
         Pageable pageable = PageRequest.of(
                 r.getPage() != null ? r.getPage() : 0,
-                r.getSize() != null ? r.getSize() : 10
+                r.getSize() != null ? r.getSize() : 10,
+                Sort.by(Sort.Direction.DESC, "id")
         );
 
         return repo.searchIds(r.getProdottoId(), r.getMagazzinoId(), pageable);
     }
 
+
+
+    //  SEARCH ALL
+
     @Override
     @Transactional(readOnly = true)
     public Page<ProdottoMagazzinoResponse> search(ProdottoMagazzinoSearchRequest r) {
-
         Pageable pageable = PageRequest.of(
                 r.getPage() != null ? r.getPage() : 0,
-                r.getSize() != null ? r.getSize() : 10
+                r.getSize() != null ? r.getSize() : 10,
+                Sort.by(Sort.Direction.DESC, "id")
         );
 
         Page<ProdottoMagazzino> result = repo.search(
@@ -146,9 +205,11 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
     }
 
 
-    // La  logica di Magazzino rimane valida
+
+    //  MAGAZZINO STOCK STATUS
 
     private void updateStockStatus(Long magazzinoId) {
+
         Magazzino m = magazzinoRepo.findById(magazzinoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato: id=" + magazzinoId));
 

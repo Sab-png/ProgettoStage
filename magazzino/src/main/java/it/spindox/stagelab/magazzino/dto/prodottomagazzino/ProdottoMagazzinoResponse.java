@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.dto.prodottomagazzino;
-import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
+import it.spindox.stagelab.magazzino.entities.ScortaMinPMStatus;
 import lombok.*;
 
 
@@ -19,5 +19,13 @@ public class ProdottoMagazzinoResponse {
 
     private Integer quantita;
     private Integer scortaMin;
+    // enum runtime
 
+    private ScortaMinPMStatus scortaMinStatus;
+
+    // valore STRING salvato nel DB
+
+    private String scortaMinStatusDb;
 }
+
+

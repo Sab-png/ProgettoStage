@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.entities;
-import it.spindox.stagelab.magazzino.converter.StockStatusConverter;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,8 +40,14 @@ public class ProdottoMagazzino {
     @Column(name = "QUANTITA", nullable = false)
     private Integer quantita;
 
-    @Column(name = "SCORTA_MIN")
-    private Integer scortaMin;
+    @Column(name = "SCORTA_MIN_STATUS")
+    private String scortaMinStatus;
 
+    public void setScortaMin(@Min(0) Integer scortaMin) {
     }
+
+    public Integer getScortaMin() {
+        return 0;
+    }
+}
 

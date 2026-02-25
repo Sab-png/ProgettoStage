@@ -2,7 +2,7 @@ package it.spindox.stagelab.magazzino.mappers;
 import it.spindox.stagelab.magazzino.dto.prodottomagazzino.ProdottoMagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.prodottomagazzino.ProdottoMagazzinoResponse;
 import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
-import it.spindox.stagelab.magazzino.entities.StockStatusProdotto;
+import it.spindox.stagelab.magazzino.entities.ScortaMinPMStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -17,22 +17,27 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
 
     @Override
     public ProdottoMagazzino toEntity(ProdottoMagazzinoRequest request) {
+
         if (request == null) {
             log.warn("toEntity chiamato con request NULL");
             return null;
         }
 
         ProdottoMagazzino pm = new ProdottoMagazzino();
-        pm.setQuantita(request.getQuantita());
-        pm.setScortaMin(request.getScortaMin());
 
-        log.debug("[PM-MAPPER] toEntity -> quantita={}, scortaMin={}",
-                request.getQuantita(), request.getScortaMin());
+        // QUANTITÀ (campo numerico)
+
+        pm.setQuantita(request.getQuantita());
+
+
+        log.debug("[PM-MAPPER] toEntity -> quantita={}", request.getQuantita());
 
         return pm;
     }
 
-    // UPDATE PATCH
+
+
+    // PATCH UPDATE : ENTITY ← REQUEST
 
     @Override
     public void updateEntity(ProdottoMagazzino entity, ProdottoMagazzinoRequest request) {
@@ -46,18 +51,20 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
             log.debug("[PM-MAPPER] update quantita -> {}", request.getQuantita());
         }
 
-        if (request.getScortaMin() != null) {
-            entity.setScortaMin(request.getScortaMin());
-            log.debug("[PM-MAPPER] update scortaMin -> {}", request.getScortaMin());
-        }
     }
 
 
+
     // ENTITY : DTO RESPONSE
+
     @Override
     public ProdottoMagazzinoResponse toResponse(ProdottoMagazzino entity) {
 
         if (entity == null) return null;
+
+        // CALCOLO DELLO STATO SCORTA (runtime, enum)
+
+        ScortaMinPMStatus status = ScortaMinPMStatus.fromQuantita(entity.getQuantita());
 
         return ProdottoMagazzinoResponse.builder()
                 .id(entity.getId())
@@ -66,7 +73,13 @@ public class ProdottoMagazzinoMapperImpl implements ProdottoMagazzinoMapper {
                 .magazzinoId(entity.getMagazzino().getId())
                 .nomeMagazzino(entity.getMagazzino().getNome())
                 .quantita(entity.getQuantita())
-                .scortaMin(entity.getScortaMin())
+
+                // VALORI STATO (calcolato)
+                .scortaMinStatus(status)
+
+                // STATO SALVATO SUL DB (String)
+                .scortaMinStatusDb(entity.getScortaMinStatus())
+
                 .build();
     }
 }

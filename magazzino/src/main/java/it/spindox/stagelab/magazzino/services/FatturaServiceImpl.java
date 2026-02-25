@@ -87,7 +87,7 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
 
-    // CREATE (fattura emessa ma già PAGATA)
+    // CREATE : fattura emessa ma già PAGATA
 
     @Override
     public FatturaResponse create(FatturaRequest request) {
@@ -114,10 +114,14 @@ public class FatturaServiceImpl implements FatturaService {
 
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
 
+        // Generazione numero
+
         Long seq = fatturaRepository.nextNumeroSeq();
         entity.setNumero("FAT-" + seq);
 
-        entity.setPagato(entity.getImporto() != null ? entity.getImporto() : BigDecimal.ZERO);
+        // FATTURA risulta  PAGATA
+
+        entity.setPagato(entity.getImporto());
         entity.setStatus(SXFatturaStatus.PAGATA);
 
         entity = fatturaRepository.save(entity);
@@ -128,18 +132,19 @@ public class FatturaServiceImpl implements FatturaService {
 
     @Override
     public FatturaResponse update(Long id, FatturaRequest request) {
+
         Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
-        //  se è già pagata non si modifica
+        // Se già pagata non e' modificabile
 
         if (entity.getStatus() == SXFatturaStatus.PAGATA) {
             throw new InvalidFatturaException(id);
         }
 
-        if (request.getDataFattura() != null
-                && request.getDataScadenza() != null
-                && request.getDataScadenza().isBefore(request.getDataFattura())) {
+        if (request.getDataFattura() != null &&
+                request.getDataScadenza() != null &&
+                request.getDataScadenza().isBefore(request.getDataFattura())) {
 
             throw new InvalidFatturaException(
                     id,
@@ -154,20 +159,21 @@ public class FatturaServiceImpl implements FatturaService {
                     .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
         }
 
-        // Applica patch
-
         fatturaMapper.updateEntity(entity, request, prodotto);
 
-        // Ricalcolo coerente dello stato
+        // Ricalcolo coerente dello status in base a pagato/importo e data scadenza
 
-        BigDecimal importo = entity.getImporto();
-        BigDecimal pagato = entity.getPagato();
-        LocalDate scadenza = entity.getDataScadenza();
+        if (entity.getPagato() != null
+                && entity.getImporto() != null
+                && entity.getPagato().compareTo(entity.getImporto()) >= 0) {
 
-        if (importo != null && pagato != null && pagato.compareTo(importo) >= 0) {
             entity.setStatus(SXFatturaStatus.PAGATA);
-        } else if (scadenza != null && scadenza.isBefore(LocalDate.now())) {
+
+        } else if (entity.getDataScadenza() != null &&
+                entity.getDataScadenza().isBefore(LocalDate.now())) {
+
             entity.setStatus(SXFatturaStatus.SCADUTA);
+
         } else {
             entity.setStatus(SXFatturaStatus.EMESSA);
         }
@@ -175,7 +181,6 @@ public class FatturaServiceImpl implements FatturaService {
         entity = fatturaRepository.save(entity);
         return fatturaMapper.toResponse(entity);
     }
-
 
     // GET BY ID
 
