@@ -15,10 +15,11 @@ public enum SXFatturaStatus {
     SCADUTA("OVERDUE", "Fattura non saldata entro la data di scadenza"),
     PAGATA("PAID", "Fattura completamente saldata");
 
-    // Valore da salvare in DB se in futuro userai converter custom
+    // Valore da salvare in DB se in futuro
+
     private final String dbValue;
 
-    // Descrizione umana
+
     private final String description;
 
     SXFatturaStatus(String dbValue, String description) {
