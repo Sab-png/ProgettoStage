@@ -12,15 +12,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ProdottoSearchRequest {
 
-    // FILTRI OPZIONALI
-
+    // Filtri opzionali
     private String nome;
     private String descrizione;
     private BigDecimal prezzoMin;
     private BigDecimal prezzoMax;
 
-    // PAGINAZIONE
-
+    // Paginazione
     @Min(0)
     private Integer page = 0;
 

@@ -12,15 +12,12 @@ import lombok.NoArgsConstructor;
 public class MagazzinoSearchRequest {
 
     // Filtri opzionali
-
     private String nome;
     private String indirizzo;
-
     private Integer capacitaMin;
     private Integer capacitaMax;
 
     // Paginazione
-
     @Min(0)
     private Integer page = 0;
 

@@ -9,6 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ProblemDetail;
 import java.time.OffsetDateTime;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 
@@ -38,6 +43,7 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
+
     // 400 - BAD REQUEST GENERICO
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -56,18 +62,57 @@ public class GlobalExceptionHandler {
     }
 
 
-    // JOBEXCEPTION :  InvalidCapacityException, InvalidFatturaException, UnknownJobException
+    // 400 - VALIDAZIONE @Valid SU @RequestBody (DTO di search)
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
+
+        log.warn("Validation error su path {}: {}", request.getRequestURI(), ex.getMessage());
+
+        Map<String, String> errors = new LinkedHashMap<>();
+        for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
+            errors.put(fe.getField(), fe.getDefaultMessage());
+        }
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Richiesta non valida: errori di validazione."
+        );
+
+        pd.setProperty("errors", errors);
+        pd.setProperty(PATH, request.getRequestURI());
+        pd.setProperty(TIMESTAMP, OffsetDateTime.now().toString());
+        return pd;
+    }
+
+
+    // 400 - BODY NON LEGGIBILE / JSON MALFORMATO / proprietà sconosciute
+
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+        log.warn("Body non leggibile su path {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Body non leggibile o formattazione JSON non valida."
+        );
+
+        pd.setProperty(PATH, request.getRequestURI());
+        pd.setProperty(TIMESTAMP, OffsetDateTime.now().toString());
+        return pd;
+    }
+
+
+    // JOBEXCEPTION : InvalidCapacityException, InvalidFatturaException, UnknownJobException
+
 
     @ExceptionHandler(JobException.class)
     public ProblemDetail handleJobException(JobException ex, HttpServletRequest request) {
 
         log.error("JOB ERROR — type={}, status={}, msg={}, path={}",
-                ex.getErrorType(),
-                ex.getHttpStatus(),
-                ex.getMessage(),
-                request.getRequestURI(),
-                ex
-        );
+                ex.getErrorType(), ex.getHttpStatus(), ex.getMessage(), request.getRequestURI(), ex);
 
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(
                 ex.getHttpStatus(),
@@ -77,9 +122,9 @@ public class GlobalExceptionHandler {
         pd.setProperty("errorType", ex.getErrorType().name());
         pd.setProperty(PATH, request.getRequestURI());
         pd.setProperty(TIMESTAMP, OffsetDateTime.now().toString());
-
         return pd;
     }
+
 
     // 500 - FALLBACK GENERICO
 
@@ -96,7 +141,6 @@ public class GlobalExceptionHandler {
 
         pd.setProperty(PATH, request.getRequestURI());
         pd.setProperty(TIMESTAMP, OffsetDateTime.now().toString());
-
         return pd;
     }
 }

@@ -12,14 +12,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class JobExecutionSearchRequest {
 
-    // FILTRI (tutti opzionali)
+    // Filtri
 
     private String stato;
     private LocalDateTime from;
-    private LocalDateTime to;       // data/ora fine
-    private Boolean hasError;       // TRUE: solo job con errori | FALSE: solo senza | NULL: tutti
+    private LocalDateTime to;
+    private Boolean hasError;
 
-    // PAGINAZIONE
+    // Paginazione
     @Min(0)
     private Integer page = 0;
 
