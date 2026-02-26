@@ -114,19 +114,17 @@ public class FatturaServiceImpl implements FatturaService {
 
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
 
-        // Generazione numero
-
         Long seq = fatturaRepository.nextNumeroSeq();
         entity.setNumero("FAT-" + seq);
 
-        // FATTURA risulta  PAGATA
-
-        entity.setPagato(entity.getImporto());
+        entity.setPagato(entity.getImporto() != null ? entity.getImporto() : BigDecimal.ZERO);
         entity.setStatus(SXFatturaStatus.PAGATA);
 
         entity = fatturaRepository.save(entity);
+
         return fatturaMapper.toResponse(entity);
     }
+
 
     // UPDATE (PATCH)
 

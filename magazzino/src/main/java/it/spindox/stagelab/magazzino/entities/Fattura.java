@@ -43,7 +43,7 @@ public class Fattura {
     @Column(name = "QUANTITA", nullable = false)
     private Integer quantita;
 
-    @Column(name = "PAGATO", precision = 15, scale = 2)
+    @Column(name = "PAGATO", precision = 15, scale = 2, nullable = false)
     private BigDecimal pagato = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)

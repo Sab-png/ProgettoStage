@@ -42,10 +42,8 @@ public class FatturaMapperImpl implements FatturaMapper {
     }
 
     // Entity :  DTO Response
-    @Override
 
     public FatturaResponse toResponse(Fattura entity) {
-
         FatturaResponse r = new FatturaResponse();
         r.setId(entity.getId());
         r.setNumero(entity.getNumero());
@@ -59,9 +57,8 @@ public class FatturaMapperImpl implements FatturaMapper {
             r.setIdProdotto(entity.getProdotto().getId());
         }
 
-        // Stato
         r.setStatus(entity.getStatus());
-        r.setStatusDescription(entity.getStatus().getDescription());
+        r.setStatusDescription(entity.getStatus() != null ? entity.getStatus().getDescription() : null);
 
         return r;
     }

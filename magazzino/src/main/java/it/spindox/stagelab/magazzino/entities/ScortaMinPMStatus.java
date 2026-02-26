@@ -16,12 +16,12 @@ public enum ScortaMinPMStatus {
         this.description = description;
     }
 
-    /**
-     * Calcolo stato SOLO in base alla QUANTITA:
-     * - ROSSO  se quantita == null o quantita <= 0
-     * - GIALLO se 1 <= quantita <= 5
-     * - VERDE  se quantita > 5
-     */
+
+     // Calcolo stato SOLO in base alla QUANTITA:
+     // ROSSO  se quantita == null o quantita <= 0
+     // GIALLO se 1 <= quantita <= 5
+     // VERDE  se quantita > 5
+
     public static ScortaMinPMStatus fromQuantita(Integer quantita) {
         if (quantita == null || quantita <= 0) return ROSSO;
         if (quantita <= 5) return GIALLO;
