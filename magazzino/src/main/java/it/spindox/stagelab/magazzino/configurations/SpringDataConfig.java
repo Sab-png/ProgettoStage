@@ -6,7 +6,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 //  tramite _DTO:
 
-// impone una struttura JSON stabile e standardizzata per le risposte paginabili delle API, indipendentemente da eventuali modifiche interne alla struttura delle entità o dei repository.
+// impone una struttura JSON stabile e standardizzata per le risposte paginabili delle API
 
 
 @Configuration

@@ -39,11 +39,5 @@ public class JobExecution {
     @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;
 
-    public void setUpdateDate(OffsetDateTime utc) {
-        // TODO document why this method is empty
-    }
 
-    public void setJobName(String jobName) {
-        // TODO document why this method is empty
-    }
 }

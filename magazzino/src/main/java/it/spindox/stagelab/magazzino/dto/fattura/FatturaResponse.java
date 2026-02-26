@@ -35,5 +35,6 @@ public class FatturaResponse {
     private SXFatturaStatus status;
 
     // Opzionali per la visualizzazione
+
     private String statusDescription;
 }

@@ -11,6 +11,7 @@ import lombok.*;
 public class ProdottoMagazzinoSearchRequest {
 
     // Filtri
+
     private Long id;
     private Long prodottoId;
     private Long magazzinoId;

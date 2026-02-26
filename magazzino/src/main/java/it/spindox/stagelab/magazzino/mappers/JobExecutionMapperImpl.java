@@ -13,42 +13,36 @@ import java.time.ZoneOffset;
 
 @Slf4j
 @Component
-
 public class JobExecutionMapperImpl implements JobExecutionMapper {
 
-    // OFFSET :  LOCAL
-
+    // Offset to LocalDateTime
     private LocalDateTime toLocal(OffsetDateTime odt) {
-        return (odt != null) ? odt.toLocalDateTime() : null;
+        return odt != null ? odt.toLocalDateTime() : null;
     }
 
-    // LOCAL : OFFSET (UTC)
+    // LocalDateTime to  Offset UTC
     private OffsetDateTime toUtc(LocalDateTime ldt) {
-        return (ldt != null) ? ldt.atOffset(ZoneOffset.UTC) : null;
+        return ldt != null ? ldt.atOffset(ZoneOffset.UTC) : null;
     }
 
-    //  FACTORY: crea una nuova entity da nome job e stato
+    // FACTORY: crea una nuova JobExecution
 
     @Override
-
     public JobExecution toEntity(String jobName, StatusJob status) {
+
         if (jobName == null && status == null) {
-            log.warn("toEntity(jobName, status) chiamato con entrambi i parametri NULL");
+            log.warn("toEntity(jobName, status) chiamato con entrambi null");
         }
 
         JobExecution e = new JobExecution();
-        e.setJobName(jobName);
         e.setStatus(status);
-        e.setStartTime(OffsetDateTime.now(ZoneOffset.UTC)); // start in UTC
-        e.setUpdateDate(OffsetDateTime.now(ZoneOffset.UTC)); // audit in UTC
-        // e.setEndTime(null); // opzionale: lascialo null finché il job non termina
+        e.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));  // start
         return e;
     }
 
-    //  ENTITY : RESPONSE DTO
+    // ENTITY TO RESPONSE DTO
 
     @Override
-
     public JobExecutionResponse toResponse(JobExecution entity) {
         if (entity == null) return null;
 
@@ -62,47 +56,35 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
                 .build();
     }
 
-    // UPDATE : senza errorType
+    // UPDATE senza errorType
 
     @Override
-
     public void updateEntity(JobExecution target, StatusJob status, String errorMessage) {
         update(target, status, null, errorMessage);
     }
 
-    // UPDATE : con errorType
+    // UPDATE con errorType
 
     @Override
-
     public void updateEntity(JobExecution target, StatusJob status, StatusJobErrorType errorType, String errorMessage) {
         update(target, status, errorType, errorMessage);
     }
 
-
     private void update(JobExecution target, StatusJob status, StatusJobErrorType errorType, String errorMessage) {
 
-        log.info(
-                "Aggiornamento JobExecution (id={}): status={}, errorType={}, errorMessage={}",
-                target != null ? target.getId() : null, status, errorType, errorMessage
-        );
-
         if (target == null) {
-            log.warn("updateEntity chiamato con target NULL");
+            log.warn("updateEntity chiamato con target null");
             return;
         }
 
         target.setStatus(status);
         target.setErrorType(errorType);
         target.setErrorMessage(errorMessage);
-        target.setUpdateDate(OffsetDateTime.now(ZoneOffset.UTC)); // coerente: sempre UTC
-
-        log.debug("JobExecution aggiornato: {}", target);
     }
 
-    // REQUEST DTO : ENTITY
+    // DTO (search) to  ENTITY
 
     @Override
-
     public JobExecution toEntity(JobExecutionRequest req) {
         if (req == null) return null;
 

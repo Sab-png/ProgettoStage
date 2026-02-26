@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class ProdottoMagazzinoResponse {
 
     private Long id;
@@ -19,6 +20,7 @@ public class ProdottoMagazzinoResponse {
 
     private Integer quantita;
     private Integer scortaMin;
+
     // enum runtime
 
     private ScortaMinPMStatus scortaMinStatus;

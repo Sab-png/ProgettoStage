@@ -21,10 +21,12 @@ public class MagazzinoRequest {
     private Integer capacita;
 
     // Filtri ricerca
+
     private Integer capacitaMin;
     private Integer capacitaMax;
 
     // Paginazione
+
     @Min(0)
     private Integer page = 0;
 

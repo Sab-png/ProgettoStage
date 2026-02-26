@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 public class ProdottoSearchRequest {
 
     // Filtri opzionali
+
     private String nome;
     private String descrizione;
     private BigDecimal prezzoMin;

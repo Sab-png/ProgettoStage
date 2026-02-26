@@ -19,8 +19,8 @@ public class ProdottoRequest {
     private String descrizione;
 
     @Positive(message = "Il prezzo deve essere maggiore di zero")
-    private BigDecimal prezzo;
 
+    private BigDecimal prezzo;
     private BigDecimal prezzoMin;
     private BigDecimal prezzoMax;
 

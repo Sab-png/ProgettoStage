@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class JobExecutionRequest {
 
     // FILTRI
+
     private String nomeJob;            // es. "Inventory Scheduler"
     private String stato;              // es. "SUCCESS", "FAILED"
     private LocalDateTime from;        // data inizio filtraggio (local time)

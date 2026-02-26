@@ -117,7 +117,7 @@ public class FatturaController {
     public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
             @Valid @RequestBody FatturaRequest request
-    ) throws Throwable {
+    ) {
         FatturaResponse updated = fatturaService.update(id, request);
         return ResponseEntity.ok(updated);
     }
