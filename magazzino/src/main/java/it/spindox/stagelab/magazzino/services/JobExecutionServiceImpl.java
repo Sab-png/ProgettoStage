@@ -2,28 +2,40 @@ package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
 import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
-import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
+import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
+import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.repositories.JobExecutionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 import org.springframework.data.domain.*;
-
+import org.springframework.data.domain.*;
 
 
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-
 public class JobExecutionServiceImpl implements JobExecutionService {
 
     private final JobExecutionRepository repository;
+
+
+           // UTILITIES PER CONVERSIONE DATE E MAPPING
+
+
+    private static OffsetDateTime toUtc(LocalDateTime ldt) {
+        return (ldt == null) ? null : ldt.atOffset(ZoneOffset.UTC);
+    }
+
+    private static LocalDateTime toLocal(OffsetDateTime odt) {
+        return (odt == null) ? null : odt.toLocalDateTime();
+    }
 
     private static OffsetDateTime nowUtc() {
         return OffsetDateTime.now(ZoneOffset.UTC);
@@ -34,181 +46,156 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return msg.length() > 1000 ? msg.substring(0, 1000) : msg;
     }
 
+    private static JobExecutionResponse toResponse(JobExecution e) {
+        if (e == null) return null;
+        return JobExecutionResponse.builder()
+                .id(e.getId())
+                .status(e.getStatus())
+                .startTime(toLocal(e.getStartTime()))
+                .endTime(toLocal(e.getEndTime()))
+                .errorType(e.getErrorType())
+                .errorMessage(e.getErrorMessage())
+                .build();
+    }
+
     // GET BY ID
 
     @Override
-
     public JobExecutionResponse getById(Long id) {
-        log.info("Richiesta JobExecution per id={}", id);
-
-        if (id == null) {
-            log.warn("ID nullo passato a getById(): ritorno null");
-            return null;
-        }
-
-        return null;
+        if (id == null) throw new IllegalArgumentException("id nullo");
+        JobExecution e = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("JobExecution non trovato: id=" + id));
+        return toResponse(e);
     }
 
-    // SEARCH
+    // SEARCH CON DTO
 
     @Override
-
     public Page<JobExecutionResponse> search(JobExecutionRequest request) {
-        log.info("Ricerca JobExecution avviata");
+        if (request == null) return Page.empty();
 
-        if (request == null) {
-            log.warn("JobExecutionRequest è NULL in search(): ritorno pagina vuota");
-            return Page.empty();
+        // stato come enum (accetta null)
+
+        StatusJob status = null;
+        if (request.getStato() != null && !request.getStato().isBlank()) {
+            status = StatusJob.valueOf(request.getStato().toUpperCase().trim());
         }
 
-        log.debug("Parametri ricerca -> status={}, from={}, to={}, page={}, size={}",
-                request.getStatus(),
-                request.getFrom(),
-                request.getTo(),
-                request.getPage(),
-                request.getSize()
+        Pageable pageable = PageRequest.of(
+                Math.max(request.getPage(), 0),
+                Math.max(request.getSize(), 1),
+                Sort.by(Sort.Direction.DESC, "startTime")
         );
 
-        return null;
+        OffsetDateTime from = toUtc(request.getFrom());
+        OffsetDateTime to   = toUtc(request.getTo());
+
+        Page<JobExecution> page = repository.search(status, from, to, request.getHasError(), pageable);
+        return page.map(JobExecutionServiceImpl::toResponse);
     }
 
-    // CREATE NEW JOB
+    // SEARCH IDS (DTO)
 
     @Override
-    @Transactional
+    public Page<Long> searchIds(JobExecutionRequest req) {
+        if (req == null) return Page.empty();
 
+        StatusJob status = null;
+        if (req.getStato() != null && !req.getStato().isBlank()) {
+            status = StatusJob.valueOf(req.getStato().toUpperCase().trim());
+        }
+
+        Pageable pageable = PageRequest.of(
+                Math.max(req.getPage(), 0),
+                Math.max(req.getSize(), 1),
+                Sort.by(Sort.Direction.DESC, "startTime")
+        );
+
+        OffsetDateTime from = toUtc(req.getFrom());
+        OffsetDateTime to   = toUtc(req.getTo());
+
+        return repository.searchIds(status, from, to, req.getHasError(), pageable);
+    }
+
+    // GET ALL PAGED
+
+    @Override
+    public Page<JobExecutionResponse> getAllPaged(int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), Sort.by("startTime").descending());
+        return repository.findAll(pageable).map(JobExecutionServiceImpl::toResponse);
+    }
+
+    // FIND LAST
+
+    @Override
+    public Optional<JobExecution> findLast() {
+        return repository.findFirstByOrderByStartTimeDesc();
+    }
+
+    // FIND RUNNING
+
+    @Override
+    public Optional<JobExecution> findRunning() {
+        return repository.findFirstByStatus(StatusJob.RUNNING);
+    }
+
+    // SEARCH "raw"
+
+    @Override
+    public Page<JobExecution> search(StatusJob status, OffsetDateTime startFrom, OffsetDateTime startTo, Boolean hasError, Pageable pageable) {
+        return repository.search(status, startFrom, startTo, hasError, pageable);
+    }
+
+
+           //  JOB LIFECYCLE
+
+
+    // START: crea la JobExecution in RUNNING
+
+    @Override
     public JobExecution start() {
-
         JobExecution job = new JobExecution();
         job.setStatus(StatusJob.RUNNING);
         job.setStartTime(nowUtc());
         job.setEndTime(null);
         job.setErrorType(null);
         job.setErrorMessage(null);
-
-        job = repository.save(job);
-
-        log.info("[JOB STARTED] id={} startTime(UTC)={}", job.getId(), job.getStartTime());
-        return job;
+        return repository.save(job);
     }
 
-    // JOB SUCCESS
+    // SUCCESS: chiude il job con esito positivo
+
     @Override
-    @Transactional
-
     public void success(JobExecution job) {
-
+        if (job == null) throw new IllegalArgumentException("JobExecution nullo in success()");
         job.setStatus(StatusJob.SUCCESS);
         job.setEndTime(nowUtc());
         job.setErrorType(null);
         job.setErrorMessage(null);
-
         repository.save(job);
-
-        log.info("[JOB SUCCESS] id={} endTime(UTC)={}", job.getId(), job.getEndTime());
     }
 
-    // JOB FAILED (con error type)
+    // FAILED con dettaglio del tipo errore + eccezione
+
     @Override
-    @Transactional
-
-    public void failed(JobExecution job, StatusJobErrorType type, Exception e) {
-
+    public void failed(JobExecution job, StatusJobErrorType errorType, Exception e) {
+        if (job == null) throw new IllegalArgumentException("JobExecution nullo in failed(job, type, e)");
         job.setStatus(StatusJob.FAILED);
         job.setEndTime(nowUtc());
-        job.setErrorType(type);
+        job.setErrorType(errorType);
         job.setErrorMessage(truncate(e != null ? e.getMessage() : null));
-
         repository.save(job);
-
-        log.error("[JOB FAILED] id={} type={} msg={}",
-                job.getId(), type, job.getErrorMessage(), e);
     }
 
-    // FIND LAST
+    // FAILED overload senza type
 
     @Override
-    @Transactional
-
-    public Optional<JobExecution> findLast() {
-        log.info("Richiesta ultimo JobExecution");
-
-        return Optional.empty();
-    }
-
-    // FIND RUNNING
-
-    @Override
-    @Transactional
-
-    public Optional<JobExecution> findRunning() {
-        log.info("Ricerca JobExecution in stato RUNNING");
-
-        return Optional.empty();
-    }
-
-    // SEARCH ENTITY (no DTO)
-    @Override
-    @Transactional
-
-    public Page<JobExecution> search(StatusJob status, OffsetDateTime startFrom, OffsetDateTime startTo, Boolean hasError, Pageable pageable) {
-        log.info("Ricerca JobExecution con parametri raw");
-
-        log.debug("status={}, from={}, to={}, hasError={}, pageable={}",
-                status, startFrom, startTo, hasError, pageable);
-
-        return null;
-    }
-
-    // FAILED
-    @Override
-    @Transactional
-
     public void failed(JobExecution job, Exception e) {
-        if (job == null) {
-            log.error("JobExecution è NULL durante failed(...). Eccezione: {}",
-                    e != null ? e.getMessage() : "null", e);
-            return;
-        }
-
-        log.error("[JOB FAILED] id={} msg={}",
-                job.getId(),
-                e != null ? e.getMessage() : "Errore sconosciuto",
-                e);
-    }
-
-    // SEARCH IDS
-    @Override
-    @Transactional
-
-    public Page<Long> searchIds(JobExecutionRequest req) {
-        log.info("Ricerca ID JobExecution avviata");
-
-        if (req == null) {
-            log.warn("JobExecutionRequest è NULL in searchIds(): ritorno pagina vuota");
-            return Page.empty();
-        }
-
-        log.debug("Parametri ricerca ID -> from={}, to={}, status={}, page={}, size={}",
-                req.getFrom(),
-                req.getTo(),
-                req.getStatus(),
-                req.getPage(),
-                req.getSize()
-        );
-        return null;
-    }
-
-    // GET ALL PAGED
-    @Override
-    @Transactional
-
-    public Page<JobExecutionResponse> getAllPaged(int page, int size) {
-        log.info("getAllPaged: page={}, size={}", page, size);
-
-        PageRequest pr = PageRequest.of(page, size);
-        log.debug("PageRequest creato: {}", pr);
-
-        return null;
+        if (job == null) throw new IllegalArgumentException("JobExecution nullo in failed(job, e)");
+        job.setStatus(StatusJob.FAILED);
+        job.setEndTime(nowUtc());
+        job.setErrorType(null);
+        job.setErrorMessage(truncate(e != null ? e.getMessage() : null));
+        repository.save(job);
     }
 }

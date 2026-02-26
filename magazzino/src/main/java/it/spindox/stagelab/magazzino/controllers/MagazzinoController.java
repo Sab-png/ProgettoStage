@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoSearchRequest;
+import jakarta.validation.constraints.Min;
 
 
 
@@ -18,83 +20,91 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/magazzino")
 @RequiredArgsConstructor
 @Validated
-
 public class MagazzinoController {
 
     private final MagazzinoService magazzinoService;
 
-    // GET ALL → solo ID
+
+    // GET /magazzino  : Restituisce SOLO ID
+
 
     @GetMapping
-
     public ResponseEntity<Page<Long>> getIds(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String indirizzo,
             @RequestParam(required = false) Integer capacitaMin,
             @RequestParam(required = false) Integer capacitaMax,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
-        MagazzinoRequest req = new MagazzinoRequest();
-        req.setNome(nome);
-        req.setIndirizzo(indirizzo);
-        req.setCapacitaMin(capacitaMin);
-        req.setCapacitaMax(capacitaMax);
-        req.setPage(page);
-        req.setSize(size);
+        MagazzinoSearchRequest req = new MagazzinoSearchRequest(
+                nome, indirizzo, capacitaMin, capacitaMax, page, size
+        );
 
         return ResponseEntity.ok(magazzinoService.searchIds(req));
     }
 
-    // GET ALL DTO COMPLETI + stream
+
+    // GET /magazzino/list : Tutti i magazzini completi (DTO)
+
 
     @GetMapping("/list")
-
     public ResponseEntity<Page<MagazzinoResponse>> getAllPaged(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "8") @Min(1) int size
     ) {
         return ResponseEntity.ok(magazzinoService.getAllPaged(page, size));
     }
 
-    @GetMapping("/{id}")
 
+    // GET /magazzino/{id} : singolo magazzino per ID (DTO)
+
+
+    @GetMapping("/{id}")
     public ResponseEntity<MagazzinoResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(magazzinoService.getById(id));
     }
 
-    // CREATE
+
+    // POST /magazzino  → CREATE
+
 
     @PostMapping
-
     public ResponseEntity<Void> create(@Valid @RequestBody MagazzinoRequest request) {
         magazzinoService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // UPDATE
+
+    // PATCH /magazzino/{id}  → UPDATE
+
 
     @PatchMapping("/{id}")
-
-    public ResponseEntity<Void> update(@PathVariable Long id,
-                                       @Valid @RequestBody MagazzinoRequest request) {
+    public ResponseEntity<Void> update(
+            @PathVariable Long id,
+            @Valid @RequestBody MagazzinoRequest request
+    ) {
         magazzinoService.update(id, request);
         return ResponseEntity.noContent().build();
     }
 
-    // DELETE
+    // DELETE /magazzino/{id}  : DELETE
+
 
     @DeleteMapping("/{id}")
-
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         magazzinoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/search")
 
+    // POST /magazzino/search  : Ricerca completa con DTO dedicato
+
+
+    @PostMapping("/search")
     public ResponseEntity<Page<MagazzinoResponse>> search(
-            @Valid @RequestBody MagazzinoRequest request) {
+            @Valid @RequestBody MagazzinoSearchRequest request
+    ) {
         return ResponseEntity.ok(magazzinoService.search(request));
     }
 }

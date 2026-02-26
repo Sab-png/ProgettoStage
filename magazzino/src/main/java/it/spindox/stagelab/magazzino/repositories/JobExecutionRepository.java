@@ -7,16 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 
 
 @Repository
-
 public interface JobExecutionRepository extends JpaRepository<JobExecution, Long> {
-
-    // SEARCH COMPLETA
 
     @Query("""
         SELECT j
@@ -30,13 +27,12 @@ public interface JobExecutionRepository extends JpaRepository<JobExecution, Long
     """)
     Page<JobExecution> search(
             @Param("status") StatusJob status,
-            @Param("startFrom") LocalDateTime startFrom,
-            @Param("startTo") LocalDateTime startTo,
+            @Param("startFrom") OffsetDateTime startFrom,
+            @Param("startTo") OffsetDateTime startTo,
             @Param("hasError") Boolean hasError,
             Pageable pageable
     );
 
-    // GET ALL SOLO ID
     @Query("""
         SELECT j.id
         FROM JobExecution j
@@ -49,8 +45,8 @@ public interface JobExecutionRepository extends JpaRepository<JobExecution, Long
     """)
     Page<Long> searchIds(
             @Param("status") StatusJob status,
-            @Param("startFrom") LocalDateTime startFrom,
-            @Param("startTo") LocalDateTime startTo,
+            @Param("startFrom") OffsetDateTime startFrom,
+            @Param("startTo") OffsetDateTime startTo,
             @Param("hasError") Boolean hasError,
             Pageable pageable
     );

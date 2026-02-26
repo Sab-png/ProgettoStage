@@ -1,6 +1,7 @@
 package it.spindox.stagelab.magazzino.services;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoRequest;
 import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoResponse;
+import it.spindox.stagelab.magazzino.dto.magazzino.MagazzinoSearchRequest;
 import it.spindox.stagelab.magazzino.entities.*;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
@@ -13,6 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import it.spindox.stagelab.magazzino.entities.Magazzino;
+import it.spindox.stagelab.magazzino.entities.ProdottoMagazzino;
+import it.spindox.stagelab.magazzino.entities.StockStatusMagazzino;
+
 
 
 
@@ -20,40 +25,39 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-
 public class MagazzinoServiceImpl implements MagazzinoService {
 
     private final MagazzinoRepository repository;
     private final MagazzinoMapper mapper;
-    private Integer qta;
-    private Prodotto p;
+
 
     // GET BY ID
 
     @Override
     @Transactional(readOnly = true)
-
     public MagazzinoResponse getById(Long id) {
         Magazzino entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
         return mapper.toResponse(entity);
     }
 
+
     // CREATE
+
 
     @Override
     @Transactional
-
     public void create(MagazzinoRequest request) {
         Magazzino entity = mapper.fromRequest(request);
         repository.save(entity);
     }
 
+
     // UPDATE
+
 
     @Override
     @Transactional
-
     public void update(Long id, MagazzinoRequest request) {
         Magazzino entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Magazzino non trovato"));
@@ -61,11 +65,12 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.save(entity);
     }
 
+
     // DELETE
+
 
     @Override
     @Transactional
-
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Magazzino non trovato");
@@ -73,41 +78,37 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         repository.deleteById(id);
     }
 
-    // PAGINAZIONE LIST
+
+    // GET ALL PAGED
+
 
     @Override
     @Transactional(readOnly = true)
-
     public Page<MagazzinoResponse> getAllPaged(int page, int size) {
 
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 Math.max(size, 1),
-                Sort.by(Sort.Direction.DESC, "id")
+                Sort.by(Sort.Direction.ASC, "id")
         );
 
         Page<Magazzino> pageEntities = repository.findAll(pageable);
 
-        return new PageImpl<>(
-                pageEntities.getContent().stream()
-                        .map(mapper::toResponse)
-                        .toList(),
-                pageable,
-                pageEntities.getTotalElements()
-        );
+        return pageEntities.map(mapper::toResponse);
     }
 
-    // SOLO ID
+
+    // SEARCH IDS
+
 
     @Override
     @Transactional(readOnly = true)
-
-    public Page<Long> searchIds(MagazzinoRequest req) {
+    public Page<Long> searchIds(MagazzinoSearchRequest req) {
 
         Pageable pageable = PageRequest.of(
                 req.getPage(),
                 req.getSize(),
-                Sort.by(Sort.Direction.DESC, "id")
+                Sort.by(Sort.Direction.ASC, "id")
         );
 
         return repository.searchIds(
@@ -119,17 +120,18 @@ public class MagazzinoServiceImpl implements MagazzinoService {
         );
     }
 
-    // SEARCH COMPLETA
+
+    // SEARCH COMPLETA (DTO)
+
 
     @Override
     @Transactional(readOnly = true)
-
-    public Page<MagazzinoResponse> search(MagazzinoRequest request) {
+    public Page<MagazzinoResponse> search(MagazzinoSearchRequest request) {
 
         Pageable pageable = PageRequest.of(
                 request.getPage(),
                 request.getSize(),
-                Sort.by(Sort.Direction.DESC, "id")
+                Sort.by(Sort.Direction.ASC, "id")
         );
 
         return repository.search(
@@ -142,7 +144,8 @@ public class MagazzinoServiceImpl implements MagazzinoService {
     }
 
 
-    //   LOGICA BUSINESS DEL JOB
+    // LOGICA BUSINESS DEL JOB
+
 
     @Override
     @Transactional
