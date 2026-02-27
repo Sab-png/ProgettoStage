@@ -11,6 +11,12 @@ import org.springframework.http.HttpStatus;
 // valore DB non valido
 
 
+// Eccezione unica per valori numerici non validi:
+// quantita negativa (Prodotto/Prodotto-Magazzino)
+// capacita magazzino negativa
+// valore DB non valido
+
+
 @Slf4j
 @Getter
 public class InvalidCapacityException extends JobException {
@@ -21,29 +27,11 @@ public class InvalidCapacityException extends JobException {
     private final Integer capacity;       // opzionale → caso magazzino
     private final String dbValue;         // opzionale → caso DB
 
-    private static final String DEFAULT_MESSAGE =
-            "Il valore numerico non può essere negativo o non valido.";
-
 
     // 1) CASO PRODOTTO / PRODOTTO-MAGAZZINO  : nel caso la quantita negativa/null
 
-    public InvalidCapacityException(Long prodottoId, Integer quantita) {
-        super(DEFAULT_MESSAGE, StatusJobErrorType.SYSTEM_ERROR, HttpStatus.BAD_REQUEST);
-
-        this.prodottoId = prodottoId;
-        this.quantita = quantita;
-
-        this.nomeMagazzino = null;
-        this.capacity = null;
-        this.dbValue = null;
-
-        log.error("[INVALID CAPACITY/QUANTITY] prodottoId={} quantita={}", prodottoId, quantita);
-    }
-
     public InvalidCapacityException(Long prodottoId, Integer quantita, String message) {
-        super((message == null || message.isBlank()) ? DEFAULT_MESSAGE : message,
-                StatusJobErrorType.SYSTEM_ERROR,
-                HttpStatus.BAD_REQUEST);
+        super(message, StatusJobErrorType.SYSTEM_ERROR, HttpStatus.BAD_REQUEST);
 
         this.prodottoId = prodottoId;
         this.quantita = quantita;
@@ -53,14 +41,15 @@ public class InvalidCapacityException extends JobException {
         this.dbValue = null;
 
         log.error("[INVALID CAPACITY/QUANTITY] prodottoId={} quantita={} msg={}",
-                prodottoId, quantita, getMessage());
+                prodottoId, quantita, message);
     }
 
 
     // 2) CASO MAGAZZINO : capacità negativa
 
     public InvalidCapacityException(String nomeMagazzino, Integer capacity, String message) {
-        super("La capacità del magazzino '" + nomeMagazzino + "' non può essere negativa: " + capacity,
+        super("La capacità del magazzino '" + nomeMagazzino +
+                        "' non può essere negativa: " + capacity,
                 StatusJobErrorType.SYSTEM_ERROR,
                 HttpStatus.BAD_REQUEST);
 
@@ -71,29 +60,15 @@ public class InvalidCapacityException extends JobException {
         this.quantita = null;
         this.dbValue = null;
 
-        log.error("[INVALID CAPACITY-MAGAZZINO] magazzino='{}' capacity={}", nomeMagazzino, capacity);
+        log.error("[INVALID CAPACITY-MAGAZZINO] magazzino='{}' capacity={}",
+                nomeMagazzino, capacity);
     }
 
 
     // 3) CASO DB VALUE NON VALIDO
 
-    public InvalidCapacityException(String dbValue) {
-        super(DEFAULT_MESSAGE, StatusJobErrorType.SYSTEM_ERROR, HttpStatus.BAD_REQUEST);
-
-        this.dbValue = dbValue;
-
-        this.prodottoId = null;
-        this.quantita = null;
-        this.nomeMagazzino = null;
-        this.capacity = null;
-
-        log.error("[INVALID DB VALUE] dbValue={}", dbValue);
-    }
-
     public InvalidCapacityException(String dbValue, String message) {
-        super((message == null || message.isBlank()) ? DEFAULT_MESSAGE : message,
-                StatusJobErrorType.SYSTEM_ERROR,
-                HttpStatus.BAD_REQUEST);
+        super(message, StatusJobErrorType.SYSTEM_ERROR, HttpStatus.BAD_REQUEST);
 
         this.dbValue = dbValue;
 
@@ -102,6 +77,7 @@ public class InvalidCapacityException extends JobException {
         this.nomeMagazzino = null;
         this.capacity = null;
 
-        log.error("[INVALID DB VALUE] dbValue={} msg={}", dbValue, getMessage());
+        log.error("[INVALID DB VALUE] dbValue={} msg={}",
+                dbValue, message);
     }
 }

@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 
 
 
+
 @Slf4j
 @Component
 @EnableScheduling
@@ -88,7 +89,7 @@ public class InventoryScheduler {
             log.info("[THE JOB IS SUCCEEDED] id={}", job.getId());
         }
 
-// 6) GESTIONE ECCEZIONI – ordine obbligatorio
+// 6) GESTIONE ECCEZIONI
 
 // 6.1) Errori di capacità / quantità (job)
 
@@ -104,14 +105,8 @@ public class InventoryScheduler {
             handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
         }
 
-// 6.3) Errore job sconosciuto
 
-        catch (UnknownJobException e) {
-            log.error("[UNKNOWN JOB ERROR] {}", e.getMessage(), e);
-            handleFailure(job, StatusJobErrorType.UNKNOWN, e);
-        }
-
-// 6.4) Fallback generico
+// 6.3) Fallback generico
 
         catch (Exception e) {
             log.error("[UNKNOWN ERROR] {}", e.getMessage(), e);

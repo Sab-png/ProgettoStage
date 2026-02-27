@@ -7,6 +7,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+
+import java.math.BigDecimal;
+
 public interface FatturaService {
 
     // Ricerca paginata con filtri opzionali
@@ -20,6 +23,10 @@ public interface FatturaService {
     // PATCH: Aggiorna parzialmente una fattura
 
     FatturaResponse update(Long id, FatturaRequest request);
+
+    // metodo paymentCheckFattura
+
+    FatturaResponse paymentCheckFattura(Long id, BigDecimal pagatoDaAggiungere);
 
     // Recupera dettaglio fattura per id
 

@@ -1,5 +1,6 @@
 
 package it.spindox.stagelab.magazzino.controllers;
+import it.spindox.stagelab.magazzino.dto.fattura.FatturaPagamentoRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
@@ -19,22 +20,17 @@ import java.net.URI;
 import java.time.LocalDate;
 
 
-
 @RestController
 @RequestMapping("/fatture")
 @RequiredArgsConstructor
 @Validated
-
 public class FatturaController {
 
     private final FatturaService fatturaService;
 
-
-      // GET /fatture : singola fattura solo per ID
-
+    // GET /fatture : solo IDs
 
     @GetMapping
-
     public ResponseEntity<Page<Long>> getFattureIds(
             @RequestParam(required = false) String numero,
             @RequestParam(required = false) Long idProdotto,
@@ -47,7 +43,6 @@ public class FatturaController {
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
-
         FatturaSearchRequest req = new FatturaSearchRequest();
         req.setNumero(numero);
         req.setIdProdotto(idProdotto);
@@ -62,13 +57,9 @@ public class FatturaController {
         return ResponseEntity.ok(ids);
     }
 
-
-     //  GET /fatture/list
-     // Ritorna lista fatture COMPLETE, paginazione + stream
-
+    // GET /fatture/list : fatture complete paginato
 
     @GetMapping("/list")
-
     public ResponseEntity<Page<FatturaResponse>> getAllFatturePaged(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
@@ -76,16 +67,16 @@ public class FatturaController {
         return ResponseEntity.ok(fatturaService.getAllPaged(page, size));
     }
 
-    // GET FATTURE ID
+    // GET /fatture/ID : singola fattura per ID
 
     @GetMapping("/{id}")
-
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) {
         return ResponseEntity.ok(fatturaService.getById(id));
     }
 
-    @GetMapping("/prodotto/{idProdotto}")
+    // GET /fatture/prodotto/IDProdotto
 
+    @GetMapping("/prodotto/{idProdotto}")
     public ResponseEntity<PageImpl<FatturaResponse>> getFattureByProdotto(
             @PathVariable Long idProdotto,
             @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -95,10 +86,9 @@ public class FatturaController {
         return ResponseEntity.ok(result);
     }
 
-    // SAVE FATTURA: CREATE
+    // POST /fatture : create
 
     @PostMapping
-
     public ResponseEntity<FatturaResponse> saveFattura(
             @Valid @RequestBody FatturaRequest request,
             UriComponentsBuilder uriBuilder
@@ -110,10 +100,9 @@ public class FatturaController {
         return ResponseEntity.created(location).body(created);
     }
 
-    // EDIT FATTURA
+    // PATCH /fatture/ID : update "generico"
 
     @PatchMapping("/{id}")
-
     public ResponseEntity<FatturaResponse> editFattura(
             @PathVariable Long id,
             @Valid @RequestBody FatturaRequest request
@@ -122,10 +111,31 @@ public class FatturaController {
         return ResponseEntity.ok(updated);
     }
 
-    // SEARCH FATTURA
+    //  PATCH /fatture/ID/pagamento : aggiungi pagamento e ricalcola stato
+    @PatchMapping(
+            path = "/{id}/payment-checkfattura",
+            consumes = "application/json",
+            produces = "application/json"
+    )
+    public ResponseEntity<FatturaResponse> paymentCheckFattura(
+            @PathVariable Long id,
+            @Valid @RequestBody FatturaPagamentoRequest request   // <-- QUI!
+    ) {
+        if (request == null || request.getPagatoDaAggiungere() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        FatturaResponse updated = fatturaService.paymentCheckFattura(
+                id,
+                request.getPagatoDaAggiungere()
+        );
+        return ResponseEntity.ok(updated);
+    }
+
+
+    // POST /fatture/search
 
     @PostMapping("/search")
-
     public ResponseEntity<Page<FatturaResponse>> searchFattura(
             @Valid @RequestBody FatturaSearchRequest searchRequest
     ) {
@@ -133,10 +143,9 @@ public class FatturaController {
         return ResponseEntity.ok(page);
     }
 
-    // DELETE FATTURA
+    // DELETE /fatture/{id}
 
     @DeleteMapping("/{id}")
-
     public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {
         fatturaService.delete(id);
         return ResponseEntity.noContent().build();

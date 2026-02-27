@@ -19,7 +19,6 @@ public enum SXFatturaStatus {
 
     private final String dbValue;
 
-
     private final String description;
 
     SXFatturaStatus(String dbValue, String description) {

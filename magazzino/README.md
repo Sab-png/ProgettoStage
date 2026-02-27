@@ -1,12 +1,14 @@
 # 🏭 Magazzino - Sistema di Gestione Inventario
 
-> **Applicazione REST API Spring Boot 4.0.1** per la gestione completa di prodotti, magazzini e fatture con persistenza su Oracle XE 21c
+> **Applicazione REST API Enterprise-Grade** con **Spring Boot 4.0.1** per la gestione completa di **prodotti, magazzini, fatture e giacenze** con persistenza su **Oracle XE 21c**
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.1-6DB33F?style=flat-square&logo=spring)
 ![Oracle](https://img.shields.io/badge/Oracle-XE%2021c-F80000?style=flat-square&logo=oracle)
 ![Maven](https://img.shields.io/badge/Maven-3.9.x-C71A36?style=flat-square&logo=apache-maven)
 ![Docker](https://img.shields.io/badge/Docker-Latest-2496ED?style=flat-square&logo=docker)
+![Files](https://img.shields.io/badge/Files-82-blue?style=flat-square)
+![Classes](https://img.shields.io/badge/Java%20Classes-69-blueviolet?style=flat-square)
 
 ---
 
@@ -18,7 +20,8 @@
 - [🚀 Quick Start](#-quick-start)
 - [📦 Stack Tecnologico](#-stack-tecnologico)
 - [🏗️ Architettura](#-architettura)
-- [📊 Componenti](#-componenti)
+- [📂 Struttura Progetto](#-struttura-progetto)
+- [📊 Componenti Dettagliate](#-componenti-dettagliate)
 - [🔗 Endpoints API](#-endpoints-api)
 - [🐳 Docker](#-docker)
 - [💾 Database](#-database)
@@ -209,196 +212,899 @@ magazzino/
 └── sjobs/             (Scheduled jobs)
 ```
 
-**Total: 54+ classi Java**
+---
+
+## 📂 Struttura Progetto
+
+### Albero Directory Completo
+
+```
+magazzino/
+├── 📋 pom.xml                      # Maven config (Java 21, Spring Boot 4.0.1, Oracle JDBC)
+├── 🐳 Dockerfile                   # Docker image
+├── 🐳 docker-compose.yml           # Orchestrazione (App + Oracle XE 21c)
+├── 🔧 mvnw & mvnw.cmd              # Maven wrapper
+├── 📝 README.md                    # Questo file
+├── runner.sh                       # Script automazione
+├── magazzino.iml                   # IntelliJ config
+│
+├── 📚 documentationsystem/
+│   └── system architettura schema/
+│       ├── ARCHITETTURA_SISTEMA_2026.md  # Documentazione tecnica completa
+│       ├── magazzino_architettura.pptx
+│       └── Screenshot diagrams
+│
+├── 🗄️ initdb/                       # Database initialization
+│   ├── 1_init-db.sql               # Create user/schema
+│   ├── 2_schema-ddl.sql            # Create tables
+│   ├── 3_sql-content.sql           # Initial data
+│   ├── Script-4-Aggiunta dati per popolamento.sql
+│   └── schema logico DB/
+│
+├── 📂 src/main/
+│   ├── java/it/spindox/stagelab/magazzino/
+│   │   ├── 🚀 MagazzinoApplication.java
+│   │   │
+│   │   ├── 🌐 controllers/  (5 Controllers)
+│   │   │   ├── HomeController.java
+│   │   │   ├── ProdottoController.java
+│   │   │   ├── MagazzinoController.java
+│   │   │   ├── FatturaController.java
+│   │   │   └── JobExecutionController.java
+│   │   │
+│   │   ├── 💼 services/  (10 Services)
+│   │   │   ├── ProdottoService.java (I)
+│   │   │   ├── ProdottoServiceImpl.java
+│   │   │   ├── MagazzinoService.java (I)
+│   │   │   ├── MagazzinoServiceImpl.java
+│   │   │   ├── FatturaService.java (I)
+│   │   │   ├── FatturaServiceImpl.java
+│   │   │   ├── ProdottoMagazzinoService.java (I)
+│   │   │   ├── ProdottoMagazzinoServiceImpl.java
+│   │   │   ├── JobExecutionService.java (I)
+│   │   │   └── JobExecutionServiceImpl.java
+│   │   │
+│   │   ├── 🗄️ repositories/  (5 Repositories)
+│   │   │   ├── ProdottoRepository.java
+│   │   │   ├── MagazzinoRepository.java
+│   │   │   ├── FatturaRepository.java
+│   │   │   ├── ProdottoMagazzinoRepository.java
+│   │   │   └── JobExecutionRepository.java
+│   │   │
+│   │   ├── 📦 entities/  (5 Entity + 6 Enum)
+│   │   │   ├── Prodotto.java
+│   │   │   ├── Magazzino.java
+│   │   │   ├── Fattura.java
+│   │   │   ├── ProdottoMagazzino.java
+│   │   │   ├── JobExecution.java
+│   │   │   ├── SXFatturaStatus.java
+│   │   │   ├── StockStatusProdotto.java
+│   │   │   ├── StockStatusMagazzino.java
+│   │   │   ├── StatusJob.java (PENDING, RUNNING, SUCCESS, FAILED, SYSTEM_ERROR)
+│   │   │   ├── StatusJobErrorType.java
+│   │   │   └── ScortaMinPMStatus.java
+│   │   │
+│   │   ├── 🔄 mappers/  (5 Mappers)
+│   │   │   ├── ProdottoMapper.java (I)
+│   │   │   ├── ProdottoMapperImpl.java
+│   │   │   ├── MagazzinoMapper.java (I)
+│   │   │   ├── MagazzinoMapperImpl.java
+│   │   │   ├── FatturaMapper.java (I)
+│   │   │   ├── FatturaMapperImpl.java
+│   │   │   ├── ProdottoMagazzinoMapper.java (I)
+│   │   │   ├── ProdottoMagazzinoMapperImpl.java
+│   │   │   ├── JobExecutionMapper.java (I)
+│   │   │   └── JobExecutionMapperImpl.java
+│   │   │
+│   │   ├── 📨 dto/  (15+ DTOs)
+│   │   │   ├── prodotto/
+│   │   │   │   ├── ProdottoRequest.java
+│   │   │   │   ├── ProdottoResponse.java
+│   │   │   │   └── ProdottoSearchRequest.java
+│   │   │   ├── magazzino/
+│   │   │   │   ├── MagazzinoRequest.java
+│   │   │   │   ├── MagazzinoResponse.java
+│   │   │   │   └── MagazzinoSearchRequest.java
+│   │   │   ├── fattura/
+│   │   │   │   ├── FatturaRequest.java
+│   │   │   │   ├── FatturaResponse.java
+│   │   │   │   └── FatturaSearchRequest.java
+│   │   │   ├── prodottomagazzino/
+│   │   │   │   ├── ProdottoMagazzinoRequest.java
+│   │   │   │   ├── ProdottoMagazzinoResponse.java
+│   │   │   │   └── ProdottoMagazzinoSearchRequest.java
+│   │   │   └── jobExecution/
+│   │   │       ├── JobExecutionRequest.java
+│   │   │       ├── JobExecutionResponse.java
+│   │   │       └── JobExecutionSearchRequest.java
+│   │   │
+│   │   ├── ⚙️ configurations/  (2+ Configurations)
+│   │   │   ├── SpringDataConfig.java (Page serialization VIA_DTO)
+│   │   │   └── WebConfiguration.java (CORS, MediaType)
+│   │   │
+│   │   ├── 🔄 converter/  (Custom Type Converters)
+│   │   │   └── StockStatusConverter.java
+│   │   │
+│   │   ├── ⚠️ exceptions/  (Exception Handling)
+│   │   │   ├── GlobalExceptionHandler.java
+│   │   │   ├── ResourceNotFoundException.java
+│   │   │   └── jobsexceptions/
+│   │   │       ├── JobException.java
+│   │   │       ├── UnknownJobException.java
+│   │   │       ├── InvalidFatturaException.java
+│   │   │       └── InvalidCapacityException.java
+│   │   │
+│   │   ├── ⏰ sjobs/  (Scheduled Jobs)
+│   │   │   └── InventoryScheduler.java (@Scheduled per automazione)
+│   │   │
+│   │   └── README.MD
+│   │
+│   └── resources/
+│       └── application.properties
+│
+├── 📂 src/test/
+│   ├── java/it/spindox/stagelab/magazzino/
+│   │   ├── MagazzinoApplicationTests.java
+│   │   └── services/
+│   │       └── jobTest.java
+│   │
+│   └── resources/
+│       └── application-test.properties
+│
+└── 📦 target/  (Build artifacts)
+    ├── magazzino-app.jar
+    ├── classes/
+    ├── generated-sources/
+    └── test-classes/
+```
+
+### 📊 Riepilogo File
+
+```
+✅ JAVA FILES:           69 files
+  • Controllers:         5
+  • Services:           10 (5 interface + 5 impl)
+  • Repositories:        5
+  • Entities:            5
+  • Enums:               6
+  • Mappers:            10 (5 interface + 5 impl)
+  • DTOs:               15
+  • Configurations:      2
+  • Converters:          1
+  • Exceptions:          5
+  • Scheduled Jobs:      1
+  • Main Application:    1
+  • Tests:               2
+
+✅ CONFIGURATION FILES:  13 files
+  • SQL Scripts:         4
+  • Docker:              2
+  • Maven:               3
+  • Properties:          2
+  • Documentation:       2
+
+🎯 TOTAL: 82 FILES
+```
 
 ---
 
-## 📊 Componenti
+## 📊 Componenti Dettagliate
 
-### 1. Controllers (5)
+### 🌐 Controllers (5 Files)
 
-| Controller | Endpoint | Metodi |
-|---|---|---|
-| **ProdottoController** | `/api/prodotti` | GET, POST, PUT, DELETE, SEARCH |
-| **MagazzinoController** | `/api/magazzini` | GET, POST, PUT, DELETE |
-| **FatturaController** | `/api/fatture` | GET, POST, PUT, DELETE, cambio stato |
-| **JobExecutionController** | `/api/jobs` | GET, POST (manual execution) |
-| **HomeController** | `/` | Health check |
+**HTTP Layer - REST Endpoints**
 
-### 2. Services (10)
+| Controller | Base URL | Responsabilità | Metodi |
+|---|---|---|---|
+| **HomeController** | `/home` | Health check, info app | GET 3 endpoint |
+| **ProdottoController** | `/prodotti` | Gestione catalogo | GET, POST, PUT, DELETE, SEARCH |
+| **MagazzinoController** | `/magazzino` | Gestione magazzini | GET, POST, PATCH, DELETE, SEARCH |
+| **FatturaController** | `/fatture` | Gestione ordini/fatture | GET, POST, PUT, DELETE, SEARCH |
+| **JobExecutionController** | `/jobs` | Monitoring job schedulati | GET, POST, SEARCH |
 
-**Interfacce + Implementazioni:**
-- `ProdottoService` / `ProdottoServiceImpl`
-- `MagazzinoService` / `MagazzinoServiceImpl`
-- `FatturaService` / `FatturaServiceImpl`
-- `ProdottoMagazzinoService` / `ProdottoMagazzinoServiceImpl`
-- `JobExecutionService` / `JobExecutionServiceImpl`
+**Totale Endpoint: 30+**
 
-### 3. Repositories (5)
+---
 
-Spring Data JPA repositories:
-- `ProdottoRepository`
-- `MagazzinoRepository`
-- `FatturaRepository`
-- `ProdottoMagazzinoRepository`
-- `JobExecutionRepository`
+### 💼 Services (10 Files)
 
-### 4. Entities (11)
+**Business Logic Layer - 5 Interfacce + 5 Implementazioni**
 
-**Entity:**
-- `Prodotto` → T_PRODOTTI
-- `Magazzino` → T_MAGAZZINI
-- `ProdottoMagazzino` → T_PRODOTTO_MAGAZZINO
-- `Fattura` → T_FATTURE
-- `JobExecution` → T_JOB_EXECUTION
+#### Service Interfaces
 
-**Enum:**
-- `SXFatturaStatus` (BOZZA, CONFERMATA, ANNULLATA, PAGATA)
-- `StockStatusProdotto` (DISPONIBILE, SCARICO, ESAURITO)
-- `StockStatusMagazzino` (ATTIVO, MANUTENZIONE, CHIUSO)
-- `StatusJob` (PENDING, RUNNING, SUCCESS, FAILED)
-- `StatusJobErrorType` (VALIDATION_ERROR, DB_ERROR, etc.)
-- `ScortaMinPMStatus` (SOTTO_SCORTA, ENTRO_NORMA, ECCESSO)
+```
+✅ ProdottoService.java
+   ├─ create(ProdottoRequest): void
+   ├─ getById(Long id): ProdottoResponse
+   ├─ getAllPaged(page, size): Page<ProdottoResponse>
+   ├─ searchIds(ProdottoRequest): Page<Long>
+   ├─ search(ProdottoRequest): Page<ProdottoResponse>
+   ├─ update(Long id, ProdottoRequest): void
+   └─ delete(Long id): void
 
-### 5. DTOs (10+)
+✅ MagazzinoService.java
+   ├─ create(MagazzinoRequest): void
+   ├─ getById(Long id): MagazzinoResponse
+   ├─ getAllPaged(page, size): Page<MagazzinoResponse>
+   ├─ searchIds(MagazzinoSearchRequest): Page<Long>
+   ├─ search(MagazzinoSearchRequest): Page<MagazzinoResponse>
+   ├─ update(Long id, MagazzinoRequest): void
+   └─ delete(Long id): void
 
-Organizzati per dominio:
-- `fattura/` (FatturaDTO, FatturaCreateDTO, FatturaResponseDTO)
-- `prodotto/` (ProdottoDTO, ProdottoCreateDTO, ProdottoResponseDTO)
-- `magazzino/` (MagazzinoDTO, MagazzinoResponseDTO)
-- `prodottomagazzino/` (ProdottoMagazzinoDTO, ProdottoMagazzinoGiacenzaDTO)
-- `jobExecution/` (JobExecutionDTO, JobExecutionLogDTO)
+✅ FatturaService.java
+   ├─ create(FatturaRequest): void
+   ├─ getById(Long id): FatturaResponse
+   ├─ getAllPaged(page, size): Page<FatturaResponse>
+   ├─ searchIds(FatturaSearchRequest): Page<Long>
+   ├─ search(FatturaSearchRequest): Page<FatturaResponse>
+   ├─ getByProdotto(Long id, page, size): PageImpl<FatturaResponse>
+   ├─ update(Long id, FatturaRequest): void
+   └─ delete(Long id): void
+
+✅ ProdottoMagazzinoService.java
+   ├─ manageStock(Long prodottoId, Long magazzId, int qty): void
+   ├─ updateGiacenza(Long id, Integer giacenza): void
+   ├─ getStockStatus(Long magazzId): List<StockStatus>
+   └─ searchByStatus(ScortaMinPMStatus status): Page<ProdottoMagazzino>
+
+✅ JobExecutionService.java
+   ├─ getById(Long id): JobExecutionResponse
+   ├─ getAllPaged(page, size): Page<JobExecutionResponse>
+   ├─ search(JobExecutionRequest): Page<JobExecutionResponse>
+   ├─ searchIds(JobExecutionRequest): Page<Long>
+   ├─ getLastError(): Optional<JobExecutionResponse>
+   ├─ start(): JobExecution
+   ├─ success(JobExecution job): void
+   └─ failed(JobExecution job, error): void
+```
+
+**Tutti implementati con @Transactional, validazione, logging**
+
+---
+
+### 🗄️ Repositories (5 Files)
+
+**Data Access Layer - Spring Data JPA**
+
+```
+✅ ProdottoRepository extends JpaRepository<Prodotto, Long>
+   ├─ findByCode(String code): Optional<Prodotto>
+   ├─ existsByCode(String code): boolean
+   ├─ @Query searchIds(...): Page<Long>
+   └─ @Query search(...): Page<Prodotto>
+
+✅ MagazzinoRepository extends JpaRepository<Magazzino, Long>
+   ├─ @Query search(...): Page<Magazzino>
+   ├─ @Query searchIds(...): Page<Long>
+   └─ findByCapacitaMin(Integer capacita): List<Magazzino>
+
+✅ FatturaRepository extends JpaRepository<Fattura, Long>
+   ├─ @Query searchIds(...): Page<Long>
+   ├─ @Query search(...): Page<Fattura>
+   └─ findByProdotto(Long idProdotto): List<Fattura>
+
+✅ ProdottoMagazzinoRepository extends JpaRepository<ProdottoMagazzino, Long>
+   ├─ findByMagazzinoId(Long id): List<ProdottoMagazzino>
+   ├─ findByProdottoId(Long id): List<ProdottoMagazzino>
+   └─ updateGiacenza(Long id, Integer giacenza): void
+
+✅ JobExecutionRepository extends JpaRepository<JobExecution, Long>
+   ├─ @Query search(...): Page<JobExecution>
+   ├─ @Query searchIds(...): Page<Long>
+   ├─ findByStatus(StatusJob status): List<JobExecution>
+   ├─ findLastError(): Optional<JobExecution>
+   └─ findByDateRange(LocalDateTime from, to): List<JobExecution>
+```
+
+---
+
+### 📦 Entities (5 Files)
+
+**Model Layer - JPA Entity Classes**
+
+```
+✅ Prodotto.java
+   ├─ @Table("T_PRODOTTI")
+   ├─ id, codice, nome, descrizione, prezzo
+   ├─ dataCreazione, categoria
+   ├─ @OneToMany magazzini: Set<ProdottoMagazzino>
+   └─ Lombok @Data @NoArgsConstructor @AllArgsConstructor
+
+✅ Magazzino.java
+   ├─ @Table("T_MAGAZZINI")
+   ├─ id, nome, indirizzo, capacita
+   ├─ @Enumerated StockStatusMagazzino status
+   ├─ @OneToMany prodottiMagazzini: Set<ProdottoMagazzino>
+   └─ dataCreazione, dataUltimoAggiornamento
+
+✅ Fattura.java
+   ├─ @Table("T_FATTURE")
+   ├─ id, numero, data, quantita, importo
+   ├─ @ManyToOne prodotto: Prodotto
+   ├─ @Enumerated SXFatturaStatus stato
+   └─ dataCreazione, dataPagamento
+
+✅ ProdottoMagazzino.java
+   ├─ @Table("T_PRODOTTO_MAGAZZINO")
+   ├─ id, giacenza, scortaMinima
+   ├─ @ManyToOne prodotto: Prodotto
+   ├─ @ManyToOne magazzino: Magazzino
+   ├─ @Enumerated ScortaMinPMStatus statusScorta
+   └─ dataUltimoAggiornamento
+
+✅ JobExecution.java
+   ├─ @Table("T_JOB_EXECUTION")
+   ├─ id, jobName
+   ├─ dataInizio, dataFine
+   ├─ @Enumerated StatusJob status
+   ├─ @Enumerated StatusJobErrorType errorType
+   ├─ logMessaggio (CLOB), risultato (JSON)
+   └─ Tracking esecuzioni job schedulati
+```
+
+---
+
+### 🔢 Enums (6 Files)
+
+**Type-Safe Status Management**
+
+```
+✅ SXFatturaStatus.java
+   ├─ BOZZA
+   ├─ CONFERMATA
+   ├─ PAGATA
+   └─ ANNULLATA
+
+✅ StockStatusProdotto.java
+   ├─ DISPONIBILE (Verde)
+   ├─ SCARICO (Giallo)
+   └─ ESAURITO (Rosso)
+
+✅ StockStatusMagazzino.java
+   ├─ ATTIVO
+   ├─ MANUTENZIONE
+   └─ CHIUSO
+
+✅ StatusJob.java
+   ├─ PENDING
+   ├─ RUNNING
+   ├─ SUCCESS
+   ├─ FAILED
+   └─ SYSTEM_ERROR
+
+✅ StatusJobErrorType.java
+   ├─ VALIDATION_ERROR
+   ├─ DB_ERROR
+   ├─ NETWORK_ERROR
+   └─ SYSTEM_ERROR
+
+✅ ScortaMinPMStatus.java
+   ├─ SOTTO_SCORTA
+   ├─ ENTRO_NORMA
+   └─ ECCESSO
+```
+
+---
+
+### 🔄 Mappers (10 Files)
+
+**DTO Conversion Layer - 5 Interfacce + 5 Implementazioni**
+
+```
+✅ ProdottoMapper & ProdottoMapperImpl
+   ├─ toEntity(ProdottoRequest): Prodotto
+   ├─ toResponse(Prodotto): ProdottoResponse (con calcoli giacenza)
+   ├─ updateEntity(Prodotto, ProdottoRequest): void
+   └─ @Component @Slf4j per logging
+
+✅ MagazzinoMapper & MagazzinoMapperImpl
+   ├─ toEntity(MagazzinoRequest): Magazzino
+   ├─ toResponse(Magazzino): MagazzinoResponse
+   ├─ Calcolo: quantitaTotale, percentuale riempimento
+   └─ updateEntity(Magazzino, MagazzinoRequest): void
+
+✅ FatturaMapper & FatturaMapperImpl
+   ├─ toEntity(FatturaRequest, Prodotto): Fattura
+   ├─ toResponse(Fattura): FatturaResponse
+   └─ updateEntity(Fattura, FatturaRequest, Prodotto): void
+
+✅ ProdottoMagazzinoMapper & ProdottoMagazzinoMapperImpl
+   ├─ toEntity(...): ProdottoMagazzino
+   └─ toResponse(...): ProdottoMagazzinoResponse
+
+✅ JobExecutionMapper & JobExecutionMapperImpl
+   ├─ toEntity(...): JobExecution
+   ├─ toResponse(...): JobExecutionResponse
+   └─ Conversione timezone UTC ↔ Local
+```
+
+---
+
+### 📨 DTOs (15+ Files)
+
+**Data Transfer Objects - Validazione & Serializzazione**
+
+**Prodotto DTOs:**
+```
+✅ ProdottoRequest.java
+   ├─ @NotBlank codice, nome
+   ├─ @NotNull @DecimalMin prezzo
+   └─ descrizione (optional)
+
+✅ ProdottoResponse.java
+   ├─ id, codice, nome, prezzo
+   ├─ giacenzaTotale (calcolato)
+   └─ status: StockStatusProdotto
+
+✅ ProdottoSearchRequest.java
+   ├─ nome, descrizione (filtri)
+   ├─ prezzoMin, prezzoMax
+   └─ page, size (paginazione)
+```
+
+**Magazzino DTOs:**
+```
+✅ MagazzinoRequest.java
+   ├─ @NotBlank nome, indirizzo
+   ├─ @NotNull capacita
+   └─ stato: StockStatusMagazzino
+
+✅ MagazzinoResponse.java
+   ├─ id, nome, indirizzo, capacita
+   ├─ quantitaTotale, percentuale (calcolati)
+   └─ stockStatus, statusColor
+
+✅ MagazzinoSearchRequest.java
+   ├─ nome, indirizzo (filtri)
+   ├─ capacitaMin, capacitaMax
+   └─ page, size
+```
+
+**Fattura DTOs:**
+```
+✅ FatturaRequest.java
+   ├─ @NotBlank numero
+   ├─ @NotNull data, idProdotto
+   ├─ quantita, importo
+   └─ stato: SXFatturaStatus
+
+✅ FatturaResponse.java
+   ├─ id, numero, data
+   ├─ prodotto (nested), quantita, importo
+   └─ stato, dataCreazione
+
+✅ FatturaSearchRequest.java
+   ├─ numero, idProdotto (filtri)
+   ├─ dataFrom, dataTo
+   ├─ importoMin, importoMax
+   └─ page, size
+```
+
+**ProdottoMagazzino DTOs:**
+```
+✅ ProdottoMagazzinoRequest.java
+✅ ProdottoMagazzinoResponse.java
+✅ ProdottoMagazzinoSearchRequest.java
+```
+
+**JobExecution DTOs:**
+```
+✅ JobExecutionRequest.java
+   ├─ jobName, status (filtri)
+   ├─ from, to (date range)
+   └─ hasError (flag)
+
+✅ JobExecutionResponse.java
+   ├─ id, jobName
+   ├─ startTime, endTime
+   ├─ status: StatusJob
+   ├─ errorType, errorMessage
+   └─ risultato (JSON)
+
+✅ JobExecutionSearchRequest.java
+```
+
+---
+
+### ⚙️ Configurations (2 Files)
+
+```
+✅ SpringDataConfig.java
+   └─ @EnableSpringDataWebSupport(pageSerializationMode=VIA_DTO)
+
+✅ WebConfiguration.java
+   ├─ CORS configuration
+   └─ MediaType configuration
+```
+
+---
+
+### 🔄 Converter (1 File)
+
+```
+✅ StockStatusConverter.java
+   ├─ @Converter per StockStatusProdotto
+   ├─ convertToDatabaseColumn(enum): String
+   └─ convertToEntityAttribute(String): enum
+```
+
+---
+
+### ⚠️ Exceptions (5 Files)
+
+**Centralized Exception Handling**
+
+```
+✅ GlobalExceptionHandler.java
+   ├─ @RestControllerAdvice
+   ├─ @ExceptionHandler(ResourceNotFoundException)
+   ├─ @ExceptionHandler(InvalidInputException)
+   ├─ @ExceptionHandler(MethodArgumentNotValidException)
+   └─ @ExceptionHandler(Exception) fallback
+
+✅ ResourceNotFoundException.java
+   └─ extends RuntimeException (404)
+
+✅ jobsexceptions/
+   ├─ JobException.java (base)
+   ├─ UnknownJobException.java
+   ├─ InvalidFatturaException.java
+   └─ InvalidCapacityException.java
+```
+
+---
+
+### ⏰ Scheduled Jobs (1 File)
+
+```
+✅ InventoryScheduler.java
+   ├─ @Component @Slf4j
+   ├─ @Scheduled(cron="0 0 * * * *")
+   │  updateInventoryStatus() - ogni ora
+   ├─ @Scheduled(cron="0 0 */6 * * *")
+   │  checkMinimumStockAlert() - ogni 6 ore
+   └─ JobExecution tracking per ogni esecuzione
+```
+
+---
+
+### 🧪 Tests (2 Files)
+
+```
+✅ MagazzinoApplicationTests.java
+   └─ @SpringBootTest - Integration tests
+
+✅ services/jobTest.java
+   └─ Unit tests JobExecutionService
+```
 
 ---
 
 ## 🔗 Endpoints API
 
+## 🔗 Endpoints API
+
 ### Base URL
 ```
-http://localhost:8080/api
+http://localhost:8080
 ```
 
-### 📦 Prodotti
+### 📦 PRODOTTI API (`/prodotti`)
+
+**Metodi:** GET, POST, PUT, DELETE, SEARCH
 
 ```bash
-# Elenco (paginato)
-GET /api/prodotti?page=0&size=20
+# GET - Elenco IDs (filtri opzionali)
+GET /prodotti?nome=&descrizione=&prezzoMin=&prezzoMax=&page=0&size=10
+Response: Page<Long>
 
-# Dettaglio
-GET /api/prodotti/{id}
+# GET - Elenco completo (paginato)
+GET /prodotti/list?page=0&size=10
+Response: Page<ProdottoResponse>
 
-# Ricerca per codice
-GET /api/prodotti/search?codice=PROD001
+# GET - Dettaglio singolo
+GET /prodotti/{id}
+Response: ProdottoResponse
 
-# Crea
-POST /api/prodotti
+# POST - Crea prodotto
+POST /prodotti
+Content-Type: application/json
 {
   "codice": "PROD001",
-  "descrizione": "Descrizione",
-  "prezzo": 99.99,
-  "categoria": "Categoria"
+  "nome": "Prodotto Test",
+  "descrizione": "Descrizione dettagliata",
+  "prezzo": 99.99
 }
+Response: 201 Created
 
-# Modifica
-PUT /api/prodotti/{id}
+# PUT - Aggiorna prodotto
+PUT /prodotti/{id}
+Content-Type: application/json
 {
-  "descrizione": "Descrizione aggiornata",
+  "nome": "Nome Aggiornato",
   "prezzo": 109.99
 }
+Response: 204 No Content
 
-# Elimina
-DELETE /api/prodotti/{id}
+# DELETE - Elimina prodotto
+DELETE /prodotti/{id}
+Response: 204 No Content
+
+# POST - Ricerca avanzata
+POST /prodotti/search
+Content-Type: application/json
+{
+  "nome": "prodotto",
+  "prezzoMin": 50.00,
+  "prezzoMax": 150.00,
+  "page": 0,
+  "size": 20
+}
+Response: Page<ProdottoResponse>
 ```
 
-### 🏢 Magazzini
+---
+
+### 🏢 MAGAZZINI API (`/magazzino`)
+
+**Metodi:** GET, POST, PATCH, DELETE, SEARCH
 
 ```bash
-# Elenco
-GET /api/magazzini?page=0&size=20
+# GET - Elenco IDs (filtri opzionali)
+GET /magazzino?nome=&indirizzo=&capacitaMin=&capacitaMax=&page=0&size=10
+Response: Page<Long>
 
-# Dettaglio
-GET /api/magazzini/{id}
+# GET - Elenco completo (paginato)
+GET /magazzino/list?page=0&size=8
+Response: Page<MagazzinoResponse>
 
-# Giacenze
-GET /api/magazzini/{id}/giacenze
-
-# Crea
-POST /api/magazzini
+# GET - Dettaglio magazzino (con calcoli giacenze)
+GET /magazzino/{id}
+Response: MagazzinoResponse
 {
+  "id": 1,
   "nome": "Warehouse Roma",
   "indirizzo": "Via Roma 1",
-  "capacita_max": 1000,
-  "stato": "ATTIVO"
+  "capacita": 1000,
+  "quantitaTotale": 450,
+  "percentuale": 45.0,
+  "stockStatus": "NORMALE",
+  "statusColor": "yellow",
+  "statusDescription": "Magazzino in condizioni normali"
 }
 
-# Modifica
-PUT /api/magazzini/{id}
+# POST - Crea magazzino
+POST /magazzino
+Content-Type: application/json
+{
+  "nome": "Warehouse Milano",
+  "indirizzo": "Via Milano 1, Milano",
+  "capacita": 1500,
+  "status": "ATTIVO"
+}
+Response: 201 Created
 
-# Elimina
-DELETE /api/magazzini/{id}
+# PATCH - Aggiorna magazzino (solo campi non null)
+PATCH /magazzino/{id}
+Content-Type: application/json
+{
+  "nome": "Warehouse Milano Updated",
+  "status": "MANUTENZIONE"
+}
+Response: 204 No Content
+
+# DELETE - Elimina magazzino
+DELETE /magazzino/{id}
+Response: 204 No Content
+
+# POST - Ricerca avanzata
+POST /magazzino/search
+Content-Type: application/json
+{
+  "nome": "warehouse",
+  "indirizzo": "roma",
+  "capacitaMin": 500,
+  "capacitaMax": 2000,
+  "page": 0,
+  "size": 10
+}
+Response: Page<MagazzinoResponse>
 ```
 
-### 📄 Fatture
+---
+
+### 📄 FATTURE API (`/fatture`)
+
+**Metodi:** GET, POST, PUT, DELETE, SEARCH
 
 ```bash
-# Elenco
-GET /api/fatture?page=0&size=20&stato=CONFERMATA
+# GET - Elenco IDs (filtri opzionali)
+GET /fatture?numero=&idProdotto=&dataFrom=2026-01-01&dataTo=2026-02-26&importoMin=&importoMax=&page=0&size=10
+Response: Page<Long>
 
-# Filtri: ?stato=, ?magazzino_id=, ?data_inizio=, ?data_fine=
+# GET - Elenco completo (paginato)
+GET /fatture/list?page=0&size=10
+Response: Page<FatturaResponse>
 
-# Dettaglio
-GET /api/fatture/{id}
-
-# Crea
-POST /api/fatture
+# GET - Dettaglio fattura
+GET /fatture/{id}
+Response: FatturaResponse
 {
+  "id": 1,
   "numero": "FAT001",
   "data": "2026-02-26",
-  "magazzino_id": 1,
-  "importo": 1500.00,
-  "prodotti": [
-    {"prodotto_id": 1, "quantita": 5}
-  ]
+  "prodotto": { "id": 1, "codice": "PROD001" },
+  "quantita": 10,
+  "importo": 999.90,
+  "stato": "CONFERMATA",
+  "dataCreazione": "2026-02-26T10:30:00"
 }
 
-# Modifica
-PUT /api/fatture/{id}
+# GET - Fatture per prodotto specifico
+GET /fatture/prodotto/{idProdotto}?page=0&size=10
+Response: PageImpl<FatturaResponse>
 
-# Cambia stato
-PUT /api/fatture/{id}/stato
+# POST - Crea fattura
+POST /fatture
+Content-Type: application/json
 {
-  "stato": "CONFERMATA"
+  "numero": "FAT002",
+  "data": "2026-02-27",
+  "idProdotto": 1,
+  "quantita": 5,
+  "importo": 499.95,
+  "stato": "BOZZA"
+}
+Response: 201 Created
+
+# PUT - Aggiorna fattura
+PUT /fatture/{id}
+Content-Type: application/json
+{
+  "numero": "FAT002-REV1",
+  "quantita": 6,
+  "importo": 599.94
+}
+Response: 204 No Content
+
+# POST - Ricerca avanzata
+POST /fatture/search
+Content-Type: application/json
+{
+  "numero": "FAT",
+  "idProdotto": 1,
+  "dataFrom": "2026-01-01",
+  "dataTo": "2026-02-26",
+  "importoMin": 100.00,
+  "importoMax": 5000.00,
+  "page": 0,
+  "size": 20
+}
+Response: Page<FatturaResponse>
+
+# DELETE - Elimina/Annulla fattura
+DELETE /fatture/{id}
+Response: 204 No Content
+```
+
+---
+
+### ⏰ JOB EXECUTION API (`/jobs`)
+
+**Metodi:** GET, POST, SEARCH
+
+```bash
+# GET - Dettaglio job
+GET /jobs/{id}
+Response: JobExecutionResponse
+{
+  "id": 1,
+  "jobName": "InventoryScheduler.updateInventoryStatus",
+  "status": "SUCCESS",
+  "startTime": "2026-02-27T12:00:00",
+  "endTime": "2026-02-27T12:02:30",
+  "errorType": null,
+  "errorMessage": null
 }
 
-# Elimina/Annulla
-DELETE /api/fatture/{id}
+# GET - Elenco job (paginato)
+GET /jobs/list?page=0&size=10
+Response: Page<JobExecutionResponse>
+
+# GET - Ultimo job con errore
+GET /jobs/errors/last
+Response: JobExecutionResponse
+
+# POST - Ricerca avanzata job
+POST /jobs/search
+Content-Type: application/json
+{
+  "jobName": "InventoryScheduler",
+  "stato": "SUCCESS",
+  "from": "2026-02-01",
+  "to": "2026-02-27",
+  "hasError": false,
+  "page": 0,
+  "size": 20
+}
+Response: Page<JobExecutionResponse>
+
+# POST - Esecuzione manuale job
+POST /jobs/{jobName}/run
+Response: JobExecutionResponse
 ```
 
-### ⏰ Job Execution
+---
+
+### 🏠 HOME API (`/home`)
+
+**Metodi:** GET
 
 ```bash
-# Elenco
-GET /api/jobs?page=0&size=20
+# GET - Benvenuto
+GET /home
+Response: "Magazzino API Running ☻"
 
-# Dettaglio
-GET /api/jobs/{id}
+# GET - Health check
+GET /home/health
+Response: {
+  "status": "UP",
+  "timestamp": "2026-02-27T12:30:00.000Z"
+}
 
-# Ultimi job
-GET /api/jobs/latest?limit=10
-
-# Esegui manualmente
-POST /api/jobs/inventoryScheduler/run
+# GET - Informazioni app
+GET /home/info
+Response: {
+  "app": "Magazzino API",
+  "version": "1.0.0",
+  "environment": "dev",
+  "author": "Elia Sollazzo"
+}
 ```
 
-### 🏠 Home
+---
 
-```bash
-# Health check
-GET /
+### 📊 API Response Format
 
-# Response
-HTTP 200
-"Magazzino Application is running"
+**Success Response (200/201):**
+```json
+{
+  "data": { ... },
+  "timestamp": "2026-02-27T12:30:00Z",
+  "status": "success"
+}
+```
+
+**Error Response (4xx/5xx):**
+```json
+{
+  "status": 404,
+  "message": "Prodotto non trovato",
+  "path": "/prodotti/999",
+  "timestamp": "2026-02-27T12:30:00Z"
+}
+```
+
+**Paginated Response:**
+```json
+{
+  "content": [ ... ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalElements": 50,
+  "totalPages": 5,
+  "last": false,
+  "size": 10,
+  "number": 0,
+  "numberOfElements": 10,
+  "first": true,
+  "empty": false
+}
 ```
 
 ---
@@ -571,32 +1277,15 @@ src/test/java/
 
 ## 📚 Documentazione
 
-### File README Aggiuntivi
+### File Documentazione
 
-- **ARCHITETTURA_SISTEMA_2026.md** - Architettura tecnica dettagliata con esempi di codice
-- **README.MD** - Guida originale (legacy)
+- **README.md** - Questo file (guida completa progetto)
+- **ARCHITETTURA_SISTEMA_2026.md** - Documentazione tecnica dettagliata con architettura, patterns, esempi di codice
+- **README.MD** - Guida legacy
 
-### Struttura Progetto
+### Struttura Progetto Dettagliata
 
-```
-magazzino/
-├── pom.xml                         # Maven configuration
-├── Dockerfile                      # Docker image
-├── docker-compose.yml              # Orchestrazione
-├── runner.sh                       # Automation script
-├── mvnw / mvnw.cmd                 # Maven wrapper
-├── README.md                       # Questo file
-├── documentationsystem/
-│   └── ARCHITETTURA_SISTEMA_2026.md
-├── initdb/                         # SQL scripts
-└── src/
-    ├── main/
-    │   ├── java/it/spindox/stagelab/magazzino/
-    │   └── resources/application.properties
-    └── test/
-        ├── java/it/spindox/stagelab/magazzino/
-        └── resources/application-test.properties
-```
+**Vedi sezione [📂 Struttura Progetto](#-struttura-progetto) sopra per albero completo con 69 file Java**
 
 ### Javadoc
 
@@ -692,7 +1381,7 @@ Questo progetto è stato sviluppato per Spindox StageLab.
 ## 👤 Autore
 
 **Elia Sollazzo**  
-Data: 26 Febbraio 2026
+Data: 27 Febbraio 2026
 
 ---
 
@@ -714,6 +1403,10 @@ Data: 26 Febbraio 2026
 
 ---
 
-**Ultima modifica:** 26 Febbraio 2026  
-**Versione:** 1.0  
-**Status:** ✅ Production Ready
+**Ultima modifica:** 27 Febbraio 2026  
+**Versione:** 1.0 - COMPLETO  
+**Status:** ✅ Production Ready  
+**Total Files:** 82 (69 Java + 13 Config/Resources)  
+**Total Classes:** 69 Java Classes  
+**Total Endpoints:** 30+ API Endpoints  
+**Total DTOs:** 15+ Data Transfer Objects

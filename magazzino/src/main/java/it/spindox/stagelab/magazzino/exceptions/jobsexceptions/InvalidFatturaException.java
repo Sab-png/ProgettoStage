@@ -18,34 +18,26 @@ public class InvalidFatturaException extends JobException {
     private final BigDecimal importo;
     private final Integer quantita;
 
+    // 0) ERRORE GENERICO PER MESSAGGI DI VALIDAZIONE PERSONALIZZATI
 
-
-    // 1) ERRORE DATE – data scadenza incoerente rispetto alla data fattura
-
-    public InvalidFatturaException(Long idFattura,
-                                   LocalDate dataFattura,
-                                   LocalDate dataScadenza) {
-
-        super("La data di scadenza non può essere precedente o incoerente rispetto alla data della fattura",
+    public InvalidFatturaException(String message) {
+        super(message,
                 StatusJobErrorType.SYSTEM_ERROR,
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.CONFLICT); // <-- 409
 
-        this.idFattura = idFattura;
-        this.dataFattura = dataFattura;
-        this.dataScadenza = dataScadenza;
+        this.idFattura = null;
+        this.dataFattura = null;
+        this.dataScadenza = null;
         this.importo = null;
         this.quantita = null;
 
-        log.error("[InvalidFattura-DATA] id={} dataFattura={} dataScadenza={}",
-                idFattura, dataFattura, dataScadenza);
+        log.error("[InvalidFattura] {}", message);
     }
 
-
-      // 2) ERRORE STATUS :  fattura già pagata
+    // 1) ERRORE DATE : data scadenza incoerente
 
     public InvalidFatturaException(Long idFattura) {
-
-        super("La fattura con id " + idFattura + " è già pagata e non può essere modificata",
+        super("La data di scadenza non può essere precedente o incoerente rispetto alla data della fattura",
                 StatusJobErrorType.SYSTEM_ERROR,
                 HttpStatus.BAD_REQUEST);
 
@@ -54,12 +46,9 @@ public class InvalidFatturaException extends JobException {
         this.dataScadenza = null;
         this.importo = null;
         this.quantita = null;
-
-        log.error("[InvalidFattura-STATUS] id={} status=PAGATA (update negato)", idFattura);
     }
 
-
-     // 3) ERRORE IMPORTO/QUANTITÀ – importo o quantita non validi
+    // 2) ERRORE IMPORTO/QUANTITÀ : importo o quantita non validi
 
     public InvalidFatturaException(Long idFattura,
                                    BigDecimal importo,
@@ -74,8 +63,5 @@ public class InvalidFatturaException extends JobException {
         this.dataScadenza = null;
         this.importo = importo;
         this.quantita = quantita;
-
-        log.error("[InvalidFattura-IMPORTO] id={} importo={} quantita={}",
-                idFattura, importo, quantita);
     }
 }
