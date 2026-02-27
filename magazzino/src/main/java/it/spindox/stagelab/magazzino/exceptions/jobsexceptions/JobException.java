@@ -3,6 +3,7 @@ import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import java.io.Serial;
 
 
 // Base class per tutte le eccezioni dei Job
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public abstract class JobException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // Tipo di errore del job (es. SYSTEM_ERROR, UNKNOWN)

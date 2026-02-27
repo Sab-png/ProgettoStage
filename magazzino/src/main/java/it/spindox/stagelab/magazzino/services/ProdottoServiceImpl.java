@@ -23,7 +23,7 @@ public class ProdottoServiceImpl implements ProdottoService {
     private final ProdottoRepository repo;
     private final ProdottoMapper mapper;
 
-    // GET /prodotti/list (paginazione)
+    // GET /prodotti/list
 
     @Override
     @Transactional(readOnly = true)

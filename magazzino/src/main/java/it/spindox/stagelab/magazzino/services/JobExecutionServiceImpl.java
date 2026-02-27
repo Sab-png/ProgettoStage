@@ -26,7 +26,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     private final JobExecutionRepository repository;
 
 
-           // UTILITIES PER CONVERSIONE DATE E MAPPING
+    // UTILITIES PER CONVERSIONE DATE E MAPPING
 
 
     private static OffsetDateTime toUtc(LocalDateTime ldt) {
@@ -84,7 +84,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         Pageable pageable = PageRequest.of(
                 Math.max(request.getPage(), 0),
                 Math.max(request.getSize(), 1),
-                Sort.by(Sort.Direction.DESC, "startTime")
+                Sort.by(Sort.Direction.ASC, "startTime")
         );
 
         OffsetDateTime from = toUtc(request.getFrom());
@@ -147,10 +147,10 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     }
 
 
-           //  JOB LIFECYCLE
+    //  CICLO E FUNZIONAMENTO BASE DEL JOB :  START → RUNNING → SUCCESS / FAILED
 
 
-    // START: crea la JobExecution in RUNNING
+    // START: crea la JobExecution IS RUNNING
 
     @Override
     public JobExecution start() {

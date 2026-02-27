@@ -27,9 +27,10 @@ public class FatturaMapperImpl implements FatturaMapper {
         f.setProdotto(prodotto);
 
         // In fase di creazione, la fattura è:
-        // - importo come richiesto
+        // - importo totale
         // - pagato = 0
         // - scadenza
+
         SXFatturaStatus status = SXFatturaStatus.determine(
                 request.getImporto(),      // importo totale
                 BigDecimal.ZERO,           // non ancora pagata

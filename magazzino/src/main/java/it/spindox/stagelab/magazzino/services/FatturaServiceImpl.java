@@ -50,7 +50,7 @@ public class FatturaServiceImpl implements FatturaService {
         int page = Math.max(request.getPage(), 0);
         int size = Math.max(request.getSize(), 1);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
 
         log.debug("Parametri ricerca: numero='{}', idProdotto={}, dataFrom={}, dataTo={}, importoMin={}, importoMax={}, page={}, size={}",
                 request.getNumero(),

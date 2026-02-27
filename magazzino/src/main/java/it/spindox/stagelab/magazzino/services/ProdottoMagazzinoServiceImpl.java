@@ -126,6 +126,7 @@ public class ProdottoMagazzinoServiceImpl implements ProdottoMagazzinoService {
         validateAndAlign(entity, false);
 
         //  AGGIORNA LO STATO
+
         ScortaMinPMStatus status = ScortaMinPMStatus.fromQuantita(entity.getQuantita());
         entity.setScortaMinStatus(status != null ? status.name() : null);
 

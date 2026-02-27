@@ -33,7 +33,7 @@ public interface JobExecutionService {
     void success(JobExecution job);
 
 
-      // Segna il job come fallito (VERSIONE CORRETTA)
+      // Segna il job come fallito con errore specifico
 
     void failed(JobExecution job, StatusJobErrorType errorType, Exception e);
 

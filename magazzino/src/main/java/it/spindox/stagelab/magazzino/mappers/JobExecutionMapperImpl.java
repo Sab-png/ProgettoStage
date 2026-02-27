@@ -25,7 +25,7 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
         return ldt != null ? ldt.atOffset(ZoneOffset.UTC) : null;
     }
 
-    // FACTORY: crea una nuova JobExecution
+    //  crea una nuova JobExecution
 
     @Override
     public JobExecution toEntity(String jobName, StatusJob status) {

@@ -3,18 +3,16 @@ import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityEx
 import lombok.Getter;
 import java.util.Arrays;
 
-@Getter
 
+
+@Getter
 public enum StockStatusProdotto {
 
     VERDE("GREEN", "Stock nella norma"),
     GIALLO("YELLOW", "Sotto la scorta minima"),
     ROSSO("RED", "Esaurito");
 
-    private static String message;
-    @Getter
     private final String dbValue;
-    @Getter
     private final String description;
 
     StockStatusProdotto(String dbValue, String description) {
@@ -22,20 +20,35 @@ public enum StockStatusProdotto {
         this.description = description;
     }
 
-    // Stato ottenuto dal DB
+    // Conversione dal valore del DB
 
     public static StockStatusProdotto fromDbValue(String dbValue) {
+
+        if (dbValue == null) {
+            throw new InvalidCapacityException("NULL", "Valore DB nullo per StockStatusProdotto");
+        }
+
         return Arrays.stream(values())
-                .filter(s -> s.getDbValue().equalsIgnoreCase(dbValue))
+                .filter(s -> s.getDbValue().equalsIgnoreCase(dbValue.trim()))
                 .findFirst()
-                .orElseThrow(() -> new InvalidCapacityException(dbValue, message));
+                .orElseThrow(() ->
+                        new InvalidCapacityException(
+                                dbValue,
+                                "Valore DB non valido per StockStatusProdotto"
+                        )
+                );
     }
 
-    // Stato calcolato da quantità e scorta minima
+    // Stato calcolato dinamicamente
 
     public static StockStatusProdotto fromQuantita(Integer quantita, Integer scortaMin) {
-        if (quantita == null || quantita == 0) return ROSSO;
-        if (scortaMin != null && quantita < scortaMin) return GIALLO;
+
+        if (quantita == null || quantita <= 0)
+            return ROSSO;
+
+        if (scortaMin != null && quantita < scortaMin)
+            return GIALLO;
+
         return VERDE;
     }
 }

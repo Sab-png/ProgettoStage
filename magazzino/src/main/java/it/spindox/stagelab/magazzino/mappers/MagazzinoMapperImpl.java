@@ -48,7 +48,7 @@ public class MagazzinoMapperImpl implements MagazzinoMapper {
     }
 
 
-    // ENTITY → DTO (RESPONSE)
+    // ENTITY :  DTO (RESPONSE)
 
     // Comprende il calcolo:
     // • totale prodotti
