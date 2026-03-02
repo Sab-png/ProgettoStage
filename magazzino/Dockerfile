@@ -8,3 +8,5 @@ EXPOSE 8080
 COPY /target/magazzino-app.jar /app.jar
 
 ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5900", "-jar", "app.jar"]
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Rome

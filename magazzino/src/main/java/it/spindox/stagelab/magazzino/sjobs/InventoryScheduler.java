@@ -74,13 +74,11 @@ public class InventoryScheduler {
             log.info("[JOB IS RUNNING] id={} startTime={}", job.getId(), job.getStartTime());
 
 
-
             // 4) LOGICA DEL JOB:
             //     - calcolo livelli stock
             //     - possibili eccezioni MagazzinoException
 
             magazzinoService.checkStockLevels();
-
 
 
             // 5) JOB SUCCESS

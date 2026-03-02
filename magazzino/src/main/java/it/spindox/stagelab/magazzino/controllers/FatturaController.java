@@ -112,6 +112,7 @@ public class FatturaController {
     }
 
     //  PATCH /fatture/ID/pagamento : aggiungi pagamento e ricalcola stato
+
     @PatchMapping(
             path = "/{id}/payment-checkfattura",
             consumes = "application/json",
@@ -130,8 +131,15 @@ public class FatturaController {
                 request.getPagatoDaAggiungere()
         );
         return ResponseEntity.ok(updated);
-    }
 
+    }
+    // POST:  endpoint per check pagamento di tutte le fatture
+
+    @PostMapping("/payment-check-all")
+    public ResponseEntity<Void> checkAllFatture() {
+        fatturaService.paymentCheckAllFatture();
+        return ResponseEntity.ok().build();
+    }
 
     // POST /fatture/search
 

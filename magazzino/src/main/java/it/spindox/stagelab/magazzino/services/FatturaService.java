@@ -40,6 +40,10 @@ public interface FatturaService {
 
     void delete(Long id);
 
+// Metodo per verificare tutte le fatture e aggiornare lo stato se necessario
+
+    void paymentCheckAllFatture();
+
     // Ricerca solo ID
 
     Page<Long> searchIds(FatturaSearchRequest req);

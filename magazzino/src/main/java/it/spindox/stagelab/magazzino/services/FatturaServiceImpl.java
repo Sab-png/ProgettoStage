@@ -22,6 +22,7 @@ import java.util.List;
 
 
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -86,7 +87,6 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
 
-
     // CREATE
 
     @Override
@@ -134,7 +134,7 @@ public class FatturaServiceImpl implements FatturaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
         if (entity.getStatus() == SXFatturaStatus.PAGATA) {
-            throw new InvalidFatturaException(id);
+            throw new InvalidFatturaException("La fattura è già pagata e non può essere modificata");
         }
 
         if (request.getDataFattura() != null &&
@@ -213,6 +213,40 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
 
+
+    // CONTROLLO TOTALE pagamento DELLE FATTURE
+
+    @Override
+    @Transactional
+    public void paymentCheckAllFatture() {
+
+        List<Fattura> fatture = fatturaRepository.findAll();
+
+        for (Fattura f : fatture) {
+
+            BigDecimal importo = f.getImporto();
+            BigDecimal pagato = f.getPagato() == null ? BigDecimal.ZERO : f.getPagato();
+            LocalDate scadenza = f.getDataScadenza();
+
+            // Uso la logica ENUM per determinare il nuovo stato in base a importo, pagato e scadenza
+
+            SXFatturaStatus nuovoStatus =
+                    SXFatturaStatus.determine(importo, pagato, scadenza);
+
+            if (f.getStatus() != nuovoStatus) {
+                log.info("[AUTO CHECK] Fattura id={} {} → {}",
+                        f.getId(), f.getStatus(), nuovoStatus);
+
+                f.setStatus(nuovoStatus);
+            }
+        }
+
+        fatturaRepository.saveAll(fatture);
+    }
+
+
+    //  calcolo pagato:  incrementale
+
     private static @NonNull BigDecimal calcolaNuovoTotalePagato(Fattura entity, BigDecimal pagatoDaAggiungere) {
 
         BigDecimal pagatoAttuale =
@@ -227,7 +261,6 @@ public class FatturaServiceImpl implements FatturaService {
         return nuovoTotalePagato;
     }
 
-
     // GET BY ID
 
     @Override
@@ -237,8 +270,6 @@ public class FatturaServiceImpl implements FatturaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
         return fatturaMapper.toResponse(entity);
     }
-
-
 
     // GET BY PRODOTTO paginato
 
