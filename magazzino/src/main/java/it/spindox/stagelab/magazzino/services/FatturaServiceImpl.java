@@ -10,17 +10,17 @@ import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidFatturaExc
 import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
 import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-
-
+import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 
 
 @Slf4j
@@ -30,95 +30,109 @@ import java.util.List;
 
 public class FatturaServiceImpl implements FatturaService {
 
+
     private final FatturaRepository fatturaRepository;
     private final ProdottoRepository prodottoRepository;
     private final FatturaMapper fatturaMapper;
+    private final FatturaService self;
 
+    // EntityManager per gestire manualmente la persistenza PER LE CACHE
 
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    // SEARCH
+    // SEARCH: ricerca fatture
 
     @Override
     @Transactional(readOnly = true)
     public Page<FatturaResponse> search(FatturaSearchRequest request) {
 
-        log.info("Ricerca fatture avviata");
+        if (request == null) return Page.empty();
 
-        if (request == null) {
-            log.warn("Richiesta NULL -> ritorno pagina vuota");
-            return Page.empty();
-        }
+        // Page e size sempre >= 1
 
         int page = Math.max(request.getPage(), 0);
         int size = Math.max(request.getSize(), 1);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
-
-        log.debug(
-                "Parametri ricerca: numero='{}', idProdotto={}, dataFrom={}, dataTo={}, importoMin={}, importoMax={}, page={}, size={}",
-                request.getNumero(),
-                request.getIdProdotto(),
-                request.getDataFrom(),
-                request.getDataTo(),
-                request.getImportoMin(),
-                request.getImportoMax(),
-                page,
-                size
-        );
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
 
         Fattura probe = new Fattura();
-        if (request.getNumero() != null && !request.getNumero().isBlank()) {
+
+        if (request.getNumero() != null && !request.getNumero().isBlank())
             probe.setNumero(request.getNumero());
-        }
+
         if (request.getIdProdotto() != null) {
             Prodotto p = new Prodotto();
             p.setId(request.getIdProdotto());
             probe.setProdotto(p);
         }
 
-        ExampleMatcher matcher =
-                ExampleMatcher.matchingAll()
-                        .withIgnoreCase()
-                        .withMatcher("numero", ExampleMatcher.GenericPropertyMatchers.contains());
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+                .withIgnoreCase()
+                .withMatcher("numero", ExampleMatcher.GenericPropertyMatchers.contains());
 
-        Page<Fattura> result = fatturaRepository.findAll(Example.of(probe, matcher), pageable);
+        Page<Fattura> result =
+                fatturaRepository.findAll(Example.of(probe, matcher), pageable);
 
         return result.map(fatturaMapper::toResponse);
     }
 
+
+    // SEARCH SOLO ID
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Long> searchIds(FatturaSearchRequest req) {
+        Page<FatturaResponse> pageResp = self.search(req);
+        return pageResp.map(FatturaResponse::getId);
+    }
 
     // CREATE
 
     @Override
     public FatturaResponse create(FatturaRequest request) {
 
-        if (request == null) throw new IllegalArgumentException("FatturaRequest è null");
+        if (request == null)
+            throw new IllegalArgumentException("FatturaRequest è null");
 
-        if (request.getIdProdotto() == null) {
+        if (request.getIdProdotto() == null)
             throw new InvalidFatturaException(null, request.getImporto(), request.getQuantita());
-        }
+
+        // Validazione delle date
 
         if (request.getDataScadenza() != null &&
                 request.getDataFattura() != null &&
                 request.getDataScadenza().isBefore(request.getDataFattura())) {
-
-            throw new InvalidFatturaException(
-                    (Long) null
-            );
+            throw new InvalidFatturaException((Long) null);
         }
 
-        Prodotto prodotto = prodottoRepository.findById(request.getIdProdotto())
+        // Carico il prodotto collegato
+
+        Prodotto prodotto = prodottoRepository
+                .findById(request.getIdProdotto())
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
 
+        // Map DTO → Entity
+
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
+
+        // Generazione numero sequenziale
 
         Long seq = fatturaRepository.nextNumeroSeq();
         entity.setNumero("FAT-" + seq);
 
-        entity.setPagato(
-                entity.getImporto() != null ? entity.getImporto() : BigDecimal.ZERO
-        );
-        entity.setStatus(SXFatturaStatus.PAGATA);
+        // Nuova fattura: pagato = 0
+        entity.setPagato(BigDecimal.ZERO);
+
+        // Determinazione stato iniziale
+
+        entity.setStatus(determine(
+                entity.getImporto(),
+                entity.getPagato(),
+                entity.getDataScadenza()
+        ));
+
+        // Salvataggio
 
         entity = fatturaRepository.save(entity);
         return fatturaMapper.toResponse(entity);
@@ -130,21 +144,25 @@ public class FatturaServiceImpl implements FatturaService {
     @Override
     public FatturaResponse update(Long id, FatturaRequest request) {
 
+        // Carico la fattura
+
         Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
-        if (entity.getStatus() == SXFatturaStatus.PAGATA) {
+        // Una fattura pagata non può essere modificata
+
+        if (entity.getStatus() == SXFatturaStatus.PAGATA)
             throw new InvalidFatturaException("La fattura è già pagata e non può essere modificata");
-        }
+
+        // Validazione date
 
         if (request.getDataFattura() != null &&
                 request.getDataScadenza() != null &&
                 request.getDataScadenza().isBefore(request.getDataFattura())) {
-
-            throw new InvalidFatturaException(
-                    id
-            );
+            throw new InvalidFatturaException(id);
         }
+
+        // Carico nuovo prodotto se richiesto
 
         Prodotto prodotto = null;
         if (request.getIdProdotto() != null) {
@@ -152,59 +170,15 @@ public class FatturaServiceImpl implements FatturaService {
                     .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
         }
 
+        // Mapper per aggiornamento parziale
+
         fatturaMapper.updateEntity(entity, request, prodotto);
 
-        if (entity.getPagato() != null &&
-                entity.getImporto() != null &&
-                entity.getPagato().compareTo(entity.getImporto()) >= 0) {
+        // Ricalcolo stato
 
-            entity.setStatus(SXFatturaStatus.PAGATA);
-
-        } else if (entity.getDataScadenza() != null &&
-                entity.getDataScadenza().isBefore(LocalDate.now())) {
-
-            entity.setStatus(SXFatturaStatus.SCADUTA);
-
-        } else {
-            entity.setStatus(SXFatturaStatus.EMESSA);
-        }
-
-        entity = fatturaRepository.save(entity);
-        return fatturaMapper.toResponse(entity);
-    }
-
-
-    // PAYMENT CHECK : metodo controllo fattura per aggiungere un pagamento e aggiornare lo stato di conseguenza
-
-    @Override
-    public FatturaResponse paymentCheckFattura(Long id, BigDecimal pagatoDaAggiungere) {
-
-        if (pagatoDaAggiungere == null || pagatoDaAggiungere.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Il pagamento deve essere > 0");
-        }
-
-        Fattura entity = fatturaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
-
-        // Blocco pagamenti su fattura già completamente pagata
-
-        if (entity.getStatus() == SXFatturaStatus.PAGATA) {
-            throw new InvalidFatturaException("La fattura è già pagata interamente");
-        }
-
-        // Calcolo del nuovo totale pagato
-
-        BigDecimal nuovoTotalePagato = calcolaNuovoTotalePagato(entity, pagatoDaAggiungere);
-
-        // Aggiorno importo pagato
-
-        entity.setPagato(nuovoTotalePagato);
-
-        // Aggiorno lo stato
-
-        entity.setStatus(SXFatturaStatus.determine(
+        entity.setStatus(determine(
                 entity.getImporto(),
-                nuovoTotalePagato,
+                entity.getPagato(),
                 entity.getDataScadenza()
         ));
 
@@ -213,53 +187,99 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
 
-
-    // CONTROLLO TOTALE pagamento DELLE FATTURE
+    // PAGAMENTO SINGOLA FATTURA
 
     @Override
-    @Transactional
-    public void paymentCheckAllFatture() {
+    public FatturaResponse paymentCheckFattura(Long id, BigDecimal pagatoDaAggiungere) {
+
+        if (pagatoDaAggiungere == null || pagatoDaAggiungere.compareTo(BigDecimal.ZERO) <= 0)
+            throw new IllegalArgumentException("Il pagamento deve essere > 0");
+
+        Fattura entity = fatturaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
+
+        // Una fattura già pagata non può accettare pagamenti
+
+        if (entity.getStatus() == SXFatturaStatus.PAGATA)
+            throw new InvalidFatturaException("La fattura è già pagata interamente");
+
+        BigDecimal nuovoTotale = entity.getPagato().add(pagatoDaAggiungere);
+
+        // Non si può superare l'importo totale
+
+        if (nuovoTotale.compareTo(entity.getImporto()) > 0)
+            throw new InvalidFatturaException("Il pagamento supererebbe il totale");
+
+        entity.setPagato(nuovoTotale);
+
+        // Ricalcolo stato
+
+        entity.setStatus(determine(
+                entity.getImporto(),
+                nuovoTotale,
+                entity.getDataScadenza()
+        ));
+
+        entity = fatturaRepository.save(entity);
+        return fatturaMapper.toResponse(entity);
+    }
+
+    // CHECK AUTOMATICO DI TUTTE LE FATTURE (cron/job)
+
+    @Override
+    public List<FatturaResponse> paymentCheckAllFatture() {
+
+        // PER LA CACHE
+
+        entityManager.clear();
 
         List<Fattura> fatture = fatturaRepository.findAll();
+        List<Fattura> changed = new ArrayList<>();
+        List<FatturaResponse> updated = new ArrayList<>();
 
         for (Fattura f : fatture) {
 
-            BigDecimal importo = f.getImporto();
+            // Se manca l'importo, la fattura è invalida :  la salto per evitare crash
+
+            if (f.getImporto() == null) {
+                log.error("[AUTO CHECK] Fattura ID={} ha IMPORTO NULL, saltata.", f.getId());
+                continue;
+            }
+
+            // Se manca pagato : da considerarla come zero
+
             BigDecimal pagato = f.getPagato() == null ? BigDecimal.ZERO : f.getPagato();
-            LocalDate scadenza = f.getDataScadenza();
 
-            // Uso la logica ENUM per determinare il nuovo stato in base a importo, pagato e scadenza
+            // Calcolo lo stato corretto
 
-            SXFatturaStatus nuovoStatus =
-                    SXFatturaStatus.determine(importo, pagato, scadenza);
+            SXFatturaStatus nuovo = determine(
+                    f.getImporto(),
+                    pagato,
+                    f.getDataScadenza()
+            );
 
-            if (f.getStatus() != nuovoStatus) {
-                log.info("[AUTO CHECK] Fattura id={} {} → {}",
-                        f.getId(), f.getStatus(), nuovoStatus);
+            // Aggiorno solo se lo stato è cambiato
 
-                f.setStatus(nuovoStatus);
+            if (f.getStatus() != nuovo) {
+                log.info("[AUTO CHECK] id={} {} → {}", f.getId(), f.getStatus(), nuovo);
+                f.setStatus(nuovo);
+                changed.add(f);
+                updated.add(fatturaMapper.toResponse(f));
             }
         }
 
-        fatturaRepository.saveAll(fatture);
-    }
+        // Persisto solo se ci sono modifiche
 
-
-    //  calcolo pagato:  incrementale
-
-    private static @NonNull BigDecimal calcolaNuovoTotalePagato(Fattura entity, BigDecimal pagatoDaAggiungere) {
-
-        BigDecimal pagatoAttuale =
-                entity.getPagato() == null ? BigDecimal.ZERO : entity.getPagato();
-
-        BigDecimal nuovoTotalePagato = pagatoAttuale.add(pagatoDaAggiungere);
-
-        if (nuovoTotalePagato.compareTo(entity.getImporto()) > 0) {
-            throw new InvalidFatturaException("Il pagamento supererebbe l'importo totale della fattura");
+        if (!changed.isEmpty()) {
+            fatturaRepository.saveAllAndFlush(changed);
+            log.info("[AUTO CHECK] SALVATE {} FATTURE MODIFICATE", changed.size());
+        } else {
+            log.info("[AUTO CHECK] Nessuna fattura da aggiornare.");
         }
 
-        return nuovoTotalePagato;
+        return updated;
     }
+
 
     // GET BY ID
 
@@ -271,38 +291,36 @@ public class FatturaServiceImpl implements FatturaService {
         return fatturaMapper.toResponse(entity);
     }
 
-    // GET BY PRODOTTO paginato
+
+    // GET BY PRODOTTO
 
     @Override
     @Transactional(readOnly = true)
     public PageImpl<FatturaResponse> getByProdotto(Long idProdotto, int page, int size) {
 
-        if (idProdotto == null) {
-            return new PageImpl<>(List.of(),
-                    PageRequest.of(Math.max(page, 0), Math.max(size, 1)), 0);
-        }
-
-        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
-                Sort.by("id").descending());
+        if (idProdotto == null)
+            return new PageImpl<>(List.of(), PageRequest.of(page, size), 0);
 
         List<Fattura> list = fatturaRepository.findByProdottoId(idProdotto);
 
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), list.size());
 
-        List<FatturaResponse> content = list.subList(start, end).stream()
-                .map(fatturaMapper::toResponse)
-                .toList();
+        List<FatturaResponse> content =
+                list.subList(start, end).stream()
+                        .map(fatturaMapper::toResponse)
+                        .toList();
 
         return new PageImpl<>(content, pageable, list.size());
     }
-
 
 
     // DELETE
 
     @Override
     public void delete(Long id) {
+
         if (id == null) return;
 
         Fattura entity = fatturaRepository.findById(id)
@@ -311,26 +329,13 @@ public class FatturaServiceImpl implements FatturaService {
         fatturaRepository.delete(entity);
     }
 
-
-
-    // SEARCH IDS
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Long> searchIds(FatturaSearchRequest req) {
-        Page<FatturaResponse> pageResp = this.search(req);
-        return pageResp.map(FatturaResponse::getId);
-    }
-
-
-
     // GET ALL PAGED
 
     @Override
     @Transactional(readOnly = true)
     public Page<FatturaResponse> getAllPaged(int page, int size) {
-        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1),
-                Sort.by("id").descending());
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return fatturaRepository.findAll(pageable).map(fatturaMapper::toResponse);
     }
 }

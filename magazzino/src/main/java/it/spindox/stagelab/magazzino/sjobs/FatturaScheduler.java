@@ -10,10 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 
@@ -28,16 +30,11 @@ public class FatturaScheduler {
     private final FatturaService fatturaService;
     private final JobExecutionService jobExecutionService;
 
-
-    // application.properties
-
     @Value("${fatture.check.enabled:true}")
     private boolean fattureJobEnabled;
 
     @Value("${fatture.check.cron:0 0 1 * * *}")
     private String fattureCheckCron;
-
-    // TIMEZONE
 
     private static final ZoneId ZONE_ROME = ZoneId.of("Europe/Rome");
 
@@ -46,21 +43,37 @@ public class FatturaScheduler {
                     .withZone(ZONE_ROME);
 
 
+    //  CALCOLO PROSSIMA ESECUZIONE CON LOG RELATIVO
 
-    // FATTURA SCHEDULER  GIORNALIERO: CONTROLLO STATO FATTURE
+    private void logNextExecution() {
+        try {
+            CronExpression cron = CronExpression.parse(fattureCheckCron);
+            ZonedDateTime now = ZonedDateTime.now(ZONE_ROME);
+
+            ZonedDateTime next = cron.next(now);
+
+            if (next != null) {
+                log.info("[FATTURE JOB] PROSSIMA ESECUZIONE PREVISTA: {}", TS.format(next.toInstant()));
+            } else {
+                log.warn("[FATTURE JOB] Cron invalid: impossibile calcolare la prossima esecuzione.");
+            }
+        } catch (Exception e) {
+            log.error("[FATTURE JOB] Errore nel parsing del cron '{}': {}", fattureCheckCron, e.getMessage());
+        }
+    }
+
+
+    // LO SCHEDULER
 
     @Scheduled(cron = "${fatture.check.cron}", zone = "Europe/Rome")
     public void runFattureDailyCheck() {
 
         if (!fattureJobEnabled) {
-            log.info("[FATTURE JOB] DISABILITATO via config (fatture.check.enabled=false).");
+            log.info("[FATTURE JOB] DISABILITATO via config.");
             return;
         }
 
-        if (fattureCheckCron == null || fattureCheckCron.isBlank()) {
-            log.warn("[FATTURE JOB] CRON NON CONFIGURATO correttamente (fatture.check.cron).");
-            return;
-        }
+        logNextExecution(); // Mostra SEMPRE la prossima esecuzione del job
 
         final Instant startInstant = Instant.now();
         log.info("--- FATTURE JOB START --- [{}] ---", TS.format(startInstant));
@@ -68,16 +81,16 @@ public class FatturaScheduler {
         JobExecution job = null;
 
         try {
-            // 1) JOB RUNNING
+            // RUNNING
 
             job = jobExecutionService.start();
             log.info("[JOB RUNNING] id={}", job.getId());
 
-            // 2) LOGICA DEL JOB
+            // LOGICA
 
             fatturaService.paymentCheckAllFatture();
 
-            // 3) SUCCESS
+            // SUCCESS
 
             jobExecutionService.success(job);
             log.info("[FATTURE JOB SUCCESS] id={}", job.getId());
@@ -95,7 +108,8 @@ public class FatturaScheduler {
         }
     }
 
-    // HANDLER DI FALLIMENTO
+
+    // FALLIMENTO DEL JOB
 
     private void handleFailure(JobExecution job,
                                StatusJobErrorType type,
@@ -110,7 +124,8 @@ public class FatturaScheduler {
         jobExecutionService.failed(job, type, e);
     }
 
-    // LOG DI FINE JOB
+
+    //  FINE JOB
 
     private void logJobEnd(Instant startInstant, JobExecution job) {
 
@@ -122,8 +137,13 @@ public class FatturaScheduler {
         log.info("[JOB ID] {}", (job != null ? job.getId() : "null"));
         log.info("[DURATION] {}ms", ms);
     }
+
+
+    //  LOADED
+
     @PostConstruct
     public void loaded() {
         log.info(">>> FATTURA SCHEDULER LOADED <<< enabled={} cron={}", fattureJobEnabled, fattureCheckCron);
+        logNextExecution(); // <mostra la prossima esecuzione anche allo startup
     }
 }

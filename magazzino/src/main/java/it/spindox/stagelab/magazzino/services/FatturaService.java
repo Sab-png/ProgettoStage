@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface FatturaService {
 
@@ -42,7 +43,7 @@ public interface FatturaService {
 
 // Metodo per verificare tutte le fatture e aggiornare lo stato se necessario
 
-    void paymentCheckAllFatture();
+    List<FatturaResponse> paymentCheckAllFatture();
 
     // Ricerca solo ID
 

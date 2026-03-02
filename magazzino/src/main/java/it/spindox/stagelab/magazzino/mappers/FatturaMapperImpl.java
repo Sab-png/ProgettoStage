@@ -5,47 +5,32 @@ import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.entities.Fattura;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import java.math.BigDecimal;
 
 
-@Slf4j
+
+
 @Component
 public class FatturaMapperImpl implements FatturaMapper {
 
-    // CREATE: DTO :Entity
-
     @Override
     public Fattura toEntity(FatturaRequest request, Prodotto prodotto) {
-
         Fattura f = new Fattura();
+
         f.setDataFattura(request.getDataFattura());
         f.setDataScadenza(request.getDataScadenza());
         f.setImporto(request.getImporto());
         f.setQuantita(request.getQuantita());
         f.setProdotto(prodotto);
 
-        // In fase di creazione, la fattura è:
-        // - importo totale
-        // - pagato = 0
-        // - scadenza
-
-        SXFatturaStatus status = SXFatturaStatus.determine(
-                request.getImporto(),      // importo totale
-                BigDecimal.ZERO,           // non ancora pagata
-                request.getDataScadenza()  // data scadenza
-        );
-
-        f.setStatus(status);
-
         return f;
     }
+// DTO DI RESPONSE CON TUTTI I CAMPI DELL'ENTITA' E ID PRODOTTO (SE NON NULL) E DESCRIZIONE DELLO STATUS
 
-    // Entity :  DTO Response
-
+    @Override
     public FatturaResponse toResponse(Fattura entity) {
         FatturaResponse r = new FatturaResponse();
+
         r.setId(entity.getId());
         r.setNumero(entity.getNumero());
         r.setDataFattura(entity.getDataFattura());
@@ -59,45 +44,41 @@ public class FatturaMapperImpl implements FatturaMapper {
         }
 
         r.setStatus(entity.getStatus());
-        r.setStatusDescription(entity.getStatus() != null ? entity.getStatus().getDescription() : null);
+        r.setStatusDescription(entity.getStatus() != null
+                ? entity.getStatus().getDescription()
+                : null
+        );
 
         return r;
     }
-
-    // UPDATE (PATCH)
-
+// UPDATE PARZIALE DELL'ENTITA' CON I CAMPI NON NULL DEL REQUEST E PRODOTTO (SE NON NULL)
     @Override
-
     public void updateEntity(Fattura target, FatturaRequest request, Prodotto prodotto) {
 
-        if (request.getDataFattura() != null) {
+        if (request.getDataFattura() != null)
             target.setDataFattura(request.getDataFattura());
-        }
 
-        if (request.getDataScadenza() != null) {
+        if (request.getDataScadenza() != null)
             target.setDataScadenza(request.getDataScadenza());
-        }
 
-        if (request.getImporto() != null) {
+        if (request.getImporto() != null)
             target.setImporto(request.getImporto());
-        }
 
-        if (request.getQuantita() != null) {
+        if (request.getQuantita() != null)
             target.setQuantita(request.getQuantita());
-        }
 
-        if (prodotto != null) {
+        if (prodotto != null)
             target.setProdotto(prodotto);
+
+        // Ricalcolo stato SOLO se la fattura NON è pagata
+
+        if (target.getStatus() != SXFatturaStatus.PAGATA) {
+            SXFatturaStatus nuovo = SXFatturaStatus.determine(
+                    target.getImporto(),
+                    target.getPagato(),
+                    target.getDataScadenza()
+            );
+            target.setStatus(nuovo);
         }
-
-        // Ricalcolo dello stato ogni volta che la fattura cambia
-
-        SXFatturaStatus status = SXFatturaStatus.determine(
-                target.getImporto(),        // importo aggiornato
-                target.getPagato(),         // quanto è stato pagato
-                target.getDataScadenza()    // scadenza attuale
-        );
-
-        target.setStatus(status);
     }
 }

@@ -18,6 +18,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -136,11 +138,14 @@ public class FatturaController {
     // POST:  endpoint per check pagamento di tutte le fatture
 
     @PostMapping("/payment-check-all")
-    public ResponseEntity<Void> checkAllFatture() {
-        fatturaService.paymentCheckAllFatture();
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> checkAllFatture() {
+        List<FatturaResponse> items = fatturaService.paymentCheckAllFatture();
+        Map<String, Object> body = Map.of(
+                "updatedCount", items.size(),
+                "items", items
+        );
+        return ResponseEntity.ok(body);
     }
-
     // POST /fatture/search
 
     @PostMapping("/search")

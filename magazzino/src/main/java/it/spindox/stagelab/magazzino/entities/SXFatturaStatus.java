@@ -2,6 +2,7 @@ package it.spindox.stagelab.magazzino.entities;
 import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 
 // Enum che rappresenta lo stato della fattura
@@ -27,7 +28,6 @@ public enum SXFatturaStatus {
     }
 
     // Metodo statico per determinare lo stato della fattura in base a importo, pagato e dataScadenza
-
     public static SXFatturaStatus determine(
             BigDecimal importo,
             BigDecimal pagato,
@@ -37,21 +37,19 @@ public enum SXFatturaStatus {
             throw new IllegalArgumentException("Importo nullo!");
         }
 
-        // Caso 1 : fattura pagata
+        // TODAY in Europe/Rome (fix timezone)
+        LocalDate today = LocalDate.now(ZoneId.of("Europe/Rome"));
 
+        // 1) PAGATA
         if (pagato != null && pagato.compareTo(importo) >= 0) {
             return PAGATA;
         }
 
-        // Caso 2 : fattura scaduta
-
-        if (dataScadenza != null && LocalDate.now().isAfter(dataScadenza)) {
+        // 2) SCADUTA
+        if (dataScadenza != null && today.isAfter(dataScadenza)) {
             return SCADUTA;
         }
 
-        // Caso 3 : stato Emessa
-
+        // 3) EMESSA
         return EMESSA;
-    }
-
-}
+    }}
