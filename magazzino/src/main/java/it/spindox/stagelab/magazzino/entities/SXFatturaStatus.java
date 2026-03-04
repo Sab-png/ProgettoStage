@@ -28,6 +28,7 @@ public enum SXFatturaStatus {
     }
 
     // Metodo statico per determinare lo stato della fattura in base a importo, pagato e dataScadenza
+
     public static SXFatturaStatus determine(
             BigDecimal importo,
             BigDecimal pagato,
@@ -38,18 +39,22 @@ public enum SXFatturaStatus {
         }
 
         // TODAY in Europe/Rome (fix timezone)
+
         LocalDate today = LocalDate.now(ZoneId.of("Europe/Rome"));
 
         // 1) PAGATA
+
         if (pagato != null && pagato.compareTo(importo) >= 0) {
             return PAGATA;
         }
 
         // 2) SCADUTA
+
         if (dataScadenza != null && today.isAfter(dataScadenza)) {
             return SCADUTA;
         }
 
         // 3) EMESSA
+
         return EMESSA;
     }}

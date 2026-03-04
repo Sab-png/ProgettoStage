@@ -1,6 +1,6 @@
 
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.fattura.FatturaPagamentoRequest;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionPaymentRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
@@ -122,7 +122,7 @@ public class FatturaController {
     )
     public ResponseEntity<FatturaResponse> paymentCheckFattura(
             @PathVariable Long id,
-            @Valid @RequestBody FatturaPagamentoRequest request   // <-- QUI!
+            @Valid @RequestBody FatturaWorkExecutionPaymentRequest request   // <-- QUI!
     ) {
         if (request == null || request.getPagatoDaAggiungere() == null) {
             return ResponseEntity.badRequest().build();
@@ -136,6 +136,7 @@ public class FatturaController {
 
     }
     // POST:  endpoint per check pagamento di tutte le fatture
+    // un api con metodo diverso da quello del job ( fattura scheduler) -findall
 
     @PostMapping("/payment-check-all")
     public ResponseEntity<Map<String, Object>> checkAllFatture() {

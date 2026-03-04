@@ -1,21 +1,17 @@
 package it.spindox.stagelab.magazzino.sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
-import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidFatturaException;
 import it.spindox.stagelab.magazzino.services.FatturaService;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 
@@ -25,10 +21,11 @@ import java.time.format.DateTimeFormatter;
 @Component
 @EnableScheduling
 @RequiredArgsConstructor
+
 public class FatturaScheduler {
 
-    private final FatturaService fatturaService;
-    private final JobExecutionService jobExecutionService;
+    private final FatturaService fatturaService;           // aggiorna SOLO lo stato fatture
+    private final JobExecutionService jobExecutionService; // tracciamento job
 
     @Value("${fatture.check.enabled:true}")
     private boolean fattureJobEnabled;
@@ -43,27 +40,8 @@ public class FatturaScheduler {
                     .withZone(ZONE_ROME);
 
 
-    //  CALCOLO PROSSIMA ESECUZIONE CON LOG RELATIVO
 
-    private void logNextExecution() {
-        try {
-            CronExpression cron = CronExpression.parse(fattureCheckCron);
-            ZonedDateTime now = ZonedDateTime.now(ZONE_ROME);
-
-            ZonedDateTime next = cron.next(now);
-
-            if (next != null) {
-                log.info("[FATTURE JOB] PROSSIMA ESECUZIONE PREVISTA: {}", TS.format(next.toInstant()));
-            } else {
-                log.warn("[FATTURE JOB] Cron invalid: impossibile calcolare la prossima esecuzione.");
-            }
-        } catch (Exception e) {
-            log.error("[FATTURE JOB] Errore nel parsing del cron '{}': {}", fattureCheckCron, e.getMessage());
-        }
-    }
-
-
-    // LO SCHEDULER
+     // Scheduler che AGGIORNA SOLO LO STATO DELLE FATTURE.
 
     @Scheduled(cron = "${fatture.check.cron}", zone = "Europe/Rome")
     public void runFattureDailyCheck() {
@@ -73,20 +51,19 @@ public class FatturaScheduler {
             return;
         }
 
-        logNextExecution(); // Mostra SEMPRE la prossima esecuzione del job
-
         final Instant startInstant = Instant.now();
         log.info("--- FATTURE JOB START --- [{}] ---", TS.format(startInstant));
 
         JobExecution job = null;
 
         try {
-            // RUNNING
+            // Stato RUNNING
 
             job = jobExecutionService.start();
             log.info("[JOB RUNNING] id={}", job.getId());
 
-            // LOGICA
+
+            // VERIFICA STATO DELLE FATTURE ESISTENTI
 
             fatturaService.paymentCheckAllFatture();
 
@@ -94,10 +71,6 @@ public class FatturaScheduler {
 
             jobExecutionService.success(job);
             log.info("[FATTURE JOB SUCCESS] id={}", job.getId());
-
-        } catch (InvalidFatturaException e) {
-            log.error("[INVALID FATTURA] {}", e.getMessage(), e);
-            handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
 
         } catch (Exception e) {
             log.error("[UNKNOWN ERROR] {}", e.getMessage(), e);
@@ -109,7 +82,8 @@ public class FatturaScheduler {
     }
 
 
-    // FALLIMENTO DEL JOB
+
+     // Gestione fallimento job.
 
     private void handleFailure(JobExecution job,
                                StatusJobErrorType type,
@@ -125,7 +99,8 @@ public class FatturaScheduler {
     }
 
 
-    //  FINE JOB
+
+     // Log finale job
 
     private void logJobEnd(Instant startInstant, JobExecution job) {
 
@@ -138,12 +113,4 @@ public class FatturaScheduler {
         log.info("[DURATION] {}ms", ms);
     }
 
-
-    //  LOADED
-
-    @PostConstruct
-    public void loaded() {
-        log.info(">>> FATTURA SCHEDULER LOADED <<< enabled={} cron={}", fattureJobEnabled, fattureCheckCron);
-        logNextExecution(); // <mostra la prossima esecuzione anche allo startup
     }
-}
