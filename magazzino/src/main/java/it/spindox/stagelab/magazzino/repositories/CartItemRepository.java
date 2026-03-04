@@ -16,6 +16,8 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     List<CartItem> findByCartIdAndStatus(String cartId, ReservationStatus status);
 
+    List<CartItem> findByCartId(String cartId);
+
     Optional<CartItem> findByCartIdAndProdottoIdAndStatus(
             String cartId,
             Long prodottoId,

@@ -16,9 +16,12 @@ import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import jakarta.persistence.EntityNotFoundException;
+//import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +36,8 @@ public class CartServiceImpl implements CartService {
     private final ProdottoMagazzinoRepository prodottoMagazzinoRepository;
     private final MagazzinoRepository magazzinoRepository;
 
-    private static final int RESERVATION_MINUTES = 20;
+    @Value("${cart.reservation.minutes:20}")
+    private Integer reservationMinutes;
 
     public CartServiceImpl(CartItemRepository cartItemRepository,
                            ProdottoRepository prodottoRepository,
@@ -43,6 +47,16 @@ public class CartServiceImpl implements CartService {
         this.prodottoRepository = prodottoRepository;
         this.prodottoMagazzinoRepository = prodottoMagazzinoRepository;
         this.magazzinoRepository = magazzinoRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CartResponse createCart(String cartId) {
+        boolean exists = cartItemRepository.hasActiveCart(cartId, LocalDateTime.now());
+        if (exists){
+            throw new IllegalStateException("Esiste già un carrello attivo per l'ID: "+cartId);
+        }
+        return CartMapper.toCartResponse(List.of());
     }
 
     @Override
@@ -121,7 +135,7 @@ public class CartServiceImpl implements CartService {
             }
 
             cartItem.setQuantity(newQuantity);
-            cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(RESERVATION_MINUTES));
+            cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(reservationMinutes));
             prodotto.setAvailableStock(prodotto.getAvailableStock() - request.getQuantity());
 
             //log.info("Aggiornato carrello esistente {} con nuova quantità {}", cartItem.getId(), newQuantity);
@@ -133,7 +147,7 @@ public class CartServiceImpl implements CartService {
             cartItem.setMagazzino(magazzino);
             cartItem.setQuantity(request.getQuantity());
             cartItem.setReservedAt(LocalDateTime.now());
-            cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(RESERVATION_MINUTES));
+            cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(reservationMinutes));
             cartItem.setStatus(ReservationStatus.RESERVED);
 
             prodotto.setAvailableStock(prodotto.getAvailableStock() - request.getQuantity());
@@ -154,7 +168,7 @@ public class CartServiceImpl implements CartService {
         //log.info("Recupero carrello {}", cartId);
 
         List<CartItem> items = cartItemRepository
-                .findByCartIdAndStatus(cartId, ReservationStatus.RESERVED);
+                .findByCartId(cartId);
 
         return CartMapper.toCartResponse(items);
     }
@@ -221,7 +235,7 @@ public class CartServiceImpl implements CartService {
         }
 
         cartItem.setQuantity(request.getQuantity());
-        cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(RESERVATION_MINUTES));
+        cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(reservationMinutes));
 
         prodottoRepository.save(prodotto);
         CartItem saved = cartItemRepository.save(cartItem);
@@ -261,7 +275,7 @@ public class CartServiceImpl implements CartService {
 
         // Ritorna il carrello aggiornato
         List<CartItem> items = cartItemRepository
-                .findByCartIdAndStatus(cartId, ReservationStatus.RESERVED);
+                .findByCartId(cartId);
 
         return CartMapper.toCartResponse(items);
     }

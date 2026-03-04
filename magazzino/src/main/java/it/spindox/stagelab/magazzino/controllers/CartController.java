@@ -9,6 +9,7 @@ import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
 import it.spindox.stagelab.magazzino.services.CartService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,13 @@ public class CartController {
 
     public CartController(CartService service) {
         this.service = service;
+    }
+
+    //POST createCart
+    @PostMapping
+    public ResponseEntity<CartResponse> createCart(
+            @RequestParam("cartId") String cartId) {
+        return ResponseEntity.ok(service.createCart(cartId));
     }
 
     // POST addToCart
