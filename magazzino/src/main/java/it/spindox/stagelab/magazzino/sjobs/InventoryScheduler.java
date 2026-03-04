@@ -44,7 +44,7 @@ public class InventoryScheduler {
     @Value("${inventory.check.rate}")
     private long checkRateMs;
 
-    @Value("${jobs.enabled:true}")
+    @Value("${jobs.inventory.enabled:true}")
     private boolean jobsEnabled;
 
 
@@ -55,6 +55,10 @@ public class InventoryScheduler {
 
     public void runCheck() {
 
+        if (!jobsEnabled) {
+            log.info("Inventory Scheduler is disabled");
+            return;
+        }
         // 2) TIMESTAMP DI INIZIO (UTC → Europe/Rome)
 
         final Instant startInstant = Instant.now();

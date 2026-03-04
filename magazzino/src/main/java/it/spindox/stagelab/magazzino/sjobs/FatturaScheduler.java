@@ -2,6 +2,7 @@ package it.spindox.stagelab.magazzino.sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.services.FatturaService;
+import it.spindox.stagelab.magazzino.services.FatturaWorkExecutionService;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,10 @@ import java.time.format.DateTimeFormatter;
 
 public class FatturaScheduler {
 
-    private final FatturaService fatturaService;           // aggiorna SOLO lo stato fatture
+    private final FatturaService fatturaService;
+    private final FatturaWorkExecutionService fatturaWorkExecutionService;
+    // aggiorna SOLO lo stato fatture
+
     private final JobExecutionService jobExecutionService; // tracciamento job
 
     @Value("${fatture.check.enabled:true}")
@@ -65,7 +69,7 @@ public class FatturaScheduler {
 
             // VERIFICA STATO DELLE FATTURE ESISTENTI
 
-            fatturaService.paymentCheckAllFatture();
+            fatturaWorkExecutionService.paymentCheckAllFatture();
 
             // SUCCESS
 

@@ -29,12 +29,12 @@ import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 @RequiredArgsConstructor
 @Transactional
 
-public abstract class FatturaServiceImpl implements FatturaService {
+public  class FatturaServiceImpl implements FatturaService {
 
     private final FatturaRepository fatturaRepository;
     private final ProdottoRepository prodottoRepository;
     private final FatturaMapper fatturaMapper;
-    private final FatturaService self;
+
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -82,10 +82,9 @@ public abstract class FatturaServiceImpl implements FatturaService {
     @Override
     @Transactional(readOnly = true)
     public Page<Long> searchIds(FatturaSearchRequest req) {
-        Page<FatturaResponse> pageResp = self.search(req);
+        Page<FatturaResponse> pageResp = search(req);
         return pageResp.map(FatturaResponse::getId);
     }
-
 
 
     //  CREATE FATTURA

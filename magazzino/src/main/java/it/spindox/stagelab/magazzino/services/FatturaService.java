@@ -25,9 +25,7 @@ public interface FatturaService {
 
     FatturaResponse update(Long id, FatturaRequest request);
 
-    // metodo paymentCheckFattura
 
-    FatturaResponse paymentCheckFattura(Long id, BigDecimal pagatoDaAggiungere);
 
     // Recupera dettaglio fattura per id
 
@@ -41,9 +39,6 @@ public interface FatturaService {
 
     void delete(Long id);
 
-// Metodo per verificare tutte le fatture e aggiornare lo stato se necessario
-
-    List<FatturaResponse> paymentCheckAllFatture();
 
     // Ricerca solo ID
 
