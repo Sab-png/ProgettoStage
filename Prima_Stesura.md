@@ -1,72 +1,51 @@
 ## Titolo provvisorio
 
-Progetto Custom per la gestione 
+Progetto Custom per la gestione di magazzini per una catena di supermercati
 
 ---
+##Indice
 
-## Indice di massima
+1.  Introduzione
+    1.1 Contesto aziendale e progettuale
+    1.2 Obiettivi del Project Work
+    1.3 Metodologia di lavoro adottata
+    1.4 Struttura del documento
+2.  Contesto Tecnologico e Architetturale
+    2.1 Tecnologie utilizzate (Spring Boot, JPA, Oracle Database, Docker)
+    2.2 Architettura a livelli e pattern progettuali adottati
+    2.3 Strumenti di sviluppo e versionamento
+3.  Analisi del Dominio e Modellazione dei Dati
+    3.1 Dominio applicativo: prodotti, magazzini, fatture e relazioni
+    3.2 Requisiti funzionali e non funzionali della funzionalità 
+    3.3 Estensioni dello schema Oracle per il carrello
+    3.4 Mappatura ORM con JPA/Hibernate e gestione delle sequence
+4.  Progettazione della Funzionalità
+    4.1 Modellazione delle entità e degli stati di prenotazione
+    4.2 Gestione dello stock: distinzione tra stock totale e stock disponibile
+    4.3 Identificazione stateless
+    4.4 Gestione della durata della prenotazione e dei timeout
+5.  Implementazione Back-end
+    5.1 Struttura dei package e responsabilità dei componenti
+    5.2 Controller REST e API esposte
+    5.3 Service layer e logica di business
+    5.4 Mapper, DTO e gestione centralizzata delle eccezioni
+6.  Gestione della Prenotazione e Scheduler di Clean-up
+    6.1 Meccanismo di prenotazione temporanea dello stock
+    6.2 Controllo delle quantità e garanzia di consistenza tramite lock e transazioni
+    6.3 Progettazione e comportamento del Cron Job di pulizia
+    6.4 Politiche di rilascio dello stock e tracciamento degli stati
+7.  Flussi Applicativi e Testing
+    7.1 Flussi principali: creazione carrello, aggiornamento, checkout
+    7.2 Gestione dei casi di errore e degli scenari limite
+    7.3 Test delle API REST e verifica del comportamento del Cron Job
+    7.4 Verifica della consistenza dei dati su Oracle
+8.  Analisi Critica e Conclusioni
+    8.1 Valutazione delle scelte progettuali e punti di forza
+    8.2 Limiti dell'implementazione e possibili miglioramenti
+    8.3 Considerazioni finali
 
-1. Introduzione
-   1.1 Contesto aziendale e progettuale  
-   1.2 Obiettivi della tesi  
-   1.3 Metodologia di lavoro adottata  
-   1.4 Struttura del documento  
-2. Contesto Tecnologico
-   2.1 Architettura generale del sistema di magazzino  
-   2.2 Tecnologie utilizzate (Spring Boot, JPA, Oracle Database, Docker, ecc.)  
-   2.3 Pattern architetturali e di progettazione adottati  
-3. Analisi del Dominio e Requisiti
-   3.1 Dominio applicativo: gestione di un magazzino  
-   3.2 Modellazione concettuale: prodotti, magazzini, fatture, relazioni  
-   3.3 Requisiti funzionali della funzionalità di carrello  
-   3.4 Requisiti non funzionali (prestazioni, consistenza dei dati, manutenibilità)  
-   3.5 Vincoli e assunzioni progettuali  
-4. Modellazione Dati e Integrazione con il Database
-   4.1 Schema logico del database Oracle esistente  
-   4.2 Estensioni dello schema per la funzionalità di carrello  
-   4.3 Mappatura ORM con JPA/Hibernate  
-   4.4 Gestione delle sequence e delle strategie di generazione degli identificativi  
-5. Progettazione della Funzionalità di Carrello
-   5.1 Obiettivi specifici della funzionalità di carrello  
-   5.2 Modellazione delle entità applicative (Carrello, CartItem, stati di prenotazione)  
-   5.3 Gestione dello stock e distinzione fra stock totale e stock disponibile  
-   5.4 Associazione del carrello al magazzino  
-   5.5 Gestione della durata del carrello e dei timeout  
-6. Implementazione Back-end
-   6.1 Struttura dei package e responsabilità dei componenti  
-   6.2 Controllers REST per la gestione del carrello  
-   6.3 Servizi applicativi (service layer) e logica di business  
-   6.4 Mapper e DTO per l’esposizione dei dati via API  
-   6.5 Gestione centralizzata delle eccezioni e formato di errore JSON  
-7. Gestione della Prenotazione di Stock
-   7.1 Scenario di “stockaggio” temporaneo degli articoli  
-   7.2 Algoritmi di controllo della quantità rispetto allo stock di magazzino  
-   7.3 Aggiornamento di `TOTAL_STOCK` e `AVAILABLE_STOCK`  
-   7.4 Garanzia di consistenza tramite lock e transazioni  
-8. Scheduler e Clean-up dei Carrelli
-   8.1 Motivazioni per l’uso di un job schedulato  
-   8.2 Progettazione del Cron Job di pulizia  
-   8.3 Gestione degli stati di prenotazione (`RESERVED`, `EXPIRED`, `COMPLETED`)  
-   8.4 Politiche di rilascio dello stock e tracciamento storico  
-9. Flussi Applicativi Principali
-   9.1 Creazione e popolamento del carrello  
-   9.2 Aggiornamento e rimozione degli articoli  
-   9.3 Checkout e conferma definitiva dell’ordine  
-   9.4 Gestione dei casi di errore e degli scenari limite  
-10. Testing e Validazione
-   10.1 Strategia di test per la funzionalità di carrello  
-   10.2 Test delle API REST (Postman, casi di test significativi)  
-   10.3 Verifica del comportamento del Cron Job di pulizia  
-   10.4 Test di integrazione con il database Oracle  
-11. Analisi Critica e Possibili Miglioramenti
-   11.1 Valutazione delle scelte progettuali effettuate  
-   11.2 Punti di forza dell’implementazione  
-   11.3 Limiti e aspetti migliorabili (scalabilità, estendibilità, ecc.)  
-   11.4 Proposte di evoluzione futura (es. autenticazione utenti, multi-carrello, reporting)  
-12. Conclusioni
-   12.1 Riepilogo degli obiettivi raggiunti  
-   12.2 Competenze acquisite durante il percorso di stage  
-   12.3 Considerazioni finali  
+
+
 
 ---
 
