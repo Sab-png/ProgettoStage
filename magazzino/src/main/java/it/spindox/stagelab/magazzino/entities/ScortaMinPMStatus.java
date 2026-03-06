@@ -28,7 +28,7 @@ public enum ScortaMinPMStatus {
         return VERDE;
     }
 
-    public static ScortaMinPMStatus from(Integer scortaMin) {
-        return null;
+    public static ScortaMinPMStatus from(Integer quantita) {
+        return fromQuantita(quantita);
+    };
     }
-}

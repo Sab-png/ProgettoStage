@@ -20,9 +20,11 @@ public class Prodotto {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prodotto_seq_gen")
     @SequenceGenerator(
+
             name = "prodotto_seq_gen",
-            sequenceName = "PRODOTTO_SEQ",
+            sequenceName = "SEQ_PRODOTTO",
             allocationSize = 1
+
     )
     @Column(name = "ID")
     private Long id;

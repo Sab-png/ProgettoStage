@@ -1,6 +1,8 @@
 package it.spindox.stagelab.magazzino.sjobs;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidFatturaException;
 import it.spindox.stagelab.magazzino.services.FatturaService;
 import it.spindox.stagelab.magazzino.services.FatturaWorkExecutionService;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
@@ -76,15 +78,33 @@ public class FatturaScheduler {
             jobExecutionService.success(job);
             log.info("[FATTURE JOB SUCCESS] id={}", job.getId());
 
-        } catch (Exception e) {
+        }
+        // 6) GESTIONE ECCEZIONI
+
+// 6.1) Errori di capacità / quantità (job)
+
+        catch (InvalidCapacityException e) {
+            log.error("[INVALID CAPACITY] {}", e.getMessage(), e);
+            handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
+        }
+
+        // 6.2) Errori fattura durante il job (date, stato, importi)
+
+        catch (InvalidFatturaException e) {
+            log.error("[INVALID FATTURA] {}", e.getMessage(), e);
+            handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
+        }
+        // 6.3) Fallback generico
+
+        catch (Exception e) {
             log.error("[UNKNOWN ERROR] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.UNKNOWN, e);
+        }
 
-        } finally {
+        finally {
             logJobEnd(startInstant, job);
         }
     }
-
 
 
      // Gestione fallimento job.

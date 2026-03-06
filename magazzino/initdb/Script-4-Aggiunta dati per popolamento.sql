@@ -114,7 +114,7 @@ VALUES (magazzino.SEQ_MAGAZZINO.NEXTVAL, 'Magazzino Isole', 'Via Garibaldi 3, Pa
 
 
 
- FATTURE
+FATTURE
 
 
 

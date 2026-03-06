@@ -57,4 +57,5 @@ public enum SXFatturaStatus {
         // 3) EMESSA
 
         return EMESSA;
-    }}
+    }
+}
