@@ -3,7 +3,6 @@ import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidFatturaException;
-import it.spindox.stagelab.magazzino.services.FatturaService;
 import it.spindox.stagelab.magazzino.services.FatturaWorkExecutionService;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import lombok.RequiredArgsConstructor;
@@ -27,114 +26,95 @@ import java.time.format.DateTimeFormatter;
 
 public class FatturaScheduler {
 
-    private final FatturaService fatturaService;
-    private final FatturaWorkExecutionService fatturaWorkExecutionService;
-    // aggiorna SOLO lo stato fatture
+    private static final ZoneId ZONE_ROME = ZoneId.of("Europe/Rome");
+    private static final DateTimeFormatter TS =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(ZONE_ROME);
 
-    private final JobExecutionService jobExecutionService; // tracciamento job
+    //  DIPENDENZE
+
+    private final FatturaWorkExecutionService fatturaWorkExecutionService;
+    private final JobExecutionService jobExecutionService;
+
+    //  configuration properties
 
     @Value("${fatture.check.enabled:true}")
     private boolean fattureJobEnabled;
 
-    @Value("${fatture.check.cron:0 0 1 * * *}")
+    @Value("${fatture.check.cron:0 * * * * *}")
     private String fattureCheckCron;
 
-    private static final ZoneId ZONE_ROME = ZoneId.of("Europe/Rome");
 
-    private static final DateTimeFormatter TS =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-                    .withZone(ZONE_ROME);
-
-
-
-     // Scheduler che AGGIORNA SOLO LO STATO DELLE FATTURE.
+    //  ENTRY POINT SCHEDULER
 
     @Scheduled(cron = "${fatture.check.cron}", zone = "Europe/Rome")
-    public void runFattureDailyCheck() {
+    // Per test rapido: usa @Scheduled(fixedRate = 10000)
 
+    public void runFattureDailyCheck() {
         if (!fattureJobEnabled) {
-            log.info("[FATTURE JOB] DISABILITATO via config.");
+            log.info("[FATTURE JOB] DISABILITATO via config (fatture.check.enabled=false)");
             return;
         }
 
         final Instant startInstant = Instant.now();
-        log.info("--- FATTURE JOB START --- [{}] ---", TS.format(startInstant));
+        log.info("--- FATTURE JOB START --- now={} cron='{}'",
+                TS.format(startInstant), fattureCheckCron);
 
         JobExecution job = null;
 
         try {
-            // Stato RUNNING
+            // 1) JOB  RUNNING
 
             job = jobExecutionService.start();
-            log.info("[JOB RUNNING] id={}", job.getId());
+            log.info("[JOB RUNNING] id={} startTime={}", job.getId(), job.getStartTime());
 
-
-            // VERIFICA STATO DELLE FATTURE ESISTENTI
+            // 2) LOGICA DEL JOB
+            //    Controlla/aggiorna lo stato pagamento di tutte le fatture
 
             fatturaWorkExecutionService.paymentCheckAllFatture();
 
-            // SUCCESS
+            // 3) JOB  SUCCESS
 
             jobExecutionService.success(job);
             log.info("[FATTURE JOB SUCCESS] id={}", job.getId());
 
-        }
-        // 6) GESTIONE ECCEZIONI
-
-// 6.1) Errori di capacità / quantità (job)
-
-        catch (InvalidCapacityException e) {
+        } catch (InvalidCapacityException e) {
             log.error("[INVALID CAPACITY] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
-        }
 
-        // 6.2) Errori fattura durante il job (date, stato, importi)
-
-        catch (InvalidFatturaException e) {
+        } catch (InvalidFatturaException e) {
             log.error("[INVALID FATTURA] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
-        }
-        // 6.3) Fallback generico
 
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("[UNKNOWN ERROR] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.UNKNOWN, e);
-        }
 
-        finally {
+        } finally {
             logJobEnd(startInstant, job);
         }
     }
 
-
-     // Gestione fallimento job.
+    // HANDLER ERRORI
 
     private void handleFailure(JobExecution job,
                                StatusJobErrorType type,
                                Exception e) {
-
         if (job == null) {
-            log.error("[FATTURE JOB FAILED] (no-id) type={} msg={}", type, e.getMessage());
+            log.error("[FATTURE JOB FAILED] (no-id) type={} msg={}", type, e.getMessage(), e);
             return;
         }
-
-        log.error("[FATTURE JOB FAILED] id={} type={} msg={}", job.getId(), type, e.getMessage());
+        log.error("[FATTURE JOB FAILED] id={} type={} msg={}", job.getId(), type, e.getMessage(), e);
         jobExecutionService.failed(job, type, e);
     }
 
-
-
-     // Log finale job
+    // LOG FINE JOB
 
     private void logJobEnd(Instant startInstant, JobExecution job) {
-
         Instant endInstant = Instant.now();
         long ms = Duration.between(startInstant, endInstant).toMillis();
-
         log.info("--- FATTURE JOB END ---");
         log.info("[END TIME] {}", TS.format(endInstant));
         log.info("[JOB ID] {}", (job != null ? job.getId() : "null"));
         log.info("[DURATION] {}ms", ms);
     }
-
-    }
+}

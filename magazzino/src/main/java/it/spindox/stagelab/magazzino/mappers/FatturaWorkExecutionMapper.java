@@ -7,6 +7,8 @@ public interface FatturaWorkExecutionMapper {
 
     // Crea una nuova execution legata a una fattura
 
+    FatturaWorkExecution toEntity(String workName, SXFatturaJobexecution status, Fattura fattura);
+
     FatturaWorkExecution toEntity(String workName, StatusJob status, Fattura fattura);
 
     // Costruisce la response
@@ -15,12 +17,16 @@ public interface FatturaWorkExecutionMapper {
 
     // Aggiorna stato e messaggi job
 
-    void updateEntity(FatturaWorkExecution target, StatusJob status, String errorMessage);
+    void updateEntity(FatturaWorkExecution target, SXFatturaJobexecution status, String errorMessage);
 
     // Aggiorna stato + tipo errore job
 
     void updateEntity(FatturaWorkExecution target,
-                      StatusJob status,
+                      SXFatturaJobexecution status,
                       StatusJobErrorType errorType,
                       String errorMessage);
 }
+
+
+
+

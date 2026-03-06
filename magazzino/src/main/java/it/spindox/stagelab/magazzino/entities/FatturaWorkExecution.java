@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.OffsetDateTime;
 
 
-
-
 @Slf4j
 @Entity
 @Table(name = "FATTURA_WORK_EXECUTION")
@@ -14,9 +12,9 @@ import java.time.OffsetDateTime;
 public class FatturaWorkExecution {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fatturajob_exec_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fattura_work_exec_seq")
     @SequenceGenerator(
-            name = "fatturajob_exec_seq",
+            name = "fattura_work_exec_seq",
             sequenceName = "FATTURA_WORK_EXECUTION_SEQ",
             allocationSize = 1
     )
@@ -41,5 +39,6 @@ public class FatturaWorkExecution {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false)
-    private StatusJob status;
+    private SXFatturaJobexecution status;
+
 }

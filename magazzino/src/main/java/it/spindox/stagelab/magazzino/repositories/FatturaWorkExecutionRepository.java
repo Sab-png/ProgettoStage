@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.repositories;
 import it.spindox.stagelab.magazzino.entities.FatturaWorkExecution;
-import it.spindox.stagelab.magazzino.entities.StatusJob;
+import it.spindox.stagelab.magazzino.entities.SXFatturaJobexecution;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,7 +16,9 @@ import java.util.Optional;
 @Repository
 public interface FatturaWorkExecutionRepository extends JpaRepository<FatturaWorkExecution, Long> {
 
-    // Ricerca standard (senza fatturaId) - manteniamo per retrocompatibilità
+
+    // Ricerca base status, time, error
+
     @Query("""
         SELECT f
         FROM FatturaWorkExecution f
@@ -30,12 +32,15 @@ public interface FatturaWorkExecutionRepository extends JpaRepository<FatturaWor
               )
     """)
     Page<FatturaWorkExecution> search(
-            @Param("status") StatusJob status,
+            @Param("status") SXFatturaJobexecution status,
             @Param("startFrom") OffsetDateTime startFrom,
             @Param("startTo") OffsetDateTime startTo,
             @Param("hasError") Boolean hasError,
             Pageable pageable
     );
+
+
+    // Ricerca base SOLO ID
 
     @Query("""
         SELECT f.id
@@ -50,14 +55,15 @@ public interface FatturaWorkExecutionRepository extends JpaRepository<FatturaWor
               )
     """)
     Page<Long> searchIds(
-            @Param("status") StatusJob status,
+            @Param("status") SXFatturaJobexecution status,
             @Param("startFrom") OffsetDateTime startFrom,
             @Param("startTo") OffsetDateTime startTo,
             @Param("hasError") Boolean hasError,
             Pageable pageable
     );
 
-    // Ricerca avanzata con filtro fatturaId(jobfatturasearch)
+
+    // Ricerca avanzata con fatturaId
 
     @Query("""
         SELECT f
@@ -73,7 +79,7 @@ public interface FatturaWorkExecutionRepository extends JpaRepository<FatturaWor
               )
     """)
     Page<FatturaWorkExecution> searchWorkExecutions(
-            @Param("status") StatusJob status,
+            @Param("status") SXFatturaJobexecution status,
             @Param("startFrom") OffsetDateTime startFrom,
             @Param("startTo") OffsetDateTime startTo,
             @Param("fatturaId") Long fatturaId,
@@ -83,5 +89,5 @@ public interface FatturaWorkExecutionRepository extends JpaRepository<FatturaWor
 
     Optional<FatturaWorkExecution> findFirstByOrderByStartTimeDesc();
 
-    Optional<FatturaWorkExecution> findFirstByStatus(StatusJob status);
+    Optional<FatturaWorkExecution> findFirstByStatus(SXFatturaJobexecution status);
 }

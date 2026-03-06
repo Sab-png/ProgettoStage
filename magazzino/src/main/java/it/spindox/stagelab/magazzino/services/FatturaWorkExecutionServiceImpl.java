@@ -20,6 +20,7 @@ import java.util.List;
 import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     private final EntityManager entityManager;
 
 
-    //   add.pagamento metodo
+    // ADD PAYMENT + CHECK STATUS
 
     private BigDecimal addPayment(Fattura fattura, BigDecimal pagatoDaAggiungere) {
 
@@ -59,8 +60,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         return nuovoTotale;
     }
 
-
-    // 1) PAYMENT Singola Fattura
+    // PAYMENT CHECK SINGOLA FATTURA
 
     @Override
     public FatturaWorkExecutionPaymentResponse paymentCheckFattura(Long workExecutionId, BigDecimal pagatoDaAggiungere) {
@@ -71,17 +71,27 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         Fattura fattura = fatturaRepository.findById(exec.getFatturaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
+        // RUNNING
+
+        exec.setStatus(SXFatturaJobexecution.RUNNING);
+        fatturaWorkExecutionRepository.save(exec);
+
         BigDecimal nuovoTotale = addPayment(fattura, pagatoDaAggiungere);
 
         fattura.setPagato(nuovoTotale);
         fattura.setStatus(determine(fattura.getImporto(), nuovoTotale, fattura.getDataScadenza()));
         fatturaRepository.save(fattura);
 
+        // SUCCESS
+
+        exec.setStatus(SXFatturaJobexecution.SUCCESS);
+        exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
+        fatturaWorkExecutionRepository.save(exec);
+
         return fatturaWorkExecutionMapper.toPaymentResponse(fattura, exec);
     }
 
-
-    //  2) PAYMENT su tutte le fatture
+    // PAYMENT CHECK TUTTE LE FATTURE
 
     @Override
     public List<FatturaWorkExecutionPaymentResponse> paymentCheckAllFatture() {
@@ -90,6 +100,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
         List<FatturaWorkExecution> executions = fatturaWorkExecutionRepository.findAll();
         List<Fattura> fattureDaAggiornare = new ArrayList<>();
+        List<FatturaWorkExecution> execDaAggiornare = new ArrayList<>();
         List<FatturaWorkExecutionPaymentResponse> responses = new ArrayList<>();
 
         for (FatturaWorkExecution exec : executions) {
@@ -98,17 +109,32 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
             if (f == null || f.getImporto() == null) {
                 log.error("[AUTO CHECK] WorkExec ID={} fattura assente o importo nullo", exec.getId());
+                exec.setStatus(SXFatturaJobexecution.ERROR);
+                exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
+                execDaAggiornare.add(exec);
                 continue;
+            }
+
+            // Se era PENDING, passa a RUNNING
+
+            if (exec.getStatus() == null || exec.getStatus() == SXFatturaJobexecution.PENDING) {
+                exec.setStatus(SXFatturaJobexecution.RUNNING);
             }
 
             BigDecimal pagato = f.getPagato() == null ? BigDecimal.ZERO : f.getPagato();
             SXFatturaStatus nuovo = determine(f.getImporto(), pagato, f.getDataScadenza());
 
-            if (f.getStatus() != nuovo) {
+            boolean cambiata = f.getStatus() != nuovo;
+            if (cambiata) {
                 f.setStatus(nuovo);
                 fattureDaAggiornare.add(f);
-                responses.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
             }
+
+            exec.setStatus(SXFatturaJobexecution.SUCCESS);
+            exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
+            execDaAggiornare.add(exec);
+
+            responses.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
         }
 
         if (!fattureDaAggiornare.isEmpty()) {
@@ -116,11 +142,16 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
             log.info("SALVATE {} fatture modificate", fattureDaAggiornare.size());
         }
 
+        if (!execDaAggiornare.isEmpty()) {
+            fatturaWorkExecutionRepository.saveAllAndFlush(execDaAggiornare);
+            log.info("SALVATE {} work execution aggiornate", execDaAggiornare.size());
+        }
+
         return responses;
     }
 
 
-    //  3) FIX campi null nelle fatture collegate
+    // METODO PER FIXARE I CAMPI NULL
 
     @Override
     public int fixNullFields() {
@@ -159,7 +190,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     }
 
 
-    //  4) SEARCH WorkExecution con filtro OPZIONE B (fatturaId incluso)
+    // SEARCH CON FILTRI E PAGINAZIONE
 
     @Override
     @Transactional(readOnly = true)
@@ -171,19 +202,11 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                 Sort.by("startTime").descending()
         );
 
-        OffsetDateTime startFrom = req.getStartFrom() != null
-                ? req.getStartFrom().atOffset(ZoneOffset.UTC)
-                : null;
-
-        OffsetDateTime startTo = req.getStartTo() != null
-                ? req.getStartTo().atOffset(ZoneOffset.UTC)
-                : null;
-
         Page<FatturaWorkExecution> result =
                 fatturaWorkExecutionRepository.searchWorkExecutions(
                         req.getStatus(),
-                        startFrom,
-                        startTo,
+                        req.getStartFrom() != null ? req.getStartFrom().atOffset(ZoneOffset.UTC) : null,
+                        req.getStartTo() != null ? req.getStartTo().atOffset(ZoneOffset.UTC) : null,
                         req.getFatturaId(),
                         req.getHasError(),
                         pageable
@@ -195,4 +218,3 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         });
     }
 }
-
