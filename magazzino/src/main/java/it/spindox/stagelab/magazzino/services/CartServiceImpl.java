@@ -6,12 +6,14 @@ import it.spindox.stagelab.magazzino.dto.request.UpdateCartItemRequest;
 import it.spindox.stagelab.magazzino.dto.response.CartItemResponse;
 import it.spindox.stagelab.magazzino.dto.response.CartResponse;
 import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
+import it.spindox.stagelab.magazzino.entities.Cart;
 import it.spindox.stagelab.magazzino.entities.CartItem;
 import it.spindox.stagelab.magazzino.entities.Prodotto;
 import it.spindox.stagelab.magazzino.entities.ReservationStatus;
 import it.spindox.stagelab.magazzino.exceptions.*;
 import it.spindox.stagelab.magazzino.mappers.CartMapper;
 import it.spindox.stagelab.magazzino.repositories.CartItemRepository;
+import it.spindox.stagelab.magazzino.repositories.CartRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
@@ -32,6 +34,7 @@ import java.util.Optional;
 public class CartServiceImpl implements CartService {
 
     private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
     private final ProdottoRepository prodottoRepository;
     private final ProdottoMagazzinoRepository prodottoMagazzinoRepository;
     private final MagazzinoRepository magazzinoRepository;
@@ -40,10 +43,12 @@ public class CartServiceImpl implements CartService {
     private Integer reservationMinutes;
 
     public CartServiceImpl(CartItemRepository cartItemRepository,
+                           CartRepository cartRepository,
                            ProdottoRepository prodottoRepository,
                            ProdottoMagazzinoRepository prodottoMagazzinoRepository,
                            MagazzinoRepository magazzinoRepository) {
         this.cartItemRepository = cartItemRepository;
+        this.cartRepository = cartRepository;
         this.prodottoRepository = prodottoRepository;
         this.prodottoMagazzinoRepository = prodottoMagazzinoRepository;
         this.magazzinoRepository = magazzinoRepository;
@@ -51,12 +56,25 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional(readOnly = true)
-    public CartResponse createCart(String cartId) {
-        boolean exists = cartItemRepository.hasActiveCart(cartId, LocalDateTime.now());
-        if (exists){
-            throw new IllegalStateException("Esiste già un carrello attivo per l'ID: "+cartId);
+    public CartResponse createCart(String cartId, Long magazzinoId) {
+        boolean exists = cartRepository.existsById(cartId);
+        if (exists) {
+            throw new IllegalStateException("Esiste già un carrello per l'ID: " + cartId);
         }
-        return CartMapper.toCartResponse(List.of());
+
+        // Creazione carrello "vuoto" persistita
+        var magazzino = magazzinoRepository.findById(magazzinoId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Magazzino con ID " + magazzinoId + " non trovato"
+                ));
+
+        var cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setMagazzino(magazzino);
+        cart.setCreatedAt(LocalDateTime.now());
+        Cart saved = cartRepository.save(cart);
+
+        return CartMapper.toCartResponse(saved, List.of());
     }
 
     @Override
@@ -67,17 +85,22 @@ public class CartServiceImpl implements CartService {
         // Pulisce prenotazioni scadute
         cleanExpiredReservations();
 
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Carrello con ID " + cartId + " non trovato"
+                ));
+
         // Recupera il prodotto con lock pessimistico per evitare race condition
         Prodotto prodotto = prodottoRepository.findByIdWithLock(request.getProdottoId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Prodotto con ID " + request.getProdottoId() + " non trovato"
                 ));
 
-        // Recupera il magazzino
-        var magazzino = magazzinoRepository.findById(request.getMagazzinoId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Magazzino con ID " + request.getMagazzinoId() + " non trovato"
-                ));
+        // Recupera il magazzino del carrello e verifica coerenza con richiesta
+        var magazzino = cart.getMagazzino();
+        if (!magazzino.getId().equals(request.getMagazzinoId())) {
+            throw new IllegalStateException("Il magazzino dell'item non coincide con il magazzino del carrello");
+        }
 
         // Verifica esistenza relazione prodotto-magazzino e quantità
         var prodottoMagazzino = prodottoMagazzinoRepository
@@ -167,10 +190,14 @@ public class CartServiceImpl implements CartService {
     public CartResponse getCart(String cartId) {
         //log.info("Recupero carrello {}", cartId);
 
-        List<CartItem> items = cartItemRepository
-                .findByCartId(cartId);
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Carrello con ID " + cartId + " non trovato"
+                ));
 
-        return CartMapper.toCartResponse(items);
+        List<CartItem> items = cartItemRepository.findByCartId(cartId);
+
+        return CartMapper.toCartResponse(cart, items);
     }
 
     @Override

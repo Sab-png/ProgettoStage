@@ -11,4 +11,5 @@ public class CartResponse {
     private Double totalPrice;
     private Long secondsRemaining;
     private Boolean cartActive;
+    private Long magazzinoId;
 }

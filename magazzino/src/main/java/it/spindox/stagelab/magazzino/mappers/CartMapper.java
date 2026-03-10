@@ -62,4 +62,12 @@ public class CartMapper {
 
         return response;
     }
+
+    public static CartResponse toCartResponse(it.spindox.stagelab.magazzino.entities.Cart cart, List<CartItem> items) {
+        CartResponse response = toCartResponse(items);
+        if (cart != null && cart.getMagazzino() != null) {
+            response.setMagazzinoId(cart.getMagazzino().getId());
+        }
+        return response;
+    }
 }

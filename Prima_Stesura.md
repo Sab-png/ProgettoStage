@@ -11,7 +11,7 @@ Progetto Custom per la gestione di magazzini per una catena di supermercati
     1.3 Metodologia di lavoro adottata
     1.4 Struttura del documento
 2.  Contesto Tecnologico e Architetturale
-    2.1 Tecnologie utilizzate (Spring Boot, JPA, Oracle Database, Docker)
+    2.1 Tecnologie utilizzate
     2.2 Architettura a livelli e pattern progettuali adottati
     2.3 Strumenti di sviluppo e versionamento
 3.  Analisi del Dominio e Modellazione dei Dati
@@ -37,13 +37,13 @@ Progetto Custom per la gestione di magazzini per una catena di supermercati
 7.  Flussi Applicativi e Testing
     7.1 Flussi principali: creazione carrello, aggiornamento, checkout
     7.2 Gestione dei casi di errore e degli scenari limite
-    7.3 Test delle API REST e verifica del comportamento del Cron Job
+    7.3 Test delle API REST e verifica del comportamento del Cron JobIN
     7.4 Verifica della consistenza dei dati su Oracle
 8.  Analisi Critica e Conclusioni
     8.1 Valutazione delle scelte progettuali e punti di forza
     8.2 Limiti dell'implementazione e possibili miglioramenti
     8.3 Considerazioni finali
-
+9.  Bibliografia
 
 
 

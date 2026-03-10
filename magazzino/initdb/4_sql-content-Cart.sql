@@ -2,6 +2,21 @@
 -- TABELLA CART_ITEM
 -- =====================================================
 
+-- =====================================================
+-- TABELLA CART (carrello vuoto persistito)
+-- =====================================================
+
+CREATE TABLE CART (
+    CART_ID      VARCHAR2(255) NOT NULL,
+    ID_MAGAZZINO NUMBER(19)    NOT NULL,
+    CREATED_AT   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT pk_cart PRIMARY KEY (CART_ID),
+    CONSTRAINT fk_cart_magazzino FOREIGN KEY (ID_MAGAZZINO) REFERENCES MAGAZZINO(ID)
+);
+
+CREATE INDEX idx_cart_magazzino
+    ON CART(ID_MAGAZZINO);
+
 -- 1. Sequence per gli ID
 CREATE SEQUENCE CART_ITEM_SEQ
     START WITH 1
@@ -29,6 +44,8 @@ CREATE TABLE CART_ITEM (
 
     -- Vincoli
     CONSTRAINT pk_cart_item PRIMARY KEY (ID),
+    CONSTRAINT fk_cart_item_cart FOREIGN KEY (CART_ID)
+        REFERENCES CART(CART_ID) ON DELETE CASCADE,
     CONSTRAINT fk_cart_item_prodotto FOREIGN KEY (ID_PRODOTTO)
         REFERENCES PRODOTTO(ID) ON DELETE CASCADE,
     CONSTRAINT fk_cart_item_magazzino FOREIGN KEY (ID_MAGAZZINO)
