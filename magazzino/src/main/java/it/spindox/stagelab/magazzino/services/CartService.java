@@ -9,7 +9,7 @@ import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
 
 public interface CartService {
 
-    CartResponse createCart(String cartId, Long magazzinoId);
+    CartResponse createCart(Long magazzinoId);
 
     CartItemResponse addToCart(String cartId, AddToCartRequest request);
 

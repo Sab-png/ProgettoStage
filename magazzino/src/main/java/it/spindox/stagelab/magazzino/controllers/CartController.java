@@ -26,9 +26,8 @@ public class CartController {
     //POST createCart
     @PostMapping
     public ResponseEntity<CartResponse> createCart(
-            @RequestParam("cartId") String cartId,
             @RequestParam("magazzinoId") Long magazzinoId) {
-        return ResponseEntity.ok(service.createCart(cartId, magazzinoId));
+        return ResponseEntity.ok(service.createCart(magazzinoId));
     }
 
     // POST addToCart

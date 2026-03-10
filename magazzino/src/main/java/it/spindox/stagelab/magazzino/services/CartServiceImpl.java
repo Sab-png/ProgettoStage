@@ -6,10 +6,7 @@ import it.spindox.stagelab.magazzino.dto.request.UpdateCartItemRequest;
 import it.spindox.stagelab.magazzino.dto.response.CartItemResponse;
 import it.spindox.stagelab.magazzino.dto.response.CartResponse;
 import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
-import it.spindox.stagelab.magazzino.entities.Cart;
-import it.spindox.stagelab.magazzino.entities.CartItem;
-import it.spindox.stagelab.magazzino.entities.Prodotto;
-import it.spindox.stagelab.magazzino.entities.ReservationStatus;
+import it.spindox.stagelab.magazzino.entities.*;
 import it.spindox.stagelab.magazzino.exceptions.*;
 import it.spindox.stagelab.magazzino.mappers.CartMapper;
 import it.spindox.stagelab.magazzino.repositories.CartItemRepository;
@@ -28,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -55,26 +53,22 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public CartResponse createCart(String cartId, Long magazzinoId) {
-        boolean exists = cartRepository.existsById(cartId);
-        if (exists) {
-            throw new IllegalStateException("Esiste già un carrello per l'ID: " + cartId);
-        }
+    @Transactional
+    public CartResponse createCart(Long magazzinoId) {
+        String cartId = UUID.randomUUID().toString();
 
-        // Creazione carrello "vuoto" persistita
-        var magazzino = magazzinoRepository.findById(magazzinoId)
+        Magazzino magazzino = magazzinoRepository.findById(magazzinoId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Magazzino con ID " + magazzinoId + " non trovato"
                 ));
 
-        var cart = new Cart();
+        Cart cart = new Cart();
         cart.setCartId(cartId);
         cart.setMagazzino(magazzino);
         cart.setCreatedAt(LocalDateTime.now());
-        Cart saved = cartRepository.save(cart);
+        cartRepository.save(cart);
 
-        return CartMapper.toCartResponse(saved, List.of());
+        return CartMapper.toCartResponse(cart, List.of());
     }
 
     @Override
