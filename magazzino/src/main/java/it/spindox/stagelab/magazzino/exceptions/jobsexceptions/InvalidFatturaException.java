@@ -18,7 +18,7 @@ public class InvalidFatturaException extends JobException {
     private final BigDecimal importo;
     private final Integer quantita;
 
-    // 0) ERRORE GENERICO PER MESSAGGI DI VALIDAZIONE PERSONALIZZATI
+    //  ERRORE GENERICO PER MESSAGGI DI VALIDAZIONE
 
     public InvalidFatturaException(String message) {
         super(message,

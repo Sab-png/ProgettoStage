@@ -7,7 +7,7 @@ import it.spindox.stagelab.magazzino.entities.SXFatturaJobexecution;
 
 
 
-  // Filtro di ricerca per WorkExecution
+
 
 @Data
 public class FatturaWorkExecutionSearch {

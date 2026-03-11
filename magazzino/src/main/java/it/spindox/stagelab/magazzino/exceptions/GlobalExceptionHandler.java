@@ -21,7 +21,6 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
     private static final String PATH = "path";
     private static final String TIMESTAMP = "timestamp";
 
@@ -105,7 +104,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    // JOBEXCEPTION : InvalidCapacityException, InvalidFatturaException, UnknownJobException
+    // ERRORE 409 PER JOBEXCEPTION : InvalidCapacityException, InvalidFatturaException, UnknownJobException
 
 
     @ExceptionHandler(JobException.class)

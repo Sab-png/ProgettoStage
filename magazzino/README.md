@@ -195,21 +195,22 @@ HTTP Response (JSON)
 
 ```
 magazzino/
-├── controllers/        (5 controllers)
-│   ├── FatturaController
-│   ├── MagazzinoController
+├── controllers/        (6 controllers)
+│   ├── HomeController
 │   ├── ProdottoController
-│   ├── JobExecutionController
-│   └── HomeController
-├── services/          (10 componenti: 5 interfacce + 5 impl)
-├── repositories/      (5 repository JPA)
-├── entities/          (11 classi: 5 entity + 6 enum)
-├── dto/               (10+ DTOs organizzati per dominio)
-├── mappers/           (4+ entity mapper)
+│   ├── MagazzinoController
+│   ├── FatturaController
+│   ├── FatturaWorkExecutionController
+│   └── JobExecutionController
+├── services/          (12 componenti: 6 interfacce + 6 impl)
+├── repositories/      (6 repository JPA)
+├── entities/          (13 classi: 6 entity + 7 enum)
+├── dto/               (18+ DTOs organizzati per dominio)
+├── mappers/           (12 entity mapper: 6 interfacce + 6 impl)
 ├── converter/         (Custom type converters)
 ├── configurations/    (Spring configuration)
 ├── exceptions/        (Custom exceptions)
-└── sjobs/             (Scheduled jobs)
+└── sjobs/             (2 Scheduled jobs)
 ```
 
 ---
@@ -245,14 +246,15 @@ magazzino/
 │   ├── java/it/spindox/stagelab/magazzino/
 │   │   ├── 🚀 MagazzinoApplication.java
 │   │   │
-│   │   ├── 🌐 controllers/  (5 Controllers)
+│   │   ├── 🌐 controllers/  (6 Controllers)
 │   │   │   ├── HomeController.java
 │   │   │   ├── ProdottoController.java
 │   │   │   ├── MagazzinoController.java
 │   │   │   ├── FatturaController.java
+│   │   │   ├── FatturaWorkExecutionController.java
 │   │   │   └── JobExecutionController.java
 │   │   │
-│   │   ├── 💼 services/  (10 Services)
+│   │   ├── 💼 services/  (12 Services)
 │   │   │   ├── ProdottoService.java (I)
 │   │   │   ├── ProdottoServiceImpl.java
 │   │   │   ├── MagazzinoService.java (I)
@@ -262,29 +264,34 @@ magazzino/
 │   │   │   ├── ProdottoMagazzinoService.java (I)
 │   │   │   ├── ProdottoMagazzinoServiceImpl.java
 │   │   │   ├── JobExecutionService.java (I)
-│   │   │   └── JobExecutionServiceImpl.java
+│   │   │   ├── JobExecutionServiceImpl.java
+│   │   │   ├── FatturaWorkExecutionService.java (I)
+│   │   │   └── FatturaWorkExecutionServiceImpl.java
 │   │   │
-│   │   ├── 🗄️ repositories/  (5 Repositories)
+│   │   ├── 🗄️ repositories/  (6 Repositories)
 │   │   │   ├── ProdottoRepository.java
 │   │   │   ├── MagazzinoRepository.java
 │   │   │   ├── FatturaRepository.java
 │   │   │   ├── ProdottoMagazzinoRepository.java
-│   │   │   └── JobExecutionRepository.java
+│   │   │   ├── JobExecutionRepository.java
+│   │   │   └── FatturaWorkExecutionRepository.java
 │   │   │
-│   │   ├── 📦 entities/  (5 Entity + 6 Enum)
+│   │   ├── 📦 entities/  (6 Entity + 7 Enum)
 │   │   │   ├── Prodotto.java
 │   │   │   ├── Magazzino.java
 │   │   │   ├── Fattura.java
 │   │   │   ├── ProdottoMagazzino.java
 │   │   │   ├── JobExecution.java
+│   │   │   ├── FatturaWorkExecution.java
 │   │   │   ├── SXFatturaStatus.java
 │   │   │   ├── StockStatusProdotto.java
 │   │   │   ├── StockStatusMagazzino.java
-│   │   │   ├── StatusJob.java (PENDING, RUNNING, SUCCESS, FAILED, SYSTEM_ERROR)
+│   │   │   ├── StatusJob.java
 │   │   │   ├── StatusJobErrorType.java
-│   │   │   └── ScortaMinPMStatus.java
+│   │   │   ├── ScortaMinPMStatus.java
+│   │   │   └── SXFatturaJobexecution.java
 │   │   │
-│   │   ├── 🔄 mappers/  (5 Mappers)
+│   │   ├── 🔄 mappers/  (12 Mappers)
 │   │   │   ├── ProdottoMapper.java (I)
 │   │   │   ├── ProdottoMapperImpl.java
 │   │   │   ├── MagazzinoMapper.java (I)
@@ -294,9 +301,11 @@ magazzino/
 │   │   │   ├── ProdottoMagazzinoMapper.java (I)
 │   │   │   ├── ProdottoMagazzinoMapperImpl.java
 │   │   │   ├── JobExecutionMapper.java (I)
-│   │   │   └── JobExecutionMapperImpl.java
+│   │   │   ├── JobExecutionMapperImpl.java
+│   │   │   ├── FatturaWorkExecutionMapper.java (I)
+│   │   │   └── FatturaWorkExecutionMapperImpl.java
 │   │   │
-│   │   ├── 📨 dto/  (15+ DTOs)
+│   │   ├── 📨 dto/  (18+ DTOs)
 │   │   │   ├── prodotto/
 │   │   │   │   ├── ProdottoRequest.java
 │   │   │   │   ├── ProdottoResponse.java
@@ -313,10 +322,14 @@ magazzino/
 │   │   │   │   ├── ProdottoMagazzinoRequest.java
 │   │   │   │   ├── ProdottoMagazzinoResponse.java
 │   │   │   │   └── ProdottoMagazzinoSearchRequest.java
-│   │   │   └── jobExecution/
-│   │   │       ├── JobExecutionRequest.java
-│   │   │       ├── JobExecutionResponse.java
-│   │   │       └── JobExecutionSearchRequest.java
+│   │   │   ├── jobExecution/
+│   │   │   │   ├── JobExecutionRequest.java
+│   │   │   │   ├── JobExecutionResponse.java
+│   │   │   │   └── JobExecutionSearchRequest.java
+│   │   │   └── FatturaWorkExecution/
+│   │   │       ├── FatturaWorkExecutionPaymentRequest.java
+│   │   │       ├── FatturaWorkExecutionPaymentResponse.java
+│   │   │       └── FatturaWorkExecutionSearch.java
 │   │   │
 │   │   ├── ⚙️ configurations/  (2+ Configurations)
 │   │   │   ├── SpringDataConfig.java (Page serialization VIA_DTO)
@@ -334,8 +347,9 @@ magazzino/
 │   │   │       ├── InvalidFatturaException.java
 │   │   │       └── InvalidCapacityException.java
 │   │   │
-│   │   ├── ⏰ sjobs/  (Scheduled Jobs)
-│   │   │   └── InventoryScheduler.java (@Scheduled per automazione)
+│   │   ├── ⏰ sjobs/  (2 Scheduled Jobs)
+│   │   │   ├── InventoryScheduler.java (@Scheduled per automazione inventario)
+│   │   │   └── FatturaScheduler.java (@Scheduled per automazione fatture/pagamenti)
 │   │   │
 │   │   └── README.MD
 │   │
@@ -361,18 +375,18 @@ magazzino/
 ### 📊 Riepilogo File
 
 ```
-✅ JAVA FILES:           69 files
-  • Controllers:         5
-  • Services:           10 (5 interface + 5 impl)
-  • Repositories:        5
-  • Entities:            5
-  • Enums:               6
-  • Mappers:            10 (5 interface + 5 impl)
-  • DTOs:               15
+✅ JAVA FILES:           81 files
+  • Controllers:         6
+  • Services:           12 (6 interface + 6 impl)
+  • Repositories:        6
+  • Entities:            6
+  • Enums:               7
+  • Mappers:            12 (6 interface + 6 impl)
+  • DTOs:               18+
   • Configurations:      2
   • Converters:          1
   • Exceptions:          5
-  • Scheduled Jobs:      1
+  • Scheduled Jobs:      2
   • Main Application:    1
   • Tests:               2
 
@@ -383,14 +397,14 @@ magazzino/
   • Properties:          2
   • Documentation:       2
 
-🎯 TOTAL: 82 FILES
+🎯 TOTAL: 94 FILES
 ```
 
 ---
 
 ## 📊 Componenti Dettagliate
 
-### 🌐 Controllers (5 Files)
+### 🌐 Controllers (6 Files)
 
 **HTTP Layer - REST Endpoints**
 
@@ -400,15 +414,16 @@ magazzino/
 | **ProdottoController** | `/prodotti` | Gestione catalogo | GET, POST, PUT, DELETE, SEARCH |
 | **MagazzinoController** | `/magazzino` | Gestione magazzini | GET, POST, PATCH, DELETE, SEARCH |
 | **FatturaController** | `/fatture` | Gestione ordini/fatture | GET, POST, PUT, DELETE, SEARCH |
+| **FatturaWorkExecutionController** | `/fatture/work` | Esecuzione pagamenti fatture | GET, POST, PUT, SEARCH |
 | **JobExecutionController** | `/jobs` | Monitoring job schedulati | GET, POST, SEARCH |
 
-**Totale Endpoint: 30+**
+**Totale Endpoint: 35+**
 
 ---
 
-### 💼 Services (10 Files)
+### 💼 Services (12 Files)
 
-**Business Logic Layer - 5 Interfacce + 5 Implementazioni**
+**Business Logic Layer - 6 Interfacce + 6 Implementazioni**
 
 #### Service Interfaces
 
@@ -456,13 +471,22 @@ magazzino/
    ├─ start(): JobExecution
    ├─ success(JobExecution job): void
    └─ failed(JobExecution job, error): void
+
+✅ FatturaWorkExecutionService.java
+   ├─ create(FatturaWorkExecutionPaymentRequest): void
+   ├─ getById(Long id): FatturaWorkExecutionPaymentResponse
+   ├─ getAllPaged(page, size): Page<FatturaWorkExecutionPaymentResponse>
+   ├─ search(FatturaWorkExecutionSearch): Page<FatturaWorkExecutionPaymentResponse>
+   ├─ update(Long id, FatturaWorkExecutionPaymentRequest): void
+   ├─ delete(Long id): void
+   └─ processPayment(Long fatturaId): void
 ```
 
 **Tutti implementati con @Transactional, validazione, logging**
 
 ---
 
-### 🗄️ Repositories (5 Files)
+### 🗄️ Repositories (6 Files)
 
 **Data Access Layer - Spring Data JPA**
 
@@ -494,11 +518,18 @@ magazzino/
    ├─ findByStatus(StatusJob status): List<JobExecution>
    ├─ findLastError(): Optional<JobExecution>
    └─ findByDateRange(LocalDateTime from, to): List<JobExecution>
+
+✅ FatturaWorkExecutionRepository extends JpaRepository<FatturaWorkExecution, Long>
+   ├─ @Query search(...): Page<FatturaWorkExecution>
+   ├─ @Query searchIds(...): Page<Long>
+   ├─ findByFatturaId(Long id): List<FatturaWorkExecution>
+   ├─ findByStatus(SXFatturaJobexecution status): List<FatturaWorkExecution>
+   └─ findLastPaymentAttempt(Long fatturaId): Optional<FatturaWorkExecution>
 ```
 
 ---
 
-### 📦 Entities (5 Files)
+### 📦 Entities (6 Files)
 
 **Model Layer - JPA Entity Classes**
 
@@ -540,11 +571,19 @@ magazzino/
    ├─ @Enumerated StatusJobErrorType errorType
    ├─ logMessaggio (CLOB), risultato (JSON)
    └─ Tracking esecuzioni job schedulati
+
+✅ FatturaWorkExecution.java
+   ├─ @Table("T_FATTURA_WORK_EXECUTION")
+   ├─ id, importoPagato, metodoPagamento
+   ├─ @ManyToOne fattura: Fattura
+   ├─ @Enumerated SXFatturaJobexecution stato
+   ├─ dataEsecuzione, dataNotifica
+   └─ Tracciamento esecuzioni pagamenti fatture
 ```
 
 ---
 
-### 🔢 Enums (6 Files)
+### 🔢 Enums (7 Files)
 
 **Type-Safe Status Management**
 
@@ -582,13 +621,20 @@ magazzino/
    ├─ SOTTO_SCORTA
    ├─ ENTRO_NORMA
    └─ ECCESSO
+
+✅ SXFatturaJobexecution.java
+   ├─ IN_ATTESA
+   ├─ IN_ELABORAZIONE
+   ├─ PAGATO
+   ├─ FALLITO
+   └─ RIFIUTATO
 ```
 
 ---
 
-### 🔄 Mappers (10 Files)
+### 🔄 Mappers (12 Files)
 
-**DTO Conversion Layer - 5 Interfacce + 5 Implementazioni**
+**DTO Conversion Layer - 6 Interfacce + 6 Implementazioni**
 
 ```
 ✅ ProdottoMapper & ProdottoMapperImpl
@@ -616,11 +662,16 @@ magazzino/
    ├─ toEntity(...): JobExecution
    ├─ toResponse(...): JobExecutionResponse
    └─ Conversione timezone UTC ↔ Local
+
+✅ FatturaWorkExecutionMapper & FatturaWorkExecutionMapperImpl
+   ├─ toEntity(...): FatturaWorkExecution
+   ├─ toResponse(...): FatturaWorkExecutionPaymentResponse
+   └─ updateEntity(...): void
 ```
 
 ---
 
-### 📨 DTOs (15+ Files)
+### 📨 DTOs (18+ Files)
 
 **Data Transfer Objects - Validazione & Serializzazione**
 
@@ -704,6 +755,28 @@ magazzino/
 ✅ JobExecutionSearchRequest.java
 ```
 
+**FatturaWorkExecution DTOs:**
+```
+✅ FatturaWorkExecutionPaymentRequest.java
+   ├─ @NotNull idFattura
+   ├─ @NotNull @DecimalMin importoPagato
+   ├─ metodoPagamento (CARTA, BONIFICO, CONTANTI)
+   └─ riferimentoPagamento (optional)
+
+✅ FatturaWorkExecutionPaymentResponse.java
+   ├─ id, idFattura, importoPagato
+   ├─ metodoPagamento
+   ├─ stato: SXFatturaJobexecution
+   ├─ dataEsecuzione, dataNotifica
+   └─ notaEsito
+
+✅ FatturaWorkExecutionSearch.java
+   ├─ idFattura, metodoPagamento (filtri)
+   ├─ statoEsecuzione
+   ├─ dataFrom, dataTo
+   └─ page, size
+```
+
 ---
 
 ### ⚙️ Configurations (2 Files)
@@ -754,7 +827,7 @@ magazzino/
 
 ---
 
-### ⏰ Scheduled Jobs (1 File)
+### ⏰ Scheduled Jobs (2 Files)
 
 ```
 ✅ InventoryScheduler.java
@@ -764,6 +837,14 @@ magazzino/
    ├─ @Scheduled(cron="0 0 */6 * * *")
    │  checkMinimumStockAlert() - ogni 6 ore
    └─ JobExecution tracking per ogni esecuzione
+
+✅ FatturaScheduler.java
+   ├─ @Component @Slf4j
+   ├─ @Scheduled(cron="0 0 9 * * MON-FRI")
+   │  processPaymentReminders() - 9:00 AM feriali
+   ├─ @Scheduled(cron="0 0 */2 * * *")
+   │  retryFailedPayments() - ogni 2 ore
+   └─ FatturaWorkExecution tracking e notifiche
 ```
 
 ---
@@ -985,6 +1066,70 @@ Response: Page<FatturaResponse>
 # DELETE - Elimina/Annulla fattura
 DELETE /fatture/{id}
 Response: 204 No Content
+```
+
+---
+
+### 💳 FATTURA WORK EXECUTION API (`/fatture/work`)
+
+**Metodi:** GET, POST, PUT, DELETE, SEARCH
+
+```bash
+# GET - Elenco esecuzioni pagamento (paginato)
+GET /fatture/work/list?page=0&size=10
+Response: Page<FatturaWorkExecutionPaymentResponse>
+
+# GET - Dettaglio esecuzione pagamento
+GET /fatture/work/{id}
+Response: FatturaWorkExecutionPaymentResponse
+{
+  "id": 1,
+  "idFattura": 1,
+  "importoPagato": 999.90,
+  "metodoPagamento": "CARTA",
+  "stato": "PAGATO",
+  "dataEsecuzione": "2026-02-27T11:30:00",
+  "dataNotifica": "2026-02-27T11:35:00",
+  "notaEsito": "Pagamento confermato"
+}
+
+# POST - Crea nuovo pagamento
+POST /fatture/work
+Content-Type: application/json
+{
+  "idFattura": 1,
+  "importoPagato": 999.90,
+  "metodoPagamento": "CARTA",
+  "riferimentoPagamento": "TXN123456789"
+}
+Response: 201 Created
+
+# PUT - Aggiorna pagamento
+PUT /fatture/work/{id}
+Content-Type: application/json
+{
+  "importoPagato": 999.90,
+  "metodoPagamento": "BONIFICO"
+}
+Response: 204 No Content
+
+# DELETE - Annulla pagamento
+DELETE /fatture/work/{id}
+Response: 204 No Content
+
+# POST - Ricerca avanzata pagamenti
+POST /fatture/work/search
+Content-Type: application/json
+{
+  "idFattura": 1,
+  "metodoPagamento": "CARTA",
+  "statoEsecuzione": "PAGATO",
+  "dataFrom": "2026-01-01",
+  "dataTo": "2026-02-27",
+  "page": 0,
+  "size": 20
+}
+Response: Page<FatturaWorkExecutionPaymentResponse>
 ```
 
 ---
@@ -1403,10 +1548,10 @@ Data: 27 Febbraio 2026
 
 ---
 
-**Ultima modifica:** 27 Febbraio 2026  
-**Versione:** 1.0 - COMPLETO  
+**Ultima modifica:** 10 Marzo 2026  
+**Versione:** 1.1 - AGGIORNATO  
 **Status:** ✅ Production Ready  
-**Total Files:** 82 (69 Java + 13 Config/Resources)  
-**Total Classes:** 69 Java Classes  
-**Total Endpoints:** 30+ API Endpoints  
-**Total DTOs:** 15+ Data Transfer Objects
+**Total Files:** 94 (81 Java + 13 Config/Resources)  
+**Total Classes:** 81 Java Classes  
+**Total Endpoints:** 35+ API Endpoints  
+**Total DTOs:** 18+ Data Transfer Objects

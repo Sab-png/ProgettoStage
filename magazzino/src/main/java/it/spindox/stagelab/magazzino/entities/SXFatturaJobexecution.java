@@ -1,12 +1,13 @@
 package it.spindox.stagelab.magazzino.entities;
 import lombok.Getter;
 
-
+// tracking job fatture
 
 @Getter
+
 public enum SXFatturaJobexecution {
 
-    PENDING,
+
     RUNNING,
     SUCCESS,
     FAILED,

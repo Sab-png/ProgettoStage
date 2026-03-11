@@ -11,9 +11,6 @@ import java.time.*;
 
 
 
-
-
-
 @Slf4j
 @Component
 public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMapper {
@@ -42,9 +39,6 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
 
         FatturaWorkExecution exec = new FatturaWorkExecution();
 
-        // Se non passi uno stato DA COME RISULTATO IL PENDING
-
-        exec.setStatus(status != null ? status : SXFatturaJobexecution.PENDING);
 
         // Orario di inizio esecuzione
 
@@ -73,23 +67,27 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
     public FatturaWorkExecutionPaymentResponse toPaymentResponse(Fattura fattura,
                                                                  FatturaWorkExecution exec) {
 
-        // Se entrambi null → nessun dato da mostrare
+        // Se entrambi null :  nessun dato da mostrare
+
         if (fattura == null && exec == null) return null;
 
         return FatturaWorkExecutionPaymentResponse.builder()
 
-                // ---------- DATI FATTURA ----------
+                // DATI FATTURA
+
                 .id(fattura != null ? fattura.getId() : null)
                 .status(fattura != null ? fattura.getStatus() : null)
                 .importo(fattura != null ? fattura.getImporto() : null)
                 .pagato(fattura != null ? fattura.getPagato() : null)
 
-                // Converte LocalDate → OffsetDateTime
+                // Converte LocalDate in OffsetDateTime
+
                 .dataScadenza(fattura != null
                         ? toOffset(fattura.getDataScadenza())
                         : null)
 
-                // ---------- DATI WORK EXECUTION ----------
+                // DATI WORK EXECUTION
+
                 .startTime(exec != null ? toLocal(exec.getStartTime()) : null)
                 .endTime(exec != null ? toLocal(exec.getEndTime()) : null)
                 .errorType(exec != null ? exec.getErrorType() : null)
@@ -98,9 +96,9 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
                 .build();
     }
 
-    /**
-     * Aggiorna solo stato e messaggio di errore (senza errorType).
-     */
+
+     // Aggiorna solo stato e messaggio di errore (senza errorType).
+
     @Override
     public void updateEntity(FatturaWorkExecution target,
                              SXFatturaJobexecution status,
@@ -108,9 +106,9 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         update(target, status, null, errorMessage);
     }
 
-    /**
-     * Aggiorna stato, errorType e message di una WorkExecution.
-     */
+
+     // Aggiorna stato, errorType e message di una WorkExecution.
+
     @Override
     public void updateEntity(FatturaWorkExecution target,
                              SXFatturaJobexecution status,
@@ -119,12 +117,9 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         update(target, status, errorType, errorMessage);
     }
 
-    /**
-     * Metodo interno che esegue effettivamente l’aggiornamento:
-     * - cambia stato
-     * - imposta errorType e errorMessage
-     * - setta endTime = ora attuale (chiude l’esecuzione)
-     */
+
+     // Metodo che esegue effettivamente l’aggiornamento:
+
     private void update(FatturaWorkExecution target,
                         SXFatturaJobexecution status,
                         StatusJobErrorType errorType,
@@ -136,14 +131,17 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         }
 
         // Aggiorna lo stato se presente
+
         if (status != null)
             target.setStatus(status);
 
         // Aggiorna info errore
+
         target.setErrorType(errorType);
         target.setErrorMessage(errorMessage);
 
         // EndTime = momento in cui si chiude l’esecuzione
+
         target.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }

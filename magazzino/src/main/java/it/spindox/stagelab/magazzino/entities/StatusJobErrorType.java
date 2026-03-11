@@ -23,8 +23,4 @@ public enum StatusJobErrorType {
         this.defaultMessage = defaultMessage;
         this.defaultHttpStatus = defaultHttpStatus;
     }
-
-
-
-
 }

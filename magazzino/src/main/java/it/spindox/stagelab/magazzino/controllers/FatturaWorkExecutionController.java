@@ -11,13 +11,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.*;
+
+
 
 
 @RestController
 @RequestMapping("/fattureworkexecution")
 @RequiredArgsConstructor
 @Validated
+
 public class FatturaWorkExecutionController {
 
     private final FatturaWorkExecutionService fatturaWorkExecutionService;
@@ -37,7 +39,7 @@ public class FatturaWorkExecutionController {
     // PATCH ID-payment
 
     @PatchMapping(
-            path = "/id/payment",
+            path = "/{id}/payment",
             consumes = "application/json",
             produces = "application/json"
     )

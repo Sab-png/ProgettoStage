@@ -3,6 +3,7 @@ import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidCapacityException;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidFatturaException;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.UnknownJobException;
 import it.spindox.stagelab.magazzino.services.FatturaWorkExecutionService;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class FatturaScheduler {
     @Value("${fatture.check.enabled:true}")
     private boolean fattureJobEnabled;
 
-    @Value("${fatture.check.cron:0 * * * * *}")
+    @Value("${fatture.check.cron:0 0 1 * * *}")
     private String fattureCheckCron;
 
 
@@ -56,7 +57,7 @@ public class FatturaScheduler {
         }
 
         final Instant startInstant = Instant.now();
-        log.info("--- FATTURE JOB START --- now={} cron='{}'",
+        log.info(" FATTURE JOB START  now={} cron='{}'",
                 TS.format(startInstant), fattureCheckCron);
 
         JobExecution job = null;
@@ -85,7 +86,7 @@ public class FatturaScheduler {
             log.error("[INVALID FATTURA] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.SYSTEM_ERROR, e);
 
-        } catch (Exception e) {
+        } catch ( UnknownJobException e) {
             log.error("[UNKNOWN ERROR] {}", e.getMessage(), e);
             handleFailure(job, StatusJobErrorType.UNKNOWN, e);
 

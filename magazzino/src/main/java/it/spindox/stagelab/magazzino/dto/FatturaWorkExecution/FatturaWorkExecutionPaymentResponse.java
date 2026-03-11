@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 
+
 @Data
 @Builder
 public class FatturaWorkExecutionPaymentResponse {
@@ -17,10 +18,8 @@ public class FatturaWorkExecutionPaymentResponse {
     private BigDecimal importo;
     private BigDecimal pagato;
     private OffsetDateTime dataScadenza;
-
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-
     private StatusJobErrorType errorType;
     private String errorMessage;
 }

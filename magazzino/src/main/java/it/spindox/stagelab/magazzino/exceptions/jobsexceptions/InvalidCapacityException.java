@@ -21,11 +21,11 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class InvalidCapacityException extends JobException {
 
-    private final Long prodottoId;        // opzionale → caso prodotto
-    private final Integer quantita;       // opzionale → caso prodotto
-    private final String nomeMagazzino;   // opzionale → caso magazzino
-    private final Integer capacity;       // opzionale → caso magazzino
-    private final String dbValue;         // opzionale → caso DB
+    private final Long prodottoId;        // opzionale : caso prodotto
+    private final Integer quantita;       // opzionale : caso prodotto
+    private final String nomeMagazzino;   // opzionale :  caso magazzino
+    private final Integer capacity;       // opzionale : caso magazzino
+    private final String dbValue;         // opzionale :  caso DB
 
 
     // 1) CASO PRODOTTO / PRODOTTO-MAGAZZINO  : nel caso la quantita negativa/null

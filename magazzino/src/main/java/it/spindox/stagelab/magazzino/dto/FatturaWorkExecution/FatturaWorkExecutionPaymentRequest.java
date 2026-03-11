@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Digits;
 
 
 
- // Richiesta di pagamento INCREMENTANDO  una Fattura TRAMITE  WorkExecution
+ // Richiesta di pagamento: aumentando una Fattura esistente
 
 
 @Data

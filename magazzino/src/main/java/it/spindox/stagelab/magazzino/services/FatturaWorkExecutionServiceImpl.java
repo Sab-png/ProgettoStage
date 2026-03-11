@@ -26,6 +26,7 @@ import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 @Service
 @RequiredArgsConstructor
 @Transactional
+
 public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionService {
 
     private final FatturaWorkExecutionRepository fatturaWorkExecutionRepository;
@@ -36,7 +37,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     private final EntityManager entityManager;
 
 
-      // Ritorna il totale già pagato. Se null da 0.
+    // Ritorna il totale già pagato ,  Se null da 0.
 
     private BigDecimal getPagatoCorrente(Fattura fattura) {
         return fattura.getPagato() == null
@@ -51,7 +52,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     }
 
     //   ADD PAYMENT
-     //  Calcola il nuovo totale pagato, dopo aver validato:
+    //  Calcola il nuovo totale pagato, dopo aver validato:
 
     private BigDecimal addPayment(Fattura fattura, BigDecimal pagatoDaAggiungere) {
 
@@ -130,115 +131,124 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
     //   CHECK SU TUTTE LE FATTURE
 
-
     @Override
+    @Transactional
     public List<FatturaWorkExecutionPaymentResponse> paymentCheckAllFatture() {
 
         entityManager.clear();
 
-        List<FatturaWorkExecution> executions = fatturaWorkExecutionRepository.findAll();
+        List<Fattura> fatture = fatturaRepository.findAll();
+
         List<Fattura> fattureToUpdate = new ArrayList<>();
-        List<FatturaWorkExecution> execToUpdate = new ArrayList<>();
-        List<FatturaWorkExecutionPaymentResponse> responses = new ArrayList<>();
+        List<FatturaWorkExecution> execToSave = new ArrayList<>();
 
-        for (FatturaWorkExecution exec : executions) {
+        //  lista della response con le eventuali problematiche
 
-            Fattura f = fatturaRepository.findById(exec.getFatturaId()).orElse(null);
+        List<FatturaWorkExecutionPaymentResponse> problems = new ArrayList<>();
 
-            //  Caso 1: Fattura mancante / incoerente
+        for (Fattura f : fatture) {
 
-            if (f == null || f.getImporto() == null) {
+            if (f.getImporto() == null) {
+                FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.ERROR);
+                execToSave.add(exec);
 
-                exec.setStatus(SXFatturaJobexecution.ERROR);
-                exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
+                //  SOLO ERROR
 
-                execToUpdate.add(exec);
+                problems.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
                 continue;
             }
 
-            // RUNNING se è PENDING o null
-
-            if (exec.getStatus() == null || exec.getStatus() == SXFatturaJobexecution.PENDING) {
-                exec.setStatus(SXFatturaJobexecution.RUNNING);
-            }
-
-            // Ricalcolo stato fattura
-
             BigDecimal pagato = getPagatoCorrente(f);
-            SXFatturaStatus nuovoStatus = determine(f.getImporto(), pagato, f.getDataScadenza());
 
-            if (f.getStatus() != nuovoStatus) {
+            SXFatturaStatus nuovoStatus = SXFatturaStatus.determine(
+                    f.getImporto(),
+                    pagato,
+                    f.getDataScadenza()
+            );
+
+            boolean statoCambiato = f.getStatus() != nuovoStatus;
+
+            if (statoCambiato) {
                 f.setStatus(nuovoStatus);
                 fattureToUpdate.add(f);
             }
 
-            // SUCCESS
+            //  se lo stato è cambiato  non va bene
 
-            exec.setStatus(SXFatturaJobexecution.SUCCESS);
-            exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
-            execToUpdate.add(exec);
+            SXFatturaJobexecution execStatus =
+                    statoCambiato ? SXFatturaJobexecution.ERROR : SXFatturaJobexecution.SUCCESS;
 
-            responses.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
+            FatturaWorkExecution exec = newExecution(f, execStatus);
+            execToSave.add(exec);
+
+            //  Se SUCCESS NON lo AGGIUNGo alla  lista
+
+            if (execStatus != SXFatturaJobexecution.SUCCESS) {
+                problems.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
+            }
         }
-
-        //  Dati modificati
 
         if (!fattureToUpdate.isEmpty()) {
             fatturaRepository.saveAllAndFlush(fattureToUpdate);
-            log.info("SALVATE {} fatture modificate", fattureToUpdate.size());
         }
 
-        if (!execToUpdate.isEmpty()) {
-            fatturaWorkExecutionRepository.saveAllAndFlush(execToUpdate);
-            log.info("SALVATE {} work execution aggiornate", execToUpdate.size());
+        if (!execToSave.isEmpty()) {
+            fatturaWorkExecutionRepository.saveAllAndFlush(execToSave);
         }
 
-        return responses;
+        //  Restituisci i problemi
+
+        return problems;
     }
 
+//  crea una nuova WorkExecution
+
+    private FatturaWorkExecution newExecution(Fattura f, SXFatturaJobexecution status) {
+
+        FatturaWorkExecution exec = new FatturaWorkExecution();
+        exec.setFatturaId(f.getId());
+        exec.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));
+        exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
+        exec.setStatus(status);
+
+        return exec;
+    }
 
     //   FIX CAMPI NULL
 
 
     @Override
+    @Transactional
     public int fixNullFields() {
 
-
-        //svuota la cache
+        // Svuota la cache (kesh)
 
         entityManager.clear();
 
-        // Recupera tutte le WorkExecution
-        List<FatturaWorkExecution> executions = fatturaWorkExecutionRepository.findAll();
+        // Recupera tutte le fatture
+
+        List<Fattura> fatture = fatturaRepository.findAll();
+
         List<Fattura> fattureDaAggiornare = new ArrayList<>();
 
-
-        for (FatturaWorkExecution exec : executions) {
-
-            // Recupera la fattura collegata
-
-            Fattura f = fatturaRepository.findById(exec.getFatturaId()).orElse(null);
-
-            // Se la fattura non esiste più la salta
-
+        for (Fattura f : fatture) {
             if (f == null) continue;
 
             boolean modificata = false;
 
-            // Se pagato è null  lo inizializza a ZERO
+            // Inizializza pagato a ZERO se nullo
 
             if (f.getPagato() == null) {
                 f.setPagato(BigDecimal.ZERO);
                 modificata = true;
             }
 
-            // Se status è null
-            // lo imposta a EMESSA
+            // Imposta stato a EMESSA se nullo
+
             if (f.getStatus() == null) {
                 f.setStatus(SXFatturaStatus.EMESSA);
                 modificata = true;
             }
-
 
             if (modificata) fattureDaAggiornare.add(f);
         }
@@ -250,14 +260,23 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
             log.info("FIX-NULL: ripulite {} fatture", fattureDaAggiornare.size());
         }
 
-        // Ritorna quante fatture sono state modificate
-
         return fattureDaAggiornare.size();
     }
 
+
     @Override
     public Page<FatturaWorkExecutionPaymentResponse> search(FatturaWorkExecutionSearch req) {
-        return null;
+
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize());
+
+        Page<FatturaWorkExecution> page =
+                fatturaWorkExecutionRepository.findAll(pageable);
+
+        return page.map(exec ->
+                fatturaWorkExecutionMapper.toPaymentResponse(
+                        fatturaRepository.findById(exec.getFatturaId()).orElse(null),
+                        exec
+                )
+        );
     }
 }
-
