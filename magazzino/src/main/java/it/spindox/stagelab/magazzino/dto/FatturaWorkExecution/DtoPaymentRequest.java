@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Digits;
 
 
 @Data
-public class FatturaWorkExecutionPaymentRequest {
+public class DtoPaymentRequest {
 
     @NotNull(message = "L'importo non può essere nullo")
     @DecimalMin(value = "0.01", message = "Il pagamento deve essere > 0")

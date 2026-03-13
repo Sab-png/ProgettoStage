@@ -1,6 +1,7 @@
 
 package it.spindox.stagelab.magazzino.repositories;
 import it.spindox.stagelab.magazzino.entities.Fattura;
+import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -60,8 +61,11 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
     );
 
     // SEQUENCE ORACLE
+
     @Query(value = "SELECT FATTURA_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
     Long nextNumeroSeq();
-
     List<Fattura> findByProdottoId(Long idProdotto);
+
+    Page<Fattura> findAllByStatus(SXFatturaStatus status, Pageable pageable);
+    List<Fattura> findAllByStatus(SXFatturaStatus status);
 }

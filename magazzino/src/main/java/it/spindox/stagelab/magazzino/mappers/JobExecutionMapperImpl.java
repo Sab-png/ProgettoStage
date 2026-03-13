@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.mappers;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
@@ -43,10 +43,10 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     // ENTITY TO RESPONSE DTO
 
     @Override
-    public JobExecutionResponse toResponse(JobExecution entity) {
+    public DtoJobResponse toResponse(JobExecution entity) {
         if (entity == null) return null;
 
-        return JobExecutionResponse.builder()
+        return DtoJobResponse.builder()
                 .id(entity.getId())
                 .status(entity.getStatus())
                 .startTime(toLocal(entity.getStartTime()))
@@ -85,7 +85,7 @@ public class JobExecutionMapperImpl implements JobExecutionMapper {
     // DTO (search) to  ENTITY
 
     @Override
-    public JobExecution toEntity(JobExecutionRequest req) {
+    public JobExecution toEntity(DtoJobRequest req) {
         if (req == null) return null;
 
         JobExecution e = new JobExecution();

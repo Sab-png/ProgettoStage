@@ -1,7 +1,7 @@
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionPaymentRequest;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionPaymentResponse;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionSearch;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentRequest;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentResponse;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoSearch;
 import it.spindox.stagelab.magazzino.services.FatturaWorkExecutionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,8 @@ public class FatturaWorkExecutionController {
     // GET /fattureworkexecution/search
 
     @GetMapping("/search")
-    public Page<FatturaWorkExecutionPaymentResponse> search(
-            @ModelAttribute FatturaWorkExecutionSearch req
+    public Page<DtoPaymentResponse> search(
+            @ModelAttribute DtoSearch req
     ) {
         return fatturaWorkExecutionService.search(req);
     }
@@ -43,15 +43,15 @@ public class FatturaWorkExecutionController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public ResponseEntity<FatturaWorkExecutionPaymentResponse> paymentCheckFattura(
+    public ResponseEntity<DtoPaymentResponse> paymentCheckFattura(
             @PathVariable Long id,
-            @Valid @RequestBody FatturaWorkExecutionPaymentRequest request
+            @Valid @RequestBody DtoPaymentRequest request
     ) {
         if (request == null || request.getPagatoDaAggiungere() == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        FatturaWorkExecutionPaymentResponse updated =
+        DtoPaymentResponse updated =
                 fatturaWorkExecutionService.paymentCheckFattura(
                         id,
                         request.getPagatoDaAggiungere()
@@ -67,7 +67,7 @@ public class FatturaWorkExecutionController {
     @PostMapping("/payment-check-all")
     public ResponseEntity<Map<String, Object>> checkAllFatture() {
 
-        List<FatturaWorkExecutionPaymentResponse> items =
+        List<DtoPaymentResponse> items =
                 fatturaWorkExecutionService.paymentCheckAllFatture();
 
         Map<String, Object> body = Map.of(

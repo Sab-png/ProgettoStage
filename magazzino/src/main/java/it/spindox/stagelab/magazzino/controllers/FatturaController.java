@@ -1,11 +1,10 @@
 
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionPaymentRequest;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionPaymentResponse;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentRequest;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
-import it.spindox.stagelab.magazzino.entities.FatturaWorkExecution;
 import it.spindox.stagelab.magazzino.services.FatturaService;
 import it.spindox.stagelab.magazzino.services.FatturaWorkExecutionService;
 import jakarta.validation.Valid;
@@ -23,6 +22,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+
 
 
 @RestController
@@ -124,15 +124,15 @@ public class FatturaController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public ResponseEntity<FatturaWorkExecutionPaymentResponse> paymentCheckFattura(
+    public ResponseEntity<DtoPaymentResponse> paymentCheckFattura(
             @PathVariable Long id,
-            @Valid @RequestBody FatturaWorkExecutionPaymentRequest request   // <-- QUI!
+            @Valid @RequestBody DtoPaymentRequest request
     ) {
         if (request == null || request.getPagatoDaAggiungere() == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        FatturaWorkExecutionPaymentResponse updated = fatturaWorkExecutionService.paymentCheckFattura(
+        DtoPaymentResponse updated = fatturaWorkExecutionService.paymentCheckFattura(
                 id,
                 request.getPagatoDaAggiungere()
         );
@@ -144,7 +144,7 @@ public class FatturaController {
 
     @PostMapping("/payment-check-all")
     public ResponseEntity<Map<String, Object>> checkAllFatture() {
-        List<FatturaWorkExecutionPaymentResponse> items = fatturaWorkExecutionService.paymentCheckAllFatture();
+        List<DtoPaymentResponse> items = fatturaWorkExecutionService.paymentCheckAllFatture();
         Map<String, Object> body = Map.of(
                 "updatedCount", items.size(),
                 "items", items

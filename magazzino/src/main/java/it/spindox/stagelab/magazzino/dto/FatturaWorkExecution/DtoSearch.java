@@ -1,6 +1,7 @@
 package it.spindox.stagelab.magazzino.dto.FatturaWorkExecution;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import it.spindox.stagelab.magazzino.entities.SXFatturaJobexecution;
@@ -10,7 +11,7 @@ import it.spindox.stagelab.magazzino.entities.SXFatturaJobexecution;
 
 
 @Data
-public class FatturaWorkExecutionSearch {
+public class DtoSearch {
 
     // Stato della JOB EXECUTION
 
@@ -30,6 +31,11 @@ public class FatturaWorkExecutionSearch {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startTo;
 
+// ordine
+
+    private String sortBy = "startTime";
+    private Sort.Direction sortDir = Sort.Direction.DESC;
+
     // PagE
 
     @Min(0)
@@ -37,4 +43,5 @@ public class FatturaWorkExecutionSearch {
 
     @Min(1)
     private int size = 10;
+
 }

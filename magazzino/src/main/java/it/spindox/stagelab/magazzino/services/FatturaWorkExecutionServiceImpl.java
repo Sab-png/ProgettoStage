@@ -17,7 +17,12 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static it.spindox.stagelab.magazzino.entities.SXFatturaJobexecution.SUCCESS;
+import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.EMESSA;
 import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
+
 
 
 
@@ -92,7 +97,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     //   PAGAMENTO SINGOLA FATTURA
 
     @Override
-    public FatturaWorkExecutionPaymentResponse paymentCheckFattura(
+    public DtoPaymentResponse paymentCheckFattura(
             Long workExecutionId, BigDecimal pagatoDaAggiungere) {
 
         // 1. Recupero dei dati
@@ -121,7 +126,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
         // 5. Stato SUCCESS
 
-        exec.setStatus(SXFatturaJobexecution.SUCCESS);
+        exec.setStatus(SUCCESS);
         exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
 
@@ -133,19 +138,19 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
     @Override
     @Transactional
-    public List<FatturaWorkExecutionPaymentResponse> paymentCheckAllFatture() {
+    public List<DtoPaymentResponse> paymentCheckAllFatture() {
 
         entityManager.clear();
 
-        List<Fattura> fatture = fatturaRepository.findAll();
-
+        List<Fattura> fatture = fatturaRepository.findAllByStatus(EMESSA);
+        // FIND BY STATUS EMESSO
         List<Fattura> fattureToUpdate = new ArrayList<>();
         List<FatturaWorkExecution> execToSave = new ArrayList<>();
 
         //  lista della response con le eventuali problematiche
 
-        List<FatturaWorkExecutionPaymentResponse> problems = new ArrayList<>();
-
+        List<DtoPaymentResponse> problems = new ArrayList<>();
+// dto : a posto di fattura work execution payment response
         for (Fattura f : fatture) {
 
             if (f.getImporto() == null) {
@@ -166,26 +171,17 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                     f.getDataScadenza()
             );
 
-            boolean statoCambiato = f.getStatus() != nuovoStatus;
+            boolean statoCambiato = !f.getStatus().equals (nuovoStatus);
 
             if (statoCambiato) {
                 f.setStatus(nuovoStatus);
                 fattureToUpdate.add(f);
             }
 
-            //  se lo stato è cambiato  non va bene
 
-            SXFatturaJobexecution execStatus =
-                    statoCambiato ? SXFatturaJobexecution.ERROR : SXFatturaJobexecution.SUCCESS;
-
-            FatturaWorkExecution exec = newExecution(f, execStatus);
+            FatturaWorkExecution exec = newExecution(f, SUCCESS);
             execToSave.add(exec);
 
-            //  Se SUCCESS NON lo AGGIUNGo alla  lista
-
-            if (execStatus != SXFatturaJobexecution.SUCCESS) {
-                problems.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
-            }
         }
 
         if (!fattureToUpdate.isEmpty()) {
@@ -263,11 +259,25 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         return fattureDaAggiornare.size();
     }
 
+// SEARCH FUNCTIONS
 
     @Override
-    public Page<FatturaWorkExecutionPaymentResponse> search(FatturaWorkExecutionSearch req) {
+    public Page<DtoPaymentResponse> search(DtoSearch req) {
 
-        Pageable pageable = PageRequest.of(req.getPage(), req.getSize());
+        // dto caratteristiche + sort by ( ordinamento)
+
+        Set<String> sortableFields = Set.of(
+                "id", "fatturaId", "startTime", "endTime",
+                "errorType", "errorMessage", "status"
+        );
+
+        String sortBy = sortableFields.contains(req.getSortBy())
+                ? req.getSortBy()
+                : "startTime";
+
+        Sort sort = Sort.by(req.getSortDir(), sortBy);
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sort);
+// page
 
         Page<FatturaWorkExecution> page =
                 fatturaWorkExecutionRepository.findAll(pageable);

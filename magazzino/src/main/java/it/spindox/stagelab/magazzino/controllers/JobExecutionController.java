@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.mappers.JobExecutionMapper;
 import it.spindox.stagelab.magazzino.services.JobExecutionService;
@@ -44,7 +44,7 @@ public class JobExecutionController {
             @RequestParam(defaultValue = "10") int size
     ) {
 
-        JobExecutionRequest req = new JobExecutionRequest();
+        DtoJobRequest req = new DtoJobRequest();
         req.setNomeJob(nomeJob);
         req.setStato(stato);
         req.setFrom(from);
@@ -61,7 +61,7 @@ public class JobExecutionController {
 
     @GetMapping("/{id}")
 
-    public ResponseEntity<JobExecutionResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<DtoJobResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(jobExecutionService.getById(id));
     }
 
@@ -69,7 +69,7 @@ public class JobExecutionController {
 
     @GetMapping("/list")
 
-    public ResponseEntity<Page<JobExecutionResponse>> getAllFatturePaged(
+    public ResponseEntity<Page<DtoJobResponse>> getAllFatturePaged(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
@@ -80,8 +80,8 @@ public class JobExecutionController {
 
     @PostMapping("/search")
 
-    public ResponseEntity<Page<JobExecutionResponse>> search(
-            @Valid @RequestBody JobExecutionRequest request
+    public ResponseEntity<Page<DtoJobResponse>> search(
+            @Valid @RequestBody DtoJobRequest request
     ) {
         return ResponseEntity.ok(jobExecutionService.search(request));
     }
@@ -92,7 +92,7 @@ public class JobExecutionController {
 
     @GetMapping("/errors/last")
 
-    public ResponseEntity<JobExecutionResponse> getLastError() {
+    public ResponseEntity<DtoJobResponse> getLastError() {
 
         Optional<JobExecution> last = jobExecutionService.findLast();
 

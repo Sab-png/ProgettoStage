@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
 
 @Data
 @Builder
-public class FatturaWorkExecutionPaymentResponse {
+public class DtoPaymentResponse {
 
     private Long id;
     private SXFatturaStatus status;

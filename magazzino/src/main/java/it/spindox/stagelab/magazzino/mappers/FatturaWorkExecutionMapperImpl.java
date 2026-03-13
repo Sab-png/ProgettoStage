@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.mappers;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionPaymentResponse;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentResponse;
 import it.spindox.stagelab.magazzino.entities.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -64,14 +64,14 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
      // Costruisce la response (DTO) contenente i dati della fattura e della work execution
 
     @Override
-    public FatturaWorkExecutionPaymentResponse toPaymentResponse(Fattura fattura,
-                                                                 FatturaWorkExecution exec) {
+    public DtoPaymentResponse toPaymentResponse(Fattura fattura,
+                                                FatturaWorkExecution exec) {
 
         // Se entrambi null :  nessun dato da mostrare
 
         if (fattura == null && exec == null) return null;
 
-        return FatturaWorkExecutionPaymentResponse.builder()
+        return DtoPaymentResponse.builder()
 
                 // DATI FATTURA
 

@@ -41,14 +41,13 @@ public class FatturaScheduler {
     @Value("${fatture.check.enabled:true}")
     private boolean fattureJobEnabled;
 
-    @Value("${fatture.check.cron:0 0 1 * * *}")
+    @Value("${fatture.check.cron:0 */10 * * * *}")
     private String fattureCheckCron;
 
 
     //  ENTRY POINT SCHEDULER
 
     @Scheduled(cron = "${fatture.check.cron}", zone = "Europe/Rome")
-    // Per test rapido: usa @Scheduled(fixedRate = 10000)
 
     public void runFattureDailyCheck() {
         if (!fattureJobEnabled) {
@@ -119,3 +118,4 @@ public class FatturaScheduler {
         log.info("[DURATION] {}ms", ms);
     }
 }
+

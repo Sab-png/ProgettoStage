@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
@@ -16,10 +16,10 @@ public interface JobExecutionService {
 
 
     @Transactional(readOnly = true)
-    JobExecutionResponse getById(Long id);
+    DtoJobResponse getById(Long id);
 
     @Transactional(readOnly = true)
-    Page<JobExecutionResponse> search(JobExecutionRequest request);
+    Page<DtoJobResponse> search(DtoJobRequest request);
 
 
 
@@ -58,7 +58,7 @@ public interface JobExecutionService {
 
     void failed(JobExecution job, Exception e);
 
-    Page<Long> searchIds(JobExecutionRequest req);
+    Page<Long> searchIds(DtoJobRequest req);
 
-    Page<JobExecutionResponse> getAllPaged(@Min(0) int page, @Min(1) int size);
+    Page<DtoJobResponse> getAllPaged(@Min(0) int page, @Min(1) int size);
 }

@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
@@ -46,9 +46,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return msg.length() > 1000 ? msg.substring(0, 1000) : msg;
     }
 
-    private static JobExecutionResponse toResponse(JobExecution e) {
+    private static DtoJobResponse toResponse(JobExecution e) {
         if (e == null) return null;
-        return JobExecutionResponse.builder()
+        return DtoJobResponse.builder()
                 .id(e.getId())
                 .status(e.getStatus())
                 .startTime(toLocal(e.getStartTime()))
@@ -61,7 +61,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // GET BY ID
 
     @Override
-    public JobExecutionResponse getById(Long id) {
+    public DtoJobResponse getById(Long id) {
         if (id == null) throw new IllegalArgumentException("id nullo");
         JobExecution e = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("JobExecution non trovato: id=" + id));
@@ -71,7 +71,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // SEARCH CON DTO
 
     @Override
-    public Page<JobExecutionResponse> search(JobExecutionRequest request) {
+    public Page<DtoJobResponse> search(DtoJobRequest request) {
         if (request == null) return Page.empty();
 
         // stato come enum (accetta null)
@@ -97,7 +97,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // SEARCH IDS (DTO)
 
     @Override
-    public Page<Long> searchIds(JobExecutionRequest req) {
+    public Page<Long> searchIds(DtoJobRequest req) {
         if (req == null) return Page.empty();
 
         StatusJob status = null;
@@ -120,7 +120,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     // GET ALL PAGED
 
     @Override
-    public Page<JobExecutionResponse> getAllPaged(int page, int size) {
+    public Page<DtoJobResponse> getAllPaged(int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), Sort.by("startTime").descending());
         return repository.findAll(pageable).map(JobExecutionServiceImpl::toResponse);
     }

@@ -28,20 +28,19 @@ import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 @Service
 @RequiredArgsConstructor
 @Transactional
-
-public  class FatturaServiceImpl implements FatturaService {
+public class FatturaServiceImpl implements FatturaService {
 
     private final FatturaRepository fatturaRepository;
     private final ProdottoRepository prodottoRepository;
     private final FatturaMapper fatturaMapper;
-
 
     @PersistenceContext
     private EntityManager entityManager;
 
 
 
-    //  SEARCH: ricerca fatture
+    // SEARCH
+
 
     @Override
     @Transactional(readOnly = true)
@@ -77,7 +76,8 @@ public  class FatturaServiceImpl implements FatturaService {
 
 
 
-    //  SEARCH SOLO ID
+    // SEARCH SOLO ID
+
 
     @Override
     @Transactional(readOnly = true)
@@ -87,7 +87,47 @@ public  class FatturaServiceImpl implements FatturaService {
     }
 
 
-    //  CREATE FATTURA
+
+    // GET ALL PAGED : ordinamento ASC
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FatturaResponse> getAllPaged(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        return fatturaRepository.findAll(pageable).map(fatturaMapper::toResponse);
+    }
+
+    @Override
+    public Page<FatturaResponse> getByStatus(SXFatturaStatus status) {
+        return null;
+    }
+
+
+
+    // GET BY STATUS : filter + ordine ASC
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FatturaResponse> getByStatus(SXFatturaStatus status, int page, int size) {
+
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.max(size, 1),
+                Sort.by("id").ascending()   // nuove fatture in fondo
+        );
+
+        Page<Fattura> result = fatturaRepository.findAllByStatus(status, pageable);
+
+        return result.map(fatturaMapper::toResponse);
+    }
+
+
+//     CRUD
+
+
+
+    // CREATE
 
     @Override
     public FatturaResponse create(FatturaRequest request) {
@@ -126,7 +166,7 @@ public  class FatturaServiceImpl implements FatturaService {
     }
 
 
-    //  UPDATE (PATCH)
+    // UPDATE
 
     @Override
     public FatturaResponse update(Long id, FatturaRequest request) {
@@ -162,8 +202,7 @@ public  class FatturaServiceImpl implements FatturaService {
     }
 
 
-
-    //  GET BY ID
+    // GET BY ID
 
     @Override
     @Transactional(readOnly = true)
@@ -174,7 +213,7 @@ public  class FatturaServiceImpl implements FatturaService {
     }
 
 
-    //  GET BY PRODOTTO
+    // GET BY PRODOTTO
 
     @Override
     @Transactional(readOnly = true)
@@ -185,7 +224,7 @@ public  class FatturaServiceImpl implements FatturaService {
 
         List<Fattura> list = fatturaRepository.findByProdottoId(idProdotto);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), list.size());
 
@@ -198,8 +237,7 @@ public  class FatturaServiceImpl implements FatturaService {
     }
 
 
-
-    //  DELETE
+    // DELETE
 
     @Override
     public void delete(Long id) {
@@ -211,16 +249,4 @@ public  class FatturaServiceImpl implements FatturaService {
 
         fatturaRepository.delete(entity);
     }
-
-
-
-    //  GET ALL PAGED
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<FatturaResponse> getAllPaged(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return fatturaRepository.findAll(pageable).map(fatturaMapper::toResponse);
-    }
-
 }

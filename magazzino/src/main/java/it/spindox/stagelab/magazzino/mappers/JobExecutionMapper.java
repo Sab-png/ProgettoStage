@@ -1,6 +1,6 @@
 package it.spindox.stagelab.magazzino.mappers;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionRequest;
-import it.spindox.stagelab.magazzino.dto.jobExecution.JobExecutionResponse;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobRequest;
+import it.spindox.stagelab.magazzino.dto.jobExecution.DtoJobResponse;
 import it.spindox.stagelab.magazzino.entities.JobExecution;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import it.spindox.stagelab.magazzino.entities.StatusJob;
@@ -15,7 +15,7 @@ public interface JobExecutionMapper {
 
     // Converte entity -> response
 
-    JobExecutionResponse toResponse(JobExecution entity);
+    DtoJobResponse toResponse(JobExecution entity);
 
 
     // Aggiorna una JobExecution esistente (es. SUCCESS / ERROR)
@@ -31,5 +31,5 @@ public interface JobExecutionMapper {
 
     // REQUEST DTO → ENTITY (solo per filtri)
 
-    JobExecution toEntity(JobExecutionRequest req);
+    JobExecution toEntity(DtoJobRequest req);
 }

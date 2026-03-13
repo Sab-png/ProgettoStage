@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.mappers;
-import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.FatturaWorkExecutionPaymentResponse;
+import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentResponse;
 import it.spindox.stagelab.magazzino.entities.*;
 
 
@@ -13,7 +13,7 @@ public interface FatturaWorkExecutionMapper {
 
     // Costruisce la response
 
-    FatturaWorkExecutionPaymentResponse toPaymentResponse(Fattura fattura, FatturaWorkExecution exec);
+    DtoPaymentResponse toPaymentResponse(Fattura fattura, FatturaWorkExecution exec);
 
     // Aggiorna stato e messaggi job
 
