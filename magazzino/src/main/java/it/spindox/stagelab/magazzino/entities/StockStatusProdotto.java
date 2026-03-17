@@ -39,7 +39,7 @@ public enum StockStatusProdotto {
                 );
     }
 
-    // Stato calcolato dinamicamente
+    // Stato calcolato
 
     public static StockStatusProdotto fromQuantita(Integer quantita, Integer scortaMin) {
 

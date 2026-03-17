@@ -8,8 +8,17 @@ import lombok.Getter;
 public enum SXFatturaJobexecution {
 
 
+    // Job in esecuzione
     RUNNING,
+
+    //Job completato con successo
     SUCCESS,
+
+    // Job terminato a causa di un errore
     FAILED,
-    ERROR
+
+    //Job terminato a causa di un errore di sistema
+
+    ERROR,
+
 }

@@ -4,23 +4,17 @@ import org.springframework.http.HttpStatus;
 
 
 @Getter
-
-public enum StatusJobErrorType {
+public enum SXFatturaJobexecutionErrorType {
 
     SYSTEM_ERROR("Errore di sistema imprevisto", HttpStatus.INTERNAL_SERVER_ERROR),
+    BUSINESS_ERROR("Errore di business", HttpStatus.BAD_REQUEST),
+    BUSINESS_WARNING("Anomalia di business non bloccante", HttpStatus.OK),
     UNKNOWN("Errore sconosciuto", HttpStatus.INTERNAL_SERVER_ERROR);
 
-// Messaggio di stringa di default
-
     private final String defaultMessage;
-
-    //Status HTTP per questa categoria di errore
-
     private final HttpStatus defaultHttpStatus;
 
-    // torna un  messaggio di default per la  tipologia di errore
-
-    StatusJobErrorType(String defaultMessage, HttpStatus defaultHttpStatus) {
+    SXFatturaJobexecutionErrorType(String defaultMessage, HttpStatus defaultHttpStatus) {
         this.defaultMessage = defaultMessage;
         this.defaultHttpStatus = defaultHttpStatus;
     }

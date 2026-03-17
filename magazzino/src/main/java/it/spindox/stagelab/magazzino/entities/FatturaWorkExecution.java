@@ -41,4 +41,17 @@ public class FatturaWorkExecution {
     @Column(name = "STATUS", nullable = false)
     private SXFatturaJobexecution status;
 
+
+    public void setErrorType(SXFatturaJobexecutionErrorType fatturaErrorType) {
+        if (fatturaErrorType != null) {
+            this.errorType = StatusJobErrorType.valueOf(fatturaErrorType.name());
+        }
+    }
+
+    public void setErrorType(StatusJobErrorType jobErrorType) {
+        if (jobErrorType != null) {
+            this.errorType = StatusJobErrorType.valueOf(jobErrorType.name());
+        }
+    }
 }
+

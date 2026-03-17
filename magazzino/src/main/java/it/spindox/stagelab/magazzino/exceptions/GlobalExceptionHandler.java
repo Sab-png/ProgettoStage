@@ -1,5 +1,6 @@
 
 package it.spindox.stagelab.magazzino.exceptions;
+import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.FatturaWorkExecutionException;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.JobException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -104,6 +105,47 @@ public class GlobalExceptionHandler {
     }
 
 
+
+    // Gestore centralizzato per le eccezioni del dominio FatturaWorkExecution
+
+//  - BUSINESS_ERROR   -> 400 (BAD_REQUEST)
+//  - BUSINESS_WARNING -> 200 (OK)
+//  - SYSTEM_ERROR     -> 500 (INTERNAL_SERVER_ERROR)
+//  - UNKNOWN          -> 500 (INTERNAL_SERVER_ERROR)
+
+    @ExceptionHandler(FatturaWorkExecutionException.class)
+    public ProblemDetail handleFatturaWorkExecution(FatturaWorkExecutionException ex,
+                                                    HttpServletRequest request) {
+
+        // PER IL TRACKING
+
+        log.error("[FATTURA_WORK_EXEC_ERROR] type={} http={} msg={} path={}",
+                ex.getFatturaErrorType(), ex.getHttpStatus(), ex.getMessage(), request.getRequestURI());
+
+        // Costruisce un ProblemDetail
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                ex.getHttpStatus(),   // BAD_REQUEST / OK / INTERNAL_SERVER_ERROR
+                ex.getMessage()       // messaggio dell’errore (o di warning)
+        );
+
+        // Titolo parlante: mettiamo il nome del tipo fattura
+        pd.setTitle(ex.getFatturaErrorType().name());
+
+        // VARI DATI INERENTI ALLA FATTURA
+
+        pd.setProperty("fatturaErrorType", ex.getFatturaErrorType().name());                 // es: BUSINESS_WARNING
+        pd.setProperty("fatturaId",        ex.getFatturaId());                               // id fattura (se noto)
+        pd.setProperty("workExecutionId",  ex.getWorkExecutionId());                         // id work-exec (se noto)
+        pd.setProperty("executionStatus",  ex.getExecutionStatus() != null ? ex.getExecutionStatus().name() : null); // SUCCESS/ERROR/FAILED
+        pd.setProperty("details",          ex.getDetails());                                  // es: "dataScadenza=2026-01-31"
+        pd.setProperty("occurredAt",       ex.getOccurredAt().toString());                    // timestamp errore/warning
+        pd.setProperty("path",             request.getRequestURI());
+        pd.setProperty("timestamp",        java.time.OffsetDateTime.now().toString());
+
+        return pd;
+    }
+
     // ERRORE 409 PER JOBEXCEPTION : InvalidCapacityException, InvalidFatturaException, UnknownJobException
 
 
@@ -124,7 +166,7 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-
+    
     // 500 - FALLBACK GENERICO
 
 

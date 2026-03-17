@@ -3,11 +3,7 @@ import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentResponse
 import it.spindox.stagelab.magazzino.entities.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.*;
-
 
 
 
@@ -15,22 +11,17 @@ import java.time.*;
 @Component
 public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMapper {
 
-
-     // Converte un OffsetDateTime in LocalDateTime.
-
+    // Converte un OffsetDateTime in LocalDateTime
     private LocalDateTime toLocal(OffsetDateTime odt) {
         return odt != null ? odt.toLocalDateTime() : null;
     }
 
-
-     // Converte una LocalDate in un OffsetDateTime
-
+    // Converte una LocalDate in un OffsetDateTime
     private OffsetDateTime toOffset(LocalDate ld) {
         return ld != null ? ld.atStartOfDay().atOffset(ZoneOffset.UTC) : null;
     }
 
-
-      // Crea una nuova WorkExecution collegata a una fattura.
+    // Crea una nuova WorkExecution collegata a una fattura
 
     @Override
     public FatturaWorkExecution toEntity(String workName,
@@ -40,16 +31,14 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         FatturaWorkExecution exec = new FatturaWorkExecution();
 
 
-        // Orario di inizio esecuzione
-
         exec.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));
 
-        // Collegamento all’id della fattura
 
         if (fattura != null) {
             exec.setFatturaId(fattura.getId());
         }
 
+        exec.setStatus(status);
         return exec;
     }
 
@@ -60,27 +49,23 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         return null;
     }
 
-
-     // Costruisce la response (DTO) contenente i dati della fattura e della work execution
+    // Costruisce la response (DTO) contenente i dati della fattura e della work execution
 
     @Override
     public DtoPaymentResponse toPaymentResponse(Fattura fattura,
                                                 FatturaWorkExecution exec) {
 
-        // Se entrambi null :  nessun dato da mostrare
+        // Se entrambi null : return null
 
         if (fattura == null && exec == null) return null;
 
         return DtoPaymentResponse.builder()
 
                 // DATI FATTURA
-
                 .id(fattura != null ? fattura.getId() : null)
                 .status(fattura != null ? fattura.getStatus() : null)
                 .importo(fattura != null ? fattura.getImporto() : null)
                 .pagato(fattura != null ? fattura.getPagato() : null)
-
-                // Converte LocalDate in OffsetDateTime
 
                 .dataScadenza(fattura != null
                         ? toOffset(fattura.getDataScadenza())
@@ -96,33 +81,43 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
                 .build();
     }
 
-
-     // Aggiorna solo stato e messaggio di errore (senza errorType).
+    // Aggiorna solo stato e messaggio di errore
 
     @Override
     public void updateEntity(FatturaWorkExecution target,
                              SXFatturaJobexecution status,
                              String errorMessage) {
-        update(target, status, null, errorMessage);
+        update(target, status, null, null, errorMessage);
     }
 
-
-     // Aggiorna stato, errorType e message di una WorkExecution.
+    // Aggiorna stato + tipo errore job (scheduler)
 
     @Override
     public void updateEntity(FatturaWorkExecution target,
                              SXFatturaJobexecution status,
                              StatusJobErrorType errorType,
                              String errorMessage) {
-        update(target, status, errorType, errorMessage);
+
+        update(target, status, errorType, null, errorMessage);
     }
 
+    // Aggiorna stato + tipo errore di fattura
 
-     // Metodo che esegue effettivamente l’aggiornamento:
+    @Override
+    public void updateEntity(FatturaWorkExecution target,
+                             SXFatturaJobexecution status,
+                             SXFatturaJobexecutionErrorType errorType,
+                             String errorMessage) {
+
+        update(target, status, null, errorType, errorMessage);
+    }
+
+    // Metodo che esegue effettivamente l’aggiornamento
 
     private void update(FatturaWorkExecution target,
                         SXFatturaJobexecution status,
-                        StatusJobErrorType errorType,
+                        StatusJobErrorType jobErrorType,
+                        SXFatturaJobexecutionErrorType fatturaErrorType,
                         String errorMessage) {
 
         if (target == null) {
@@ -132,16 +127,26 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
 
         // Aggiorna lo stato se presente
 
-        if (status != null)
+        if (status != null) {
             target.setStatus(status);
+        }
 
-        // Aggiorna info errore
+        // Se arriva errore del Job (scheduler)
 
-        target.setErrorType(errorType);
+        if (jobErrorType != null) {
+            target.setErrorType(jobErrorType);
+        }
+
+        // Se arriva errore della fattura
+
+        if (fatturaErrorType != null) {
+            target.setErrorType(fatturaErrorType);
+        }
+
+        // Messaggio di errore
         target.setErrorMessage(errorMessage);
 
         // EndTime = momento in cui si chiude l’esecuzione
-
         target.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }

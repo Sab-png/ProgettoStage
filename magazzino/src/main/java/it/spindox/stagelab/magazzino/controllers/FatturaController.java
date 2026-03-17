@@ -106,6 +106,41 @@ public class FatturaController {
         return ResponseEntity.created(location).body(created);
     }
 
+
+    // Fatture test
+
+// CREATE FATTURA EMESSA
+
+    @PostMapping("/status/emessa")
+    public ResponseEntity<FatturaResponse> statusEmessa(
+            @RequestParam Long idProdotto
+    ) {
+        return ResponseEntity.ok(fatturaService.createMockEmessa(idProdotto));
+    }
+
+
+
+// CREATE FATTURA SCADUTA
+
+    @PostMapping("/status/scaduta")
+    public ResponseEntity<FatturaResponse> statusScaduta(
+            @RequestParam Long idProdotto
+    ) {
+        return ResponseEntity.ok(fatturaService.createMockScaduta(idProdotto));
+    }
+
+
+
+// CREATE FATTURA PAGATA
+
+    @PostMapping("/status/pagata")
+    public ResponseEntity<FatturaResponse> statusPagata(
+            @RequestParam Long idProdotto
+    ) {
+        return ResponseEntity.ok(fatturaService.createMockPagata(idProdotto));
+    }
+
+
     // PATCH /fatture/ID : update "generico"
 
     @PatchMapping("/{id}")

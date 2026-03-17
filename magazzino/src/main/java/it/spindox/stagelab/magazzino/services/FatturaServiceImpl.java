@@ -18,6 +18,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 
@@ -121,6 +122,58 @@ public class FatturaServiceImpl implements FatturaService {
 
         return result.map(fatturaMapper::toResponse);
     }
+
+    // FATTURE TEST
+
+    // FATTURA EMESSA
+
+    @Override
+    public FatturaResponse createMockEmessa(Long idProdotto) {
+        FatturaRequest req = new FatturaRequest(
+                LocalDate.of(2026, 2, 25),
+                idProdotto,
+                5,
+                new BigDecimal("100.50"),
+                LocalDate.of(2026, 12, 31)   // scadenza futura : EMESSA
+        );
+        return create(req);
+    }
+
+    // FATT. SCADUTA
+
+    @Override
+    public FatturaResponse createMockScaduta(Long idProdotto) {
+        FatturaRequest req = new FatturaRequest(
+                LocalDate.of(2026, 2, 25),
+                idProdotto,
+                1,
+                new BigDecimal("120.00"),
+                LocalDate.of(2026, 3, 1)    // scadenza passata : SCADUTA
+        );
+        return create(req);
+    }
+
+ // FATT.PAGATA
+
+ @Override
+ public FatturaResponse createMockPagata(Long idProdotto) {
+
+     FatturaResponse r = create(new FatturaRequest(
+             LocalDate.of(2026, 2, 25),
+             idProdotto,
+             1,
+             new BigDecimal("50.00"),
+             LocalDate.of(2026, 12, 31)
+     ));
+
+     Fattura f = fatturaRepository.findById(r.getId()).orElseThrow();
+
+     f.setPagato(new BigDecimal("50.00"));    // pagato = importo
+     f.setStatus(SXFatturaStatus.PAGATA);
+
+     fatturaRepository.save(f);
+     return fatturaMapper.toResponse(f);
+ }
 
 
 //     CRUD

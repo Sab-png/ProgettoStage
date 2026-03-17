@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 
 @Configuration
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
+
 public class SpringDataConfig {
 
     // Personalizza i parametri di paginazione
@@ -16,7 +17,7 @@ public class SpringDataConfig {
     @Bean
     public PageableHandlerMethodArgumentResolverCustomizer customize() {
         return p -> {
-            p.setOneIndexedParameters(true); // La pagina 1 sarà la prima (default è 0)
+            p.setOneIndexedParameters(true);
             p.setMaxPageSize(100);           // Limite massimo di record per pagina
         };
     }

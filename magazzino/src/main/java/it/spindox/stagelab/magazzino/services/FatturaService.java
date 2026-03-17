@@ -55,5 +55,13 @@ public interface FatturaService {
 
     @Transactional(readOnly = true)
     Page<FatturaResponse> getByStatus(SXFatturaStatus status, int page, int size);
+
+// METODI TEST PER FATTURE
+
+    FatturaResponse createMockScaduta(Long idProdotto);
+
+    FatturaResponse createMockPagata(Long idProdotto);
+
+    FatturaResponse createMockEmessa(Long idProdotto);
 }
 
