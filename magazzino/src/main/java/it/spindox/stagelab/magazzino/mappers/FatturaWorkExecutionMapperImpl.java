@@ -12,11 +12,13 @@ import java.time.*;
 public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMapper {
 
     // Converte un OffsetDateTime in LocalDateTime
+
     private LocalDateTime toLocal(OffsetDateTime odt) {
         return odt != null ? odt.toLocalDateTime() : null;
     }
 
     // Converte una LocalDate in un OffsetDateTime
+
     private OffsetDateTime toOffset(LocalDate ld) {
         return ld != null ? ld.atStartOfDay().atOffset(ZoneOffset.UTC) : null;
     }
@@ -30,15 +32,14 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
 
         FatturaWorkExecution exec = new FatturaWorkExecution();
 
-
         exec.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));
-
 
         if (fattura != null) {
             exec.setFatturaId(fattura.getId());
         }
 
         exec.setStatus(status);
+
         return exec;
     }
 
@@ -46,6 +47,7 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
     public FatturaWorkExecution toEntity(String workName,
                                          StatusJob status,
                                          Fattura fattura) {
+
         return null;
     }
 
@@ -55,27 +57,30 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
     public DtoPaymentResponse toPaymentResponse(Fattura fattura,
                                                 FatturaWorkExecution exec) {
 
-        // Se entrambi null : return null
+        // Se entrambi null , return null
 
         if (fattura == null && exec == null) return null;
 
         return DtoPaymentResponse.builder()
 
                 // DATI FATTURA
-                .id(fattura != null ? fattura.getId() : null)
+                .workexecutionid(fattura != null ? fattura.getId() : null)
                 .status(fattura != null ? fattura.getStatus() : null)
                 .importo(fattura != null ? fattura.getImporto() : null)
                 .pagato(fattura != null ? fattura.getPagato() : null)
-
-                .dataScadenza(fattura != null
-                        ? toOffset(fattura.getDataScadenza())
-                        : null)
+                .dataScadenza(fattura != null ? toOffset(fattura.getDataScadenza()) : null)
 
                 // DATI WORK EXECUTION
 
                 .startTime(exec != null ? toLocal(exec.getStartTime()) : null)
                 .endTime(exec != null ? toLocal(exec.getEndTime()) : null)
-                .errorType(exec != null ? exec.getErrorType() : null)
+
+                // mappo il tipo di errore della WorkExecution (enum di dominio fattura)
+
+                .errorMessage(exec != null ? String.valueOf(exec.getErrorType()) : null)
+
+                // un eventuale messaggio di errore
+
                 .errorMessage(exec != null ? exec.getErrorMessage() : null)
 
                 .build();
@@ -90,14 +95,13 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         update(target, status, null, null, errorMessage);
     }
 
-    // Aggiorna stato + tipo errore job (scheduler)
+    // Aggiorna stato + tipo errore job
 
     @Override
     public void updateEntity(FatturaWorkExecution target,
                              SXFatturaJobexecution status,
                              StatusJobErrorType errorType,
                              String errorMessage) {
-
         update(target, status, errorType, null, errorMessage);
     }
 
@@ -108,7 +112,6 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
                              SXFatturaJobexecution status,
                              SXFatturaJobexecutionErrorType errorType,
                              String errorMessage) {
-
         update(target, status, null, errorType, errorMessage);
     }
 
@@ -126,27 +129,34 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         }
 
         // Aggiorna lo stato se presente
-
         if (status != null) {
             target.setStatus(status);
         }
 
-        // Se arriva errore del Job (scheduler)
-
+        // Se si presenta un errore del Job converto per nome all'errore di fattura
         if (jobErrorType != null) {
-            target.setErrorType(jobErrorType);
+            try {
+                SXFatturaJobexecutionErrorType converted =
+                        SXFatturaJobexecutionErrorType.valueOf(jobErrorType.name());
+                target.setErrorType(converted);
+            } catch (IllegalArgumentException ex) {
+                // Fallback prudente
+                target.setErrorType(SXFatturaJobexecutionErrorType.UNKNOWN);
+            }
         }
 
-        // Se arriva errore della fattura
+        // Se arriva errore della fattura viene segnato
 
         if (fatturaErrorType != null) {
             target.setErrorType(fatturaErrorType);
         }
 
         // Messaggio di errore
+
         target.setErrorMessage(errorMessage);
 
         // EndTime = momento in cui si chiude l’esecuzione
+
         target.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }

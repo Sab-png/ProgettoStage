@@ -12,6 +12,8 @@ public enum StatusJobErrorType {
 
 // Messaggio di stringa di default
 
+    public static StatusJobErrorType BUSINESS_WARNING;
+    public static StatusJobErrorType BUSINESS_ERROR;
     private final String defaultMessage;
 
     //Status HTTP per questa categoria di errore

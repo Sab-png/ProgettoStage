@@ -129,14 +129,14 @@ public class GlobalExceptionHandler {
                 ex.getMessage()       // messaggio dell’errore (o di warning)
         );
 
-        // Titolo parlante: mettiamo il nome del tipo fattura
+        // tipo fattura
         pd.setTitle(ex.getFatturaErrorType().name());
 
         // VARI DATI INERENTI ALLA FATTURA
 
         pd.setProperty("fatturaErrorType", ex.getFatturaErrorType().name());                 // es: BUSINESS_WARNING
-        pd.setProperty("fatturaId",        ex.getFatturaId());                               // id fattura (se noto)
-        pd.setProperty("workExecutionId",  ex.getWorkExecutionId());                         // id work-exec (se noto)
+        pd.setProperty("fatturaId",        ex.getFatturaId());                               // id fattura
+        pd.setProperty("workExecutionId",  ex.getWorkExecutionId());                         // id work-exec
         pd.setProperty("executionStatus",  ex.getExecutionStatus() != null ? ex.getExecutionStatus().name() : null); // SUCCESS/ERROR/FAILED
         pd.setProperty("details",          ex.getDetails());                                  // es: "dataScadenza=2026-01-31"
         pd.setProperty("occurredAt",       ex.getOccurredAt().toString());                    // timestamp errore/warning
@@ -166,7 +166,7 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-    
+
     // 500 - FALLBACK GENERICO
 
 

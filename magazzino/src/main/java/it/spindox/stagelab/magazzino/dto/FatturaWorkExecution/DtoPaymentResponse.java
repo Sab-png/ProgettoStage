@@ -1,4 +1,5 @@
 package it.spindox.stagelab.magazzino.dto.FatturaWorkExecution;
+import it.spindox.stagelab.magazzino.entities.SXFatturaJobexecutionErrorType;
 import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
 import it.spindox.stagelab.magazzino.entities.StatusJobErrorType;
 import lombok.Builder;
@@ -13,13 +14,14 @@ import java.time.OffsetDateTime;
 @Builder
 public class DtoPaymentResponse {
 
-    private Long id;
+    private Long workexecutionid;
+    private Long fatturaId;
     private SXFatturaStatus status;
     private BigDecimal importo;
     private BigDecimal pagato;
     private OffsetDateTime dataScadenza;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private StatusJobErrorType errorType;
+    private SXFatturaJobexecutionErrorType fatturaErrorType;
     private String errorMessage;
 }

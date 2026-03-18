@@ -1,5 +1,4 @@
 package it.spindox.stagelab.magazzino.services;
-
 import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoPaymentResponse;
 import it.spindox.stagelab.magazzino.dto.FatturaWorkExecution.DtoSearch;
 import it.spindox.stagelab.magazzino.entities.*;
@@ -22,10 +21,12 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import static it.spindox.stagelab.magazzino.entities.SXFatturaJobexecution.SUCCESS;
 import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.EMESSA;
 import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
+
+
+
+
 
 
 
@@ -34,8 +35,6 @@ import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 @Service
 @RequiredArgsConstructor
 @Transactional
-
-
 public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionService {
 
     private final FatturaWorkExecutionRepository fatturaWorkExecutionRepository;
@@ -43,7 +42,8 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     private final FatturaWorkExecutionMapper fatturaWorkExecutionMapper;
 
     @PersistenceContext
-    private final EntityManager entityManager;// per la cache (kesh)
+    private final EntityManager entityManager; // per la cache (kesh)
+
 
     //  Ritorna il totale già pagato ,  Se null da 0.
 
@@ -56,6 +56,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
             throw new IllegalArgumentException("Il pagamento deve essere > 0");
         }
     }
+// AGGIUNGE UN EVENTUALE PAGAMENTO
 
     private BigDecimal addPayment(Fattura fattura, BigDecimal pagatoDaAggiungere) {
 
@@ -77,26 +78,25 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         return nuovoTotale;
     }
 
-    //   PAGAMENTO SINGOLA FATTURA
-    
-    @Override
-    public DtoPaymentResponse paymentCheckFattura(
-            Long workExecutionId, BigDecimal pagatoDaAggiungere) {
 
-        // 1. Recupero dei dati
+    //   PAGAMENTO SINGOLA FATTURA
+
+    @Override
+    public DtoPaymentResponse paymentCheckFattura(Long workExecutionId, BigDecimal pagatoDaAggiungere) {
+
         FatturaWorkExecution exec = fatturaWorkExecutionRepository.findById(workExecutionId)
                 .orElseThrow(() -> new ResourceNotFoundException("WorkExecution non trovata"));
 
         Fattura fattura = fatturaRepository.findById(exec.getFatturaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
 
-        // 2. Stato RUNNING
         exec.setStatus(SXFatturaJobexecution.RUNNING);
         exec.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
 
         try {
             // 3. Calcolo nuovo pagamento
+
             BigDecimal nuovoTotale = addPayment(fattura, pagatoDaAggiungere);
 
             // 4. Aggiornamento dati fattura
@@ -105,6 +105,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
             fatturaRepository.save(fattura);
 
             // 5. Stato SUCCESS
+
             exec.setStatus(SXFatturaJobexecution.SUCCESS);
             exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
             fatturaWorkExecutionRepository.save(exec);
@@ -113,38 +114,25 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
         } catch (InvalidFatturaException e) {
 
-            // Business error (es. già pagata, importo non definito, pagamento > importo)
-            throw handleFailure(
-                    exec,
-                    fattura,
-                    SXFatturaJobexecutionErrorType.BUSINESS_ERROR,
-                    e.getMessage()
-            );
+            // Business error
+            throw handleFailure(exec, fattura, SXFatturaJobexecutionErrorType.BUSINESS_ERROR, e.getMessage());
 
         } catch (Exception e) {
 
-            // System error (qualsiasi altra eccezione inattesa)
-            throw handleFailure(
-                    exec,
-                    fattura,
-                    SXFatturaJobexecutionErrorType.SYSTEM_ERROR,
-                    e.getMessage()
-            );
+            // System error
+            throw handleFailure(exec, fattura, SXFatturaJobexecutionErrorType.SYSTEM_ERROR, e.getMessage());
         }
     }
 
 
-
-      // traccia l'errore (status=ERROR, errorType, errorMessage, endTime)
-    // salva la WorkExecution
- //  RITORNA la FatturaWorkExecutionException da rilanciare nel catch
+    // Traccia errore (status=ERROR, errorType, errorMessage, endTime)
+    // Ritorna l'eccezione da rilanciare
 
     private FatturaWorkExecutionException handleFailure(FatturaWorkExecution exec,
                                                         Fattura fattura,
                                                         SXFatturaJobexecutionErrorType errorType,
                                                         String message) {
 
-        // Aggiorna tracking WorkExecution → sempre ERROR
         fatturaWorkExecutionMapper.updateEntity(
                 exec,
                 SXFatturaJobexecution.ERROR,
@@ -153,16 +141,12 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         );
         fatturaWorkExecutionRepository.save(exec);
 
-        // Log
-
         log.error("[PAYMENT-CHECK-FATTURA] workExecId={} fatturaId={} type={} msg={}",
                 exec.getId(),
                 (fattura != null ? fattura.getId() : null),
                 errorType,
                 message
         );
-
-        // RITORNA l’eccezione CHE POI Sarà rilanciata dal catch
 
         return new FatturaWorkExecutionException(
                 errorType,
@@ -173,6 +157,8 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                 SXFatturaJobexecution.ERROR
         );
     }
+
+
     //   CHECK SU TUTTE LE FATTURE
 
     @Override
@@ -181,19 +167,24 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
         entityManager.clear();
 
-        List<Fattura> fatture = fatturaRepository.findAllByStatus(EMESSA);
+        //  PROCESSA LE FATTURE NON SOLO EMESSA
+        List<Fattura> fatture = fatturaRepository.findAllByStatusIn(
+                List.of(
+                        SXFatturaStatus.EMESSA,
+                        SXFatturaStatus.SCADUTA,
+                        SXFatturaStatus.PAGATA
+                )
+        );
 
         List<Fattura> fattureToUpdate = new ArrayList<>();
         List<FatturaWorkExecution> execToSave = new ArrayList<>();
 
-        //  lista della response con le eventuali problematiche
         List<DtoPaymentResponse> problems = new ArrayList<>();
 
         for (Fattura f : fatture) {
 
             try {
-                 // CASO ERRORE : IMPORTO NULL
-
+                // CASO ERRORE : IMPORTO NULL
                 if (f.getImporto() == null) {
                     FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.ERROR);
                     fatturaWorkExecutionMapper.updateEntity(
@@ -207,9 +198,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                     continue;
                 }
 
-
-                  // STATUS NORMALE
-
+                // STATUS NORMALE
                 BigDecimal pagato = getPagatoCorrente(f);
                 SXFatturaStatus nuovoStatus = determine(
                         f.getImporto(),
@@ -217,10 +206,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                         f.getDataScadenza()
                 );
 
-
-
-                 // CASO DI BUSINESS WARNING : FATTURA SCADUTA( SUCCESS + 200)
-
+                // CASO DI BUSINESS WARNING : FATTURA SCADUTA
                 if (nuovoStatus == SXFatturaStatus.SCADUTA) {
 
                     FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.SUCCESS);
@@ -241,10 +227,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                     continue;
                 }
 
-
-
-                // SUCCESS
-
+                // SUCCESS senza errori
                 if (!f.getStatus().equals(nuovoStatus)) {
                     f.setStatus(nuovoStatus);
                     fattureToUpdate.add(f);
@@ -253,10 +236,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                 FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.SUCCESS);
                 execToSave.add(exec);
 
-
             } catch (FatturaWorkExecutionException ex) {
-
-                 // Eccezioni del dominio FATTURA WorkExecution:
 
                 FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.ERROR);
 
@@ -275,8 +255,6 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
             } catch (Exception ex) {
 
-                // Fallback imprevisto : SYSTEM_ERROR
-
                 FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.ERROR);
 
                 fatturaWorkExecutionMapper.updateEntity(
@@ -294,9 +272,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
             }
         }
 
-
         // SALVATAGGI DB
-
         if (!fattureToUpdate.isEmpty())
             fatturaRepository.saveAllAndFlush(fattureToUpdate);
 
@@ -322,10 +298,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     }
 
 
-
-
     // FIX NULL FIELDS
-
 
     @Override
     @Transactional
@@ -336,12 +309,8 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         List<Fattura> fatture = fatturaRepository.findAll();
         List<Fattura> fattureDaAggiornare = new ArrayList<>();
 
-        // Recupera tutte le fatture
-
         for (Fattura f : fatture) {
             boolean modificata = false;
-
-            // Inizializza pagato a ZERO se nullo
 
             if (f.getPagato() == null) {
                 f.setPagato(BigDecimal.ZERO);
@@ -349,7 +318,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
             }
 
             if (f.getStatus() == null) {
-                f.setStatus(SXFatturaStatus.EMESSA);
+                f.setStatus(EMESSA);
                 modificata = true;
             }
 
@@ -366,8 +335,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     }
 
 
-    // SEARCH
-
+    //   SEARCH
 
     @Override
     public Page<DtoPaymentResponse> search(DtoSearch req) {

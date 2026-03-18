@@ -49,7 +49,7 @@ public class FatturaWorkExecutionException extends RuntimeException {
     //  metodi exception//
 
     public static FatturaWorkExecutionException businessError(String msg, String details,
-                                                                     Long fatturaId, Long execId) {
+                                                              Long fatturaId, Long execId) {
         return new FatturaWorkExecutionException(
                 SXFatturaJobexecutionErrorType.BUSINESS_ERROR,
                 msg, details, fatturaId, execId, SXFatturaJobexecution.FAILED
@@ -62,7 +62,7 @@ public class FatturaWorkExecutionException extends RuntimeException {
     // BUSINESS WARNING
 
     public static FatturaWorkExecutionException businessWarning(String msg, String details,
-                                                                       Long fatturaId, Long execId) {
+                                                                Long fatturaId, Long execId) {
         return new FatturaWorkExecutionException(
                 SXFatturaJobexecutionErrorType.BUSINESS_WARNING,
                 msg, details, fatturaId, execId, SXFatturaJobexecution.SUCCESS
@@ -71,7 +71,7 @@ public class FatturaWorkExecutionException extends RuntimeException {
 // SYSTEM ERROR
 
     public static FatturaWorkExecutionException systemError(String msg, String details,
-                                                                   Long fatturaId, Long execId) {
+                                                            Long fatturaId, Long execId) {
         return new FatturaWorkExecutionException(
                 SXFatturaJobexecutionErrorType.SYSTEM_ERROR,
                 msg, details, fatturaId, execId, SXFatturaJobexecution.ERROR
@@ -81,10 +81,14 @@ public class FatturaWorkExecutionException extends RuntimeException {
     // UNKNOWN
 
     public static FatturaWorkExecutionException unknown(String msg, String details,
-                                                               Long fatturaId, Long execId) {
+                                                        Long fatturaId, Long execId) {
         return new FatturaWorkExecutionException(
                 SXFatturaJobexecutionErrorType.UNKNOWN,
                 msg, details, fatturaId, execId, SXFatturaJobexecution.FAILED
         );
+    }
+
+    public SXFatturaJobexecutionErrorType getErrorType() {
+        return null;
     }
 }

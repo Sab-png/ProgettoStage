@@ -67,5 +67,5 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
     List<Fattura> findByProdottoId(Long idProdotto);
 
     Page<Fattura> findAllByStatus(SXFatturaStatus status, Pageable pageable);
-    List<Fattura> findAllByStatus(SXFatturaStatus status);
+    List<Fattura> findAllByStatusIn(List<SXFatturaStatus> emessa);
 }

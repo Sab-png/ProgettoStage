@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.OffsetDateTime;
 
 
+
 @Slf4j
+@Data
 @Entity
 @Table(name = "FATTURA_WORK_EXECUTION")
-@Data
 public class FatturaWorkExecution {
 
     @Id
@@ -32,7 +33,7 @@ public class FatturaWorkExecution {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ERROR_TYPE")
-    private StatusJobErrorType errorType;
+    private SXFatturaJobexecutionErrorType errorType; // enum di fattura
 
     @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;
@@ -41,17 +42,4 @@ public class FatturaWorkExecution {
     @Column(name = "STATUS", nullable = false)
     private SXFatturaJobexecution status;
 
-
-    public void setErrorType(SXFatturaJobexecutionErrorType fatturaErrorType) {
-        if (fatturaErrorType != null) {
-            this.errorType = StatusJobErrorType.valueOf(fatturaErrorType.name());
-        }
-    }
-
-    public void setErrorType(StatusJobErrorType jobErrorType) {
-        if (jobErrorType != null) {
-            this.errorType = StatusJobErrorType.valueOf(jobErrorType.name());
-        }
-    }
 }
-
