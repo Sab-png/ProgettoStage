@@ -7,11 +7,19 @@
 -- =====================================================
 
 CREATE TABLE CART (
-    CART_ID      VARCHAR2(255) NOT NULL,
-    ID_MAGAZZINO NUMBER(19)    NOT NULL,
-    CREATED_AT   TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT pk_cart PRIMARY KEY (CART_ID),
-    CONSTRAINT fk_cart_magazzino FOREIGN KEY (ID_MAGAZZINO) REFERENCES MAGAZZINO(ID)
+                      CART_ID          VARCHAR2(255) NOT NULL,
+                      ID_MAGAZZINO     NUMBER(19)    NOT NULL,
+                      CREATED_AT       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                      STATUS           VARCHAR2(20)  DEFAULT 'RESERVED' NOT NULL,
+                      SHIPPING_ADDRESS VARCHAR2(500),
+                      SHIPPING_EMAIL   VARCHAR2(255),
+                      DELIVERY_SLOT    VARCHAR2(20),
+                      DELIVERY_DATE    DATE,
+                      CHECKED_OUT_AT   TIMESTAMP,
+                      CONSTRAINT pk_cart PRIMARY KEY (CART_ID),
+                      CONSTRAINT fk_cart_magazzino FOREIGN KEY (ID_MAGAZZINO) REFERENCES MAGAZZINO(ID),
+                      CONSTRAINT chk_cart_status CHECK (STATUS IN ('RESERVED', 'COMPLETED', 'EXPIRED')),
+                      CONSTRAINT chk_delivery_slot CHECK (DELIVERY_SLOT IN ('09:00-12:00', '12:00-15:00', '15:00-18:00', '18:00-21:00'))
 );
 
 CREATE INDEX idx_cart_magazzino
@@ -33,25 +41,25 @@ CREATE SEQUENCE CART_ITEM_SEQ
 
 -- 2. Tabella CART_ITEM (sintassi Oracle)
 CREATE TABLE CART_ITEM (
-    ID           NUMBER(19)        NOT NULL,
-    CART_ID      VARCHAR2(255)     NOT NULL,
-    ID_PRODOTTO  NUMBER(19)        NOT NULL,
-    ID_MAGAZZINO NUMBER(19)        NOT NULL,
-    QUANTITY     NUMBER(10)        NOT NULL,
-    RESERVED_AT  TIMESTAMP         DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    EXPIRES_AT   TIMESTAMP         NOT NULL,
-    STATUS       VARCHAR2(20)      DEFAULT 'RESERVED' NOT NULL,
+                           ID           NUMBER(19)        NOT NULL,
+                           CART_ID      VARCHAR2(255)     NOT NULL,
+                           ID_PRODOTTO  NUMBER(19)        NOT NULL,
+                           ID_MAGAZZINO NUMBER(19)        NOT NULL,
+                           QUANTITY     NUMBER(10)        NOT NULL,
+                           RESERVED_AT  TIMESTAMP         DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                           EXPIRES_AT   TIMESTAMP         NOT NULL,
+                           STATUS       VARCHAR2(20)      DEFAULT 'RESERVED' NOT NULL,
 
     -- Vincoli
-    CONSTRAINT pk_cart_item PRIMARY KEY (ID),
-    CONSTRAINT fk_cart_item_cart FOREIGN KEY (CART_ID)
-        REFERENCES CART(CART_ID) ON DELETE CASCADE,
-    CONSTRAINT fk_cart_item_prodotto FOREIGN KEY (ID_PRODOTTO)
-        REFERENCES PRODOTTO(ID) ON DELETE CASCADE,
-    CONSTRAINT fk_cart_item_magazzino FOREIGN KEY (ID_MAGAZZINO)
-        REFERENCES MAGAZZINO(ID),
-    CONSTRAINT chk_cart_quantity CHECK (QUANTITY > 0),
-    CONSTRAINT chk_cart_status CHECK (STATUS IN ('RESERVED', 'EXPIRED', 'COMPLETED'))
+                           CONSTRAINT pk_cart_item PRIMARY KEY (ID),
+                           CONSTRAINT fk_cart_item_cart FOREIGN KEY (CART_ID)
+                               REFERENCES CART(CART_ID) ON DELETE CASCADE,
+                           CONSTRAINT fk_cart_item_prodotto FOREIGN KEY (ID_PRODOTTO)
+                               REFERENCES PRODOTTO(ID) ON DELETE CASCADE,
+                           CONSTRAINT fk_cart_item_magazzino FOREIGN KEY (ID_MAGAZZINO)
+                               REFERENCES MAGAZZINO(ID),
+                           CONSTRAINT chk_cart_quantity CHECK (QUANTITY > 0),
+                           CONSTRAINT chk_cart_status CHECK (STATUS IN ('RESERVED', 'EXPIRED', 'COMPLETED'))
 );
 
 -- 3. Indici per ottimizzare le query
@@ -85,6 +93,13 @@ COMMENT ON COLUMN CART_ITEM.QUANTITY IS 'Quantità riservata del prodotto';
 COMMENT ON COLUMN CART_ITEM.RESERVED_AT IS 'Timestamp di inizio prenotazione';
 COMMENT ON COLUMN CART_ITEM.EXPIRES_AT IS 'Timestamp di scadenza prenotazione (20 minuti)';
 COMMENT ON COLUMN CART_ITEM.STATUS IS 'Stato: RESERVED, EXPIRED, COMPLETED';
+
+COMMENT ON COLUMN CART.STATUS IS 'Stato carrello: RESERVED (aperto), COMPLETED (checkout effettuato), EXPIRED (scaduto)';
+COMMENT ON COLUMN CART.SHIPPING_ADDRESS IS 'Indirizzo di spedizione inserito al checkout';
+COMMENT ON COLUMN CART.SHIPPING_EMAIL IS 'Email del cliente per notifiche ordine';
+COMMENT ON COLUMN CART.DELIVERY_SLOT IS 'Fascia oraria di consegna scelta (es. 09:00-12:00)';
+COMMENT ON COLUMN CART.DELIVERY_DATE IS 'Data desiderata per la consegna';
+COMMENT ON COLUMN CART.CHECKED_OUT_AT IS 'Timestamp in cui il checkout è stato completato';
 
 -- 6. Inizializzazione stock prodotto in base alle quantità a magazzino
 --    TOTAL_STOCK = somma delle quantità in PRODOTTO_MAGAZZINO

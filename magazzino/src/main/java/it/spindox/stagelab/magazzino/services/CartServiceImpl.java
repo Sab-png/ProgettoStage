@@ -66,6 +66,7 @@ public class CartServiceImpl implements CartService {
         cart.setCartId(cartId);
         cart.setMagazzino(magazzino);
         cart.setCreatedAt(LocalDateTime.now());
+        cart.setStatus(ReservationStatus.RESERVED);
         cartRepository.save(cart);
 
         return CartMapper.toCartResponse(cart, List.of());
@@ -77,7 +78,7 @@ public class CartServiceImpl implements CartService {
         //log.info("Aggiunta prodotto {} al carrello {}", request.getProdottoId(), cartId);
 
         // Pulisce prenotazioni scadute
-        cleanExpiredReservations();
+        //cleanExpiredReservations();
 
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -170,7 +171,7 @@ public class CartServiceImpl implements CartService {
             prodotto.setAvailableStock(prodotto.getAvailableStock() - request.getQuantity());
 
             //log.info("Creato nuovo elemento carrello per prodotto {} con quantità {}",
-                    //prodotto.getId(), request.getQuantity(););
+            //prodotto.getId(), request.getQuantity(););
         }
 
         prodottoRepository.save(prodotto);
@@ -289,7 +290,7 @@ public class CartServiceImpl implements CartService {
             prodottoRepository.save(prodotto);
 
             //log.info("Rilasciate {} unità del prodotto {} nello stock",
-                    //cartItem.getQuantity(), prodotto.getId(););
+            //cartItem.getQuantity(), prodotto.getId(););
         }
 
         cartItemRepository.delete(cartItem);
@@ -305,6 +306,17 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public CheckoutResponse checkout(String cartId, CheckoutRequest request) {
         //log.info("Elaborazione checkout per carrello {}", cartId);
+
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Carrello con ID " + cartId + " non trovato"
+                ));
+
+        if (cart.getStatus() != ReservationStatus.RESERVED) {
+            throw new IllegalStateException(
+                    "Il carrello è già " + cart.getStatus().name().toLowerCase()
+            );
+        }
 
         List<CartItem> items = cartItemRepository
                 .findByCartIdAndStatus(cartId, ReservationStatus.RESERVED);
@@ -330,20 +342,27 @@ public class CartServiceImpl implements CartService {
                 .mapToDouble(item -> item.getProdotto().getPrezzo() * item.getQuantity())
                 .sum();
 
-        // Aggiorna lo stock totale e rimuove le prenotazioni completate
+        // Aggiorna lo stock totale e marca gli item come COMPLETED
         for (CartItem item : items) {
             Prodotto prodotto = item.getProdotto();
-
-            // Lo stock disponibile è già stato decrementato, ora decrementa anche quello totale
             prodotto.setTotalStock(prodotto.getTotalStock() - item.getQuantity());
             prodottoRepository.save(prodotto);
 
-            // Rimuove definitivamente la riga di carrello
-            cartItemRepository.delete(item);
+            item.setStatus(ReservationStatus.COMPLETED);
+            cartItemRepository.save(item);
 
             //log.info("Completato acquisto di {} unità del prodotto {}",
-                    //item.getQuantity(), prodotto.getId());
+            //item.getQuantity(), prodotto.getId());
         }
+
+        // Persiste i dati di checkout sul carrello
+        cart.setStatus(ReservationStatus.COMPLETED);
+        cart.setShippingAddress(request.getShippingAddress());
+        cart.setShippingEmail(request.getShippingEmail());
+        cart.setDeliveryTimeSlot(request.getDeliveryTimeSlot());
+        cart.setDeliveryDate(request.getDeliveryDate());
+        cart.setCheckedOutAt(now);
+        cartRepository.save(cart);
 
         // Genera ID ordine (qui dovresti creare l'entità Order se esiste)
         String orderId = "ORD-" + System.currentTimeMillis();
