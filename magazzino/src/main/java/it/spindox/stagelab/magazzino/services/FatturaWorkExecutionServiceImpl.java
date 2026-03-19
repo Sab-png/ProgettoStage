@@ -10,7 +10,9 @@ import it.spindox.stagelab.magazzino.repositories.FatturaRepository;
 import it.spindox.stagelab.magazzino.repositories.FatturaWorkExecutionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -18,12 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.EMESSA;
 import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
-
 
 
 
@@ -43,6 +43,10 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
     @PersistenceContext
     private final EntityManager entityManager; // per la cache (kesh)
+    @Setter
+    @Getter
+    private int lastUpdatedCount;
+
 
 
     //  Ritorna il totale già pagato ,  Se null da 0.
@@ -165,30 +169,30 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     @Transactional
     public List<DtoPaymentResponse> paymentCheckAllFatture() {
 
-        entityManager.clear();// per la cache
+        entityManager.clear(); // per la cache
 
         List<Fattura> fatture = fatturaRepository.findAllByStatus(SXFatturaStatus.EMESSA);
 
-
         List<Fattura> fattureToUpdate = new ArrayList<>();
         List<FatturaWorkExecution> execToSave = new ArrayList<>();
-
-        List<DtoPaymentResponse> problems = new ArrayList<>();
+        List<DtoPaymentResponse> problemsShallow = new ArrayList<>();
 
         for (Fattura f : fatture) {
-
             try {
+
                 // CASO ERRORE : IMPORTO NULL
                 if (f.getImporto() == null) {
                     FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.ERROR);
+
                     fatturaWorkExecutionMapper.updateEntity(
                             exec,
                             SXFatturaJobexecution.ERROR,
                             SXFatturaJobexecutionErrorType.SYSTEM_ERROR,
                             "Importo nullo"
                     );
+
                     execToSave.add(exec);
-                    problems.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
+                    problemsShallow.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
                     continue;
                 }
 
@@ -200,10 +204,11 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                         f.getDataScadenza()
                 );
 
-                // CASO DI BUSINESS WARNING : FATTURA SCADUTA
+                // CASO WARNING : FATTURA SCADUTA
                 if (nuovoStatus == SXFatturaStatus.SCADUTA) {
 
                     FatturaWorkExecution exec = newExecution(f, SXFatturaJobexecution.SUCCESS);
+
                     fatturaWorkExecutionMapper.updateEntity(
                             exec,
                             SXFatturaJobexecution.SUCCESS,
@@ -217,11 +222,11 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                     }
 
                     execToSave.add(exec);
-                    problems.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
+                    problemsShallow.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
                     continue;
                 }
 
-                // SUCCESS senza errori
+                // SUCCESS SENZA WARNING
                 if (!f.getStatus().equals(nuovoStatus)) {
                     f.setStatus(nuovoStatus);
                     fattureToUpdate.add(f);
@@ -242,7 +247,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                 );
 
                 execToSave.add(exec);
-                problems.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
+                problemsShallow.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
 
                 log.error("[BATCH-FATTURE] WorkExecution error fatturaId={} type={} msg={}",
                         f.getId(), ex.getFatturaErrorType(), ex.getMessage());
@@ -259,7 +264,7 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
                 );
 
                 execToSave.add(exec);
-                problems.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
+                problemsShallow.add(fatturaWorkExecutionMapper.toPaymentResponse(f, exec));
 
                 log.error("[BATCH-FATTURE] Unexpected error fatturaId={} msg={}",
                         f.getId(), ex.getMessage(), ex);
@@ -267,15 +272,45 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
         }
 
         // SALVATAGGI DB
-        if (!fattureToUpdate.isEmpty())
+
+        if (!fattureToUpdate.isEmpty()) {
             fatturaRepository.saveAllAndFlush(fattureToUpdate);
+        }
 
-        if (!execToSave.isEmpty())
+        if (!execToSave.isEmpty()) {
             fatturaWorkExecutionRepository.saveAllAndFlush(execToSave);
+        }
 
-        return problems;
+        // RIMAPPATURA DEI PROBLEMI DOPO I SAVE
+
+        List<DtoPaymentResponse> responses = new ArrayList<>();
+
+        Map<Long, Fattura> fatturaById = fatture.stream()
+                .collect(Collectors.toMap(Fattura::getId, f -> f));
+
+        Set<Long> problemFatIds = problemsShallow.stream()
+                .map(DtoPaymentResponse::getFatturaId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        for (FatturaWorkExecution exec : execToSave) {
+            Long fatId = exec.getFatturaId();
+            if (fatId != null && problemFatIds.contains(fatId)) {
+                responses.add(
+                        fatturaWorkExecutionMapper.toPaymentResponse(
+                                fatturaById.get(fatId),
+                                exec
+                        )
+                );
+            }
+        }
+// ultimi aggiornamenti con i processi
+
+        this.lastUpdatedCount = fattureToUpdate.size();
+
+
+        return responses; //  il Controller da qua  farà updatedCount = responses.size()
     }
-
 
     //   CREATE NEW EXECUTION
 
@@ -337,8 +372,9 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     public Page<DtoPaymentResponse> search(DtoSearch req) {
 
         // campi ordinabili
+
         Set<String> sortableFields = Set.of(
-                "workexecutionid",            // id WorkExecution
+                "workexecutionid",
                 "fatturaId",
                 "startTime",
                 "endTime",
@@ -369,4 +405,5 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
             return fatturaWorkExecutionMapper.toPaymentResponse(fattura, exec);
         });
     }
+
 }

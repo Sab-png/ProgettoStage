@@ -112,30 +112,67 @@ public class FatturaController {
 
 
     // Fatture testing
-// FATTURA EMESSA
+
+    // FATTURA EMESSA
+
     @PostMapping("/status/emessa")
     public ResponseEntity<FatturaResponse> statusEmessa(
-            @RequestParam Long idProdotto
+            @RequestParam Long idProdotto,
+            @RequestBody(required = false) FatturaRequest body
     ) {
-        return ResponseEntity.ok(fatturaService.createMockEmessa(idProdotto));
+        FatturaRequest req = (body != null) ? body : new FatturaRequest();
+        req.setIdProdotto(idProdotto);
+
+        if (req.getDataFattura() == null) req.setDataFattura(LocalDate.now());
+        if (req.getQuantita() == null) req.setQuantita(1);
+        if (req.getImporto() == null) req.setImporto(new BigDecimal("1.00"));
+        if (req.getDataScadenza() == null) req.setDataScadenza(LocalDate.now().plusDays(30));
+        if (req.getUsername() == null || req.getUsername().isBlank()) req.setUsername("system");
+
+        return ResponseEntity.ok(fatturaService.createMockEmessa(req));
     }
 
-    // FATTURA SCADUTA
+
+    //  FATTURA SCADUTA
+
     @PostMapping("/status/scaduta")
     public ResponseEntity<FatturaResponse> statusScaduta(
-            @RequestParam Long idProdotto
+            @RequestParam Long idProdotto,
+            @RequestBody(required = false) FatturaRequest body
     ) {
-        return ResponseEntity.ok(fatturaService.createMockScaduta(idProdotto));
+        FatturaRequest req = (body != null) ? body : new FatturaRequest();
+        req.setIdProdotto(idProdotto);
+
+        if (req.getDataFattura() == null) req.setDataFattura(LocalDate.now());
+        if (req.getQuantita() == null) req.setQuantita(1);
+        if (req.getImporto() == null) req.setImporto(new BigDecimal("1.00"));
+        if (req.getDataScadenza() == null) req.setDataScadenza(LocalDate.now().minusDays(30));
+        if (req.getUsername() == null || req.getUsername().isBlank()) req.setUsername("system");
+
+        return ResponseEntity.ok(fatturaService.createMockScaduta(req));
     }
 
+
     // FATTURA PAGATA
+
     @PostMapping("/status/pagata")
     public ResponseEntity<FatturaResponse> statusPagata(
-            @RequestParam Long idProdotto
+            @RequestParam Long idProdotto,
+            @RequestBody(required = false) FatturaRequest body
     ) {
-        return ResponseEntity.ok(fatturaService.createMockPagata(idProdotto));
+        FatturaRequest req = (body != null) ? body : new FatturaRequest();
+        req.setIdProdotto(idProdotto);
 
-    }    // PATCH /fatture/{id} : update generico
+        if (req.getDataFattura() == null) req.setDataFattura(LocalDate.now());
+        if (req.getQuantita() == null) req.setQuantita(1);
+        if (req.getImporto() == null) req.setImporto(new BigDecimal("1.00"));
+        if (req.getDataScadenza() == null) req.setDataScadenza(LocalDate.now().plusDays(30));
+        if (req.getUsername() == null || req.getUsername().isBlank()) req.setUsername("system");
+
+        return ResponseEntity.ok(fatturaService.createMockPagata(req));
+    }
+
+   // PATCH /fatture/{id} : update generico
 
     @PatchMapping("/{id}")
     public ResponseEntity<FatturaResponse> editFattura(
@@ -171,15 +208,24 @@ public class FatturaController {
 
     // POST check pagamento di tutte le fatture
 
+    // POST /payment-check-all
+
+
     @PostMapping("/payment-check-all")
     public ResponseEntity<Map<String, Object>> checkAllFatture() {
-        List<DtoPaymentResponse> items = fatturaWorkExecutionService.paymentCheckAllFatture();
+
+        List<DtoPaymentResponse> items =
+                fatturaWorkExecutionService.paymentCheckAllFatture();
+
         Map<String, Object> body = Map.of(
-                "updatedCount", items.size(),
+                "updatedCount", fatturaWorkExecutionService.getLastUpdatedCount(),
                 "items", items
-        );
+        );             // lista dei problemi
+
+
         return ResponseEntity.ok(body);
     }
+
 
 
     // POST /fatture/search

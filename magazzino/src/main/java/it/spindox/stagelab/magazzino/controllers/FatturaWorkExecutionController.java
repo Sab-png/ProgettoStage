@@ -62,6 +62,7 @@ public class FatturaWorkExecutionController {
 
 
 
+
     // POST /payment-check-all
 
     @PostMapping("/payment-check-all")
@@ -71,9 +72,10 @@ public class FatturaWorkExecutionController {
                 fatturaWorkExecutionService.paymentCheckAllFatture();
 
         Map<String, Object> body = Map.of(
-                "updatedCount", items.size(),
+                "updatedCount", fatturaWorkExecutionService.getLastUpdatedCount(),
                 "items", items
-        );
+        );             // lista dei problemi
+
 
         return ResponseEntity.ok(body);
     }

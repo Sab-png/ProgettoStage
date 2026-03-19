@@ -24,4 +24,5 @@ public class DtoPaymentResponse {
     private LocalDateTime endTime;
     private SXFatturaJobexecutionErrorType fatturaErrorType;
     private String errorMessage;
+
 }

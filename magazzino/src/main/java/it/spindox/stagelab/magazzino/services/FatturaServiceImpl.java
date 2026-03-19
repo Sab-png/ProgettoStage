@@ -262,6 +262,8 @@ public class FatturaServiceImpl implements FatturaService {
         fatturaRepository.save(f);
 
         // 2) CREA WORKEXECUTION: SUCCESS, NESSUN ERRORE
+        //  crea e salva la fattura f
+
         FatturaWorkExecution exec = new FatturaWorkExecution();
         exec.setFatturaId(f.getId());
         exec.setStatus(SXFatturaJobexecution.SUCCESS);
@@ -269,7 +271,11 @@ public class FatturaServiceImpl implements FatturaService {
         exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
 
-        return fatturaMapper.toResponse(f);
+//  Mappa la fattura e poi aggiunge il workExecutionId
+
+        FatturaResponse res = fatturaMapper.toResponse(f);
+        res.setWorkExecutionId(exec.getId());
+        return res;
     }
 
     @Override
@@ -295,6 +301,8 @@ public class FatturaServiceImpl implements FatturaService {
         fatturaRepository.save(f);
 
         // 2) CREA WORKEXECUTION: SUCCESS + BUSINESS_WARNING
+        // crea e salva la fattura f
+
         FatturaWorkExecution exec = new FatturaWorkExecution();
         exec.setFatturaId(f.getId());
         exec.setStatus(SXFatturaJobexecution.SUCCESS);
@@ -304,8 +312,13 @@ public class FatturaServiceImpl implements FatturaService {
         exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
 
-        return fatturaMapper.toResponse(f);
+//  Aggiunge l'id dell'exec nella response
+
+        FatturaResponse res = fatturaMapper.toResponse(f);
+        res.setWorkExecutionId(exec.getId());
+        return res;
     }
+
 
     @Override
     public FatturaResponse createMockPagata(FatturaRequest req) {
@@ -330,6 +343,8 @@ public class FatturaServiceImpl implements FatturaService {
         fatturaRepository.save(f);
 
         // 2) CREA WORKEXECUTION SENZA ERRORI
+        // crea e salva la fattura f
+
         FatturaWorkExecution exec = new FatturaWorkExecution();
         exec.setFatturaId(f.getId());
         exec.setStatus(SXFatturaJobexecution.SUCCESS);
@@ -337,7 +352,11 @@ public class FatturaServiceImpl implements FatturaService {
         exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
 
-        return fatturaMapper.toResponse(f);
+//  Aggiungi l'id dell'exec nella response
+
+        FatturaResponse res = fatturaMapper.toResponse(f);
+        res.setWorkExecutionId(exec.getId());
+        return res;
     }
 
     // CRUD

@@ -26,6 +26,7 @@ public class FatturaResponse {
     private Integer quantita;
     private Long idProdotto;
 
+    private Long workExecutionId;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataScadenza;
 
@@ -38,4 +39,5 @@ public class FatturaResponse {
     // Opzionali per la visualizzazione
 
     private String statusDescription;
+
 }

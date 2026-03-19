@@ -30,7 +30,7 @@ public class FatturaMapperImpl implements FatturaMapper {
     @Override
     public FatturaResponse toResponse(Fattura entity) {
         FatturaResponse r = new FatturaResponse();
-
+        r.setUsername(entity.getUsername());
         r.setId(entity.getId());
         r.setNumero(entity.getNumero());
         r.setDataFattura(entity.getDataFattura());

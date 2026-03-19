@@ -11,17 +11,20 @@ import java.time.*;
 @Component
 public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMapper {
 
+
     // Converte un OffsetDateTime in LocalDateTime
 
     private LocalDateTime toLocal(OffsetDateTime odt) {
         return odt != null ? odt.toLocalDateTime() : null;
     }
 
+
     // Converte una LocalDate in un OffsetDateTime
 
     private OffsetDateTime toOffset(LocalDate ld) {
         return ld != null ? ld.atStartOfDay().atOffset(ZoneOffset.UTC) : null;
     }
+
 
     // Crea una nuova WorkExecution collegata a una fattura
 
@@ -47,11 +50,13 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
     public FatturaWorkExecution toEntity(String workName,
                                          StatusJob status,
                                          Fattura fattura) {
-
         return null;
     }
 
-    // Costruisce la response (DTO) contenente i dati della fattura e della work execution
+
+
+    // Costruisce la response (DTO) contenente i dati della fattura
+    // e della work execution
 
     @Override
     public DtoPaymentResponse toPaymentResponse(Fattura fattura,
@@ -69,7 +74,11 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
 
                 // ID DELLA FATTURA
 
-                .fatturaId(exec != null ? exec.getFatturaId() : null)
+                .fatturaId(
+                        fattura != null && fattura.getId() != null
+                                ? fattura.getId()
+                                : (exec != null ? exec.getFatturaId() : null)
+                )
 
 
                 // DATI FATTURA
@@ -77,8 +86,11 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
                 .status(fattura != null ? fattura.getStatus() : null)
                 .importo(fattura != null ? fattura.getImporto() : null)
                 .pagato(fattura != null ? fattura.getPagato() : null)
-                .dataScadenza(fattura != null ?
-                        toOffset(fattura.getDataScadenza()) : null)
+                .dataScadenza(
+                        fattura != null
+                                ? toOffset(fattura.getDataScadenza())
+                                : null
+                )
 
 
                 // DATI WORK EXECUTION
@@ -87,11 +99,15 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
                 .endTime(exec != null ? toLocal(exec.getEndTime()) : null)
                 .fatturaErrorType(exec != null ? exec.getErrorType() : null)
 
-                // messaggio di errore
+
+                // Messaggio di errore
+
                 .errorMessage(exec != null ? exec.getErrorMessage() : null)
 
                 .build();
     }
+
+
 
     // Aggiorna solo stato e messaggio di errore
 
@@ -112,6 +128,7 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         update(target, status, errorType, null, errorMessage);
     }
 
+
     // Aggiorna stato + tipo errore di fattura
 
     @Override
@@ -122,7 +139,8 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         update(target, status, null, errorType, errorMessage);
     }
 
-    // Metodo che esegue effettivamente l’aggiornamento
+
+    // Metodo per l’aggiornamento
 
     private void update(FatturaWorkExecution target,
                         SXFatturaJobexecution status,
@@ -140,30 +158,26 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
             target.setStatus(status);
         }
 
-        // Se si presenta un errore del Job converto per nome all'errore di fattura
+        // Se arriva errore di esecuzione Job lo  converte in errore di fattura
         if (jobErrorType != null) {
             try {
                 SXFatturaJobexecutionErrorType converted =
                         SXFatturaJobexecutionErrorType.valueOf(jobErrorType.name());
                 target.setErrorType(converted);
             } catch (IllegalArgumentException ex) {
-                // Fallback prudente
                 target.setErrorType(SXFatturaJobexecutionErrorType.UNKNOWN);
             }
         }
 
-        // Se arriva errore della fattura viene segnato
-
+        // Se arriva errore della fattura vengono segnati direttamente
         if (fatturaErrorType != null) {
             target.setErrorType(fatturaErrorType);
         }
 
         // Messaggio di errore
-
         target.setErrorMessage(errorMessage);
 
         // EndTime = momento in cui si chiude l’esecuzione
-
         target.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }

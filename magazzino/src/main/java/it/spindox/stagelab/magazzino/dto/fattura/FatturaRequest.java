@@ -49,7 +49,7 @@ public class FatturaRequest {
                           BigDecimal importo,
                           LocalDate dataScadenza) {
 
-        this.username = null; // oppure "system" se si vuole un default automatico
+        this.username = "system"; // oppure "system" se si vuole un default automatico
         this.dataFattura = dataFattura;
         this.idProdotto = idProdotto;
         this.quantita = quantita;

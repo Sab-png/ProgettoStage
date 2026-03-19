@@ -22,4 +22,7 @@ public interface FatturaWorkExecutionService {
 
     Page<DtoPaymentResponse> search(DtoSearch req);
 
+    // last update count
+
+   int getLastUpdatedCount();
 }
