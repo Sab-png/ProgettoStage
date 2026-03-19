@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/magazzino/{magazzinoId}/cart")
 public class CartController {
 
     private final CartService service;
@@ -26,13 +26,14 @@ public class CartController {
     //POST createCart
     @PostMapping
     public ResponseEntity<CartResponse> createCart(
-            @RequestParam("magazzinoId") Long magazzinoId) {
+            @PathVariable Long magazzinoId) {
         return ResponseEntity.ok(service.createCart(magazzinoId));
     }
 
     // POST addToCart
     @PostMapping("/add")
     public ResponseEntity<CartItemResponse> addToCart(
+            @PathVariable Long magazzinoId,
             @RequestParam("cartId") String cartId,
             @Valid @RequestBody AddToCartRequest request) {
         return ResponseEntity.ok(service.addToCart(cartId, request));
@@ -41,6 +42,7 @@ public class CartController {
     // GET getCart
     @GetMapping
     public ResponseEntity<CartResponse> getCart(
+            @PathVariable Long magazzinoId,
             @RequestParam("cartId") String cartId) {
         return ResponseEntity.ok(service.getCart(cartId));
     }
@@ -48,6 +50,7 @@ public class CartController {
     // PATCH updateCartItem
     @PatchMapping("/items/{itemId}")
     public ResponseEntity<CartItemResponse> updateCartItem(
+            @PathVariable Long magazzinoId,
             @RequestParam("cartId") String cartId,
             @PathVariable Long itemId,
             @Valid @RequestBody UpdateCartItemRequest request) {
@@ -57,6 +60,7 @@ public class CartController {
     // DELETE removeFromCart
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<CartResponse> removeFromCart(
+            @PathVariable Long magazzinoId,
             @RequestParam("cartId") String cartId,
             @PathVariable Long itemId) {
         CartResponse updatedCart = service.removeFromCart(cartId, itemId);
@@ -66,6 +70,7 @@ public class CartController {
     // POST checkout
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponse> checkout(
+            @PathVariable Long magazzinoId,
             @RequestParam("cartId") String cartId,
             @Valid @RequestBody CheckoutRequest request) {
         return ResponseEntity.ok(service.checkout(cartId, request));

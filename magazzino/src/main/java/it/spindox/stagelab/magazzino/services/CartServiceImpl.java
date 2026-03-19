@@ -58,7 +58,7 @@ public class CartServiceImpl implements CartService {
         String cartId = UUID.randomUUID().toString();
 
         Magazzino magazzino = magazzinoRepository.findById(magazzinoId)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new MagazzinoNotFoundException(
                         "Magazzino con ID " + magazzinoId + " non trovato"
                 ));
 
