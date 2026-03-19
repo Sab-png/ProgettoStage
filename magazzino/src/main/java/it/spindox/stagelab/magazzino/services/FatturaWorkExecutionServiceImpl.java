@@ -30,7 +30,6 @@ import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
 
 
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor

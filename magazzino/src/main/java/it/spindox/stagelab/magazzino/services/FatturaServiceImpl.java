@@ -239,10 +239,12 @@ public class FatturaServiceImpl implements FatturaService {
 
 
     // FATTURE TEST (EMESSA / SCADUTA / PAGATA)
+
     @Override
     public FatturaResponse createMockEmessa(FatturaRequest req) {
 
         // 1) CREA FATTURA COMPLETA
+
         Fattura f = new Fattura();
         f.setNumero("FAT-" + System.currentTimeMillis());
         f.setDataFattura(req.getDataFattura());
@@ -252,11 +254,13 @@ public class FatturaServiceImpl implements FatturaService {
         f.setPagato(BigDecimal.ZERO);
         f.setStatus(SXFatturaStatus.EMESSA);
 
-        // FIX: usa ResourceNotFoundException, non orElseThrow() senza supplier
+        // FIX: usa ResourceNotFoundException
+
         f.setProdotto(prodottoRepository.findById(req.getIdProdotto())
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato")));
 
         //  forza “system” se non viene passato
+
         f.setUsername(req.getUsername() != null && !req.getUsername().isBlank() ? req.getUsername() : "system");
 
         fatturaRepository.save(f);
@@ -324,6 +328,7 @@ public class FatturaServiceImpl implements FatturaService {
     public FatturaResponse createMockPagata(FatturaRequest req) {
 
         // 1) CREA FATTURA PAGATA
+
         Fattura f = new Fattura();
         f.setNumero("FAT-" + System.currentTimeMillis());
         f.setDataFattura(req.getDataFattura());

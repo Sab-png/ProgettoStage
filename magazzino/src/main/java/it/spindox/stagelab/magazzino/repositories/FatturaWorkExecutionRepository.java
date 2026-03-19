@@ -87,7 +87,4 @@ public interface FatturaWorkExecutionRepository extends JpaRepository<FatturaWor
             Pageable pageable
     );
 
-    Optional<FatturaWorkExecution> findFirstByOrderByStartTimeDesc();
-
-    Optional<FatturaWorkExecution> findFirstByStatus(SXFatturaJobexecution status);
 }

@@ -159,6 +159,7 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         }
 
         // Se arriva errore di esecuzione Job lo  converte in errore di fattura
+
         if (jobErrorType != null) {
             try {
                 SXFatturaJobexecutionErrorType converted =
@@ -170,14 +171,17 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
         }
 
         // Se arriva errore della fattura vengono segnati direttamente
+
         if (fatturaErrorType != null) {
             target.setErrorType(fatturaErrorType);
         }
 
         // Messaggio di errore
+
         target.setErrorMessage(errorMessage);
 
         // EndTime = momento in cui si chiude l’esecuzione
+
         target.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }

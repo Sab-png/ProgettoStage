@@ -52,6 +52,7 @@ public class FatturaMapperImpl implements FatturaMapper {
         return r;
     }
 // UPDATE PARZIALE DELL'ENTITA' CON I CAMPI NON NULL DEL REQUEST E PRODOTTO (SE NON NULL)
+
     @Override
     public void updateEntity(Fattura target, FatturaRequest request, Prodotto prodotto) {
 
