@@ -25,6 +25,9 @@ import java.util.Map;
 
 
 
+
+
+
 @RestController
 @RequestMapping("/fatture")
 @RequiredArgsConstructor
@@ -34,16 +37,14 @@ public class FatturaController {
     private final FatturaService fatturaService;
     private final FatturaWorkExecutionService fatturaWorkExecutionService;
 
-    // GET /fatture : solo IDs
+    // GET /fatture by IDs
 
     @GetMapping
     public ResponseEntity<Page<Long>> getFattureIds(
             @RequestParam(required = false) String numero,
             @RequestParam(required = false) Long idProdotto,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFrom,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataTo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataTo,
             @RequestParam(required = false) BigDecimal importoMin,
             @RequestParam(required = false) BigDecimal importoMax,
             @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -73,14 +74,16 @@ public class FatturaController {
         return ResponseEntity.ok(fatturaService.getAllPaged(page, size));
     }
 
-    // GET /fatture/ID : singola fattura per ID
+
+    // GET /fatture/id
 
     @GetMapping("/{id}")
     public ResponseEntity<FatturaResponse> getFattura(@PathVariable Long id) {
         return ResponseEntity.ok(fatturaService.getById(id));
     }
 
-    // GET /fatture/prodotto/IDProdotto
+
+    // GET /fatture/prodotto/idProdotto
 
     @GetMapping("/prodotto/{idProdotto}")
     public ResponseEntity<PageImpl<FatturaResponse>> getFattureByProdotto(
@@ -91,6 +94,7 @@ public class FatturaController {
         PageImpl<FatturaResponse> result = fatturaService.getByProdotto(idProdotto, page, size);
         return ResponseEntity.ok(result);
     }
+
 
     // POST /fatture : create
 
@@ -108,34 +112,30 @@ public class FatturaController {
 
 
     // Fatture testing
-
-    // FATTUTRA EMESSA
-
+// FATTURA EMESSA
     @PostMapping("/status/emessa")
     public ResponseEntity<FatturaResponse> statusEmessa(
-            @Valid @RequestBody FatturaRequest request
+            @RequestParam Long idProdotto
     ) {
-        return ResponseEntity.ok(fatturaService.createMockEmessa(request.getIdProdotto()));
+        return ResponseEntity.ok(fatturaService.createMockEmessa(idProdotto));
     }
 
     // FATTURA SCADUTA
-
     @PostMapping("/status/scaduta")
     public ResponseEntity<FatturaResponse> statusScaduta(
-            @Valid @RequestBody FatturaRequest request
+            @RequestParam Long idProdotto
     ) {
-        return ResponseEntity.ok(fatturaService.createMockScaduta(request.getIdProdotto()));
+        return ResponseEntity.ok(fatturaService.createMockScaduta(idProdotto));
     }
-// FATTURA PAGATA
 
+    // FATTURA PAGATA
     @PostMapping("/status/pagata")
     public ResponseEntity<FatturaResponse> statusPagata(
-            @Valid @RequestBody FatturaRequest request
+            @RequestParam Long idProdotto
     ) {
-        return ResponseEntity.ok(fatturaService.createMockPagata(request.getIdProdotto()));
-    }
+        return ResponseEntity.ok(fatturaService.createMockPagata(idProdotto));
 
-    // PATCH /fatture/ID : update "generico"
+    }    // PATCH /fatture/{id} : update generico
 
     @PatchMapping("/{id}")
     public ResponseEntity<FatturaResponse> editFattura(
@@ -146,7 +146,7 @@ public class FatturaController {
         return ResponseEntity.ok(updated);
     }
 
-    //  PATCH /fatture/ID/pagamento : aggiungi pagamento e ricalcola stato
+    // PATCH pagamento singola fattura
 
     @PatchMapping(
             path = "/{id}/payment-checkfattura",
@@ -166,10 +166,10 @@ public class FatturaController {
                 request.getPagatoDaAggiungere()
         );
         return ResponseEntity.ok(updated);
-
     }
-    // POST:  endpoint per check pagamento di tutte le fatture
-    // un api con metodo diverso da quello del job ( fattura scheduler) -findall
+
+
+    // POST check pagamento di tutte le fatture
 
     @PostMapping("/payment-check-all")
     public ResponseEntity<Map<String, Object>> checkAllFatture() {
@@ -180,6 +180,8 @@ public class FatturaController {
         );
         return ResponseEntity.ok(body);
     }
+
+
     // POST /fatture/search
 
     @PostMapping("/search")
@@ -190,7 +192,7 @@ public class FatturaController {
         return ResponseEntity.ok(page);
     }
 
-    // DELETE /fatture/{id}
+    // DELETE /fatture/id
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFattura(@PathVariable Long id) {

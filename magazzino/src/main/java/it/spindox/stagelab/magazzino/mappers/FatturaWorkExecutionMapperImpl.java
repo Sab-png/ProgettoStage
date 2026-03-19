@@ -57,30 +57,37 @@ public class FatturaWorkExecutionMapperImpl implements FatturaWorkExecutionMappe
     public DtoPaymentResponse toPaymentResponse(Fattura fattura,
                                                 FatturaWorkExecution exec) {
 
-        // Se entrambi null , return null
-
         if (fattura == null && exec == null) return null;
 
         return DtoPaymentResponse.builder()
 
+
+                // ID DELLA WORK EXECUTION
+
+                .workexecutionid(exec != null ? exec.getId() : null)
+
+
+                // ID DELLA FATTURA
+
+                .fatturaId(exec != null ? exec.getFatturaId() : null)
+
+
                 // DATI FATTURA
-                .workexecutionid(fattura != null ? fattura.getId() : null)
+
                 .status(fattura != null ? fattura.getStatus() : null)
                 .importo(fattura != null ? fattura.getImporto() : null)
                 .pagato(fattura != null ? fattura.getPagato() : null)
-                .dataScadenza(fattura != null ? toOffset(fattura.getDataScadenza()) : null)
+                .dataScadenza(fattura != null ?
+                        toOffset(fattura.getDataScadenza()) : null)
+
 
                 // DATI WORK EXECUTION
 
                 .startTime(exec != null ? toLocal(exec.getStartTime()) : null)
                 .endTime(exec != null ? toLocal(exec.getEndTime()) : null)
+                .fatturaErrorType(exec != null ? exec.getErrorType() : null)
 
-                // mappo il tipo di errore della WorkExecution (enum di dominio fattura)
-
-                .errorMessage(exec != null ? String.valueOf(exec.getErrorType()) : null)
-
-                // un eventuale messaggio di errore
-
+                // messaggio di errore
                 .errorMessage(exec != null ? exec.getErrorMessage() : null)
 
                 .build();

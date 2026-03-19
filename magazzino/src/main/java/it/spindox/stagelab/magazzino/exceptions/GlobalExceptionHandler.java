@@ -108,10 +108,10 @@ public class GlobalExceptionHandler {
 
     // Gestore centralizzato per le eccezioni del dominio FatturaWorkExecution
 
-//  - BUSINESS_ERROR   -> 400 (BAD_REQUEST)
-//  - BUSINESS_WARNING -> 200 (OK)
-//  - SYSTEM_ERROR     -> 500 (INTERNAL_SERVER_ERROR)
-//  - UNKNOWN          -> 500 (INTERNAL_SERVER_ERROR)
+//  - BUSINESS_ERROR :  400 (BAD_REQUEST)
+//  - BUSINESS_WARNING : 200 (OK)
+//  - SYSTEM_ERROR :  500 (INTERNAL_SERVER_ERROR)
+//  - UNKNOWN : 500 (INTERNAL_SERVER_ERROR)
 
     @ExceptionHandler(FatturaWorkExecutionException.class)
     public ProblemDetail handleFatturaWorkExecution(FatturaWorkExecutionException ex,

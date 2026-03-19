@@ -15,6 +15,7 @@ import lombok.Data;
 @Builder
 public class FatturaResponse {
 
+    private String username;
     private Long id;
     private String numero;
 

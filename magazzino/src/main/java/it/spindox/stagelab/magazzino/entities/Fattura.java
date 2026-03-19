@@ -9,11 +9,11 @@ import java.time.LocalDate;
 
 
 
+
 @Slf4j
 @Data
 @Entity
 @Table(name = "FATTURA")
-
 public class Fattura {
 
     @Id
@@ -25,6 +25,9 @@ public class Fattura {
     )
     @Column(name = "ID")
     private Long id;
+
+    @Column(name = "USERNAME", length = 100)
+    private String username;
 
     @Column(name = "NUMERO", nullable = false)
     private String numero;
@@ -53,4 +56,7 @@ public class Fattura {
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
     private SXFatturaStatus status;
+
 }
+
+

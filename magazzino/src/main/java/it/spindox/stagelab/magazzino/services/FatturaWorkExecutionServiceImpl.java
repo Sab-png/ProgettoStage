@@ -165,16 +165,10 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
     @Transactional
     public List<DtoPaymentResponse> paymentCheckAllFatture() {
 
-        entityManager.clear();
+        entityManager.clear();// per la cache
 
-        //  PROCESSA LE FATTURE NON SOLO EMESSA
-        List<Fattura> fatture = fatturaRepository.findAllByStatusIn(
-                List.of(
-                        SXFatturaStatus.EMESSA,
-                        SXFatturaStatus.SCADUTA,
-                        SXFatturaStatus.PAGATA
-                )
-        );
+        List<Fattura> fatture = fatturaRepository.findAllByStatus(SXFatturaStatus.EMESSA);
+
 
         List<Fattura> fattureToUpdate = new ArrayList<>();
         List<FatturaWorkExecution> execToSave = new ArrayList<>();
@@ -337,28 +331,42 @@ public class FatturaWorkExecutionServiceImpl implements FatturaWorkExecutionServ
 
     //   SEARCH
 
+//   SEARCH
+
     @Override
     public Page<DtoPaymentResponse> search(DtoSearch req) {
 
+        // campi ordinabili
         Set<String> sortableFields = Set.of(
-                "id", "fatturaId", "startTime", "endTime",
-                "errorType", "errorMessage", "status"
+                "workexecutionid",            // id WorkExecution
+                "fatturaId",
+                "startTime",
+                "endTime",
+                "errorType",
+                "errorMessage",
+                "status"
         );
 
-        String sortBy = sortableFields.contains(req.getSortBy())
+        String sortBy = (req.getSortBy() != null && sortableFields.contains(req.getSortBy()))
                 ? req.getSortBy()
                 : "startTime";
 
         Sort sort = Sort.by(req.getSortDir(), sortBy);
         Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sort);
 
+       // PAGING
         Page<FatturaWorkExecution> page = fatturaWorkExecutionRepository.findAll(pageable);
 
-        return page.map(exec ->
-                fatturaWorkExecutionMapper.toPaymentResponse(
-                        fatturaRepository.findById(exec.getFatturaId()).orElse(null),
-                        exec
-                )
-        );
+        // Mapp
+        // - workexecutionid = exec.getId()
+        // - fatturaId      = exec.getFatturaId()
+        // Carico la fattura SOLO se serve mappare campi della fattura (status/importo/pagato/dataScadenza)
+        return page.map(exec -> {
+            Fattura fattura = null;
+            if (exec.getFatturaId() != null) {
+                fattura = fatturaRepository.findById(exec.getFatturaId()).orElse(null);
+            }
+            return fatturaWorkExecutionMapper.toPaymentResponse(fattura, exec);
+        });
     }
 }

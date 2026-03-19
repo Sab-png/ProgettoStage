@@ -30,6 +30,7 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
           AND (:importoMax IS NULL OR f.importo <= :importoMax)
     """)
     Page<Fattura> search(
+            @Param("username") String username,
             @Param("numero") String numero,
             @Param("idProdotto") Long idProdotto,
             @Param("dataFrom") LocalDate dataFrom,
@@ -51,6 +52,7 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
           AND (:importoMax IS NULL OR f.importo <= :importoMax)
     """)
     Page<Long> searchIds(
+            @Param("username") String username,
             @Param("numero") String numero,
             @Param("idProdotto") Long idProdotto,
             @Param("dataFrom") LocalDate dataFrom,
@@ -67,5 +69,5 @@ public interface FatturaRepository extends JpaRepository<Fattura, Long> {
     List<Fattura> findByProdottoId(Long idProdotto);
 
     Page<Fattura> findAllByStatus(SXFatturaStatus status, Pageable pageable);
-    List<Fattura> findAllByStatusIn(List<SXFatturaStatus> emessa);
+    List<Fattura> findAllByStatus(SXFatturaStatus sxFatturaStatus);
 }

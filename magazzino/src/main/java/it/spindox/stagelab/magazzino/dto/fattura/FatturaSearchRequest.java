@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 
 public class FatturaSearchRequest {
-
+    private String username;
     private String numero;
     private Long idProdotto;
     private LocalDate dataFrom;

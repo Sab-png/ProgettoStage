@@ -21,6 +21,12 @@ public interface FatturaService {
 
     // Crea una nuova fattura
 
+    FatturaResponse createMockEmessa(FatturaRequest req);
+
+    FatturaResponse createMockScaduta(FatturaRequest req);
+
+    FatturaResponse createMockPagata(FatturaRequest req);
+
     FatturaResponse create(FatturaRequest request);
 
     // PATCH: Aggiorna parzialmente una fattura
@@ -56,7 +62,7 @@ public interface FatturaService {
     @Transactional(readOnly = true)
     Page<FatturaResponse> getByStatus(SXFatturaStatus status, int page, int size);
 
-// METODI TEST PER FATTURE
+// METODI TEST PER FATTURE: SCADUTA,PAGATA,EMESSA
 
     FatturaResponse createMockScaduta(Long idProdotto);
 

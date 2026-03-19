@@ -16,7 +16,7 @@ public class FatturaMapperImpl implements FatturaMapper {
     @Override
     public Fattura toEntity(FatturaRequest request, Prodotto prodotto) {
         Fattura f = new Fattura();
-
+        f.setUsername(request.getUsername());
         f.setDataFattura(request.getDataFattura());
         f.setDataScadenza(request.getDataScadenza());
         f.setImporto(request.getImporto());
