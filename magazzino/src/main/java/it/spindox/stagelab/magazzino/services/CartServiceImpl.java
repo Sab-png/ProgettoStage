@@ -345,14 +345,31 @@ public class CartServiceImpl implements CartService {
         // Aggiorna lo stock totale e marca gli item come COMPLETED
         for (CartItem item : items) {
             Prodotto prodotto = item.getProdotto();
+
+            // Decrementa totalStock sul prodotto
             prodotto.setTotalStock(prodotto.getTotalStock() - item.getQuantity());
+
+            // Riallinea availableStock (era già stato decrementato in addToCart,
+            // ora lo aggiorniamo per essere coerente col nuovo totalStock)
+            prodotto.setAvailableStock(prodotto.getTotalStock());
+
             prodottoRepository.save(prodotto);
+
+            // Decrementa la quantità fisica nel magazzino specifico
+            var prodottoMagazzino = prodottoMagazzinoRepository
+                    .findByProdottoIdAndMagazzinoId(
+                            prodotto.getId(),
+                            item.getMagazzino().getId()
+                    )
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Relazione prodotto-magazzino non trovata per prodotto "
+                                    + prodotto.getId()
+                    ));
+            prodottoMagazzino.setQuantita(prodottoMagazzino.getQuantita() - item.getQuantity());
+            prodottoMagazzinoRepository.save(prodottoMagazzino);
 
             item.setStatus(ReservationStatus.COMPLETED);
             cartItemRepository.save(item);
-
-            //log.info("Completato acquisto di {} unità del prodotto {}",
-            //item.getQuantity(), prodotto.getId());
         }
 
         // Persiste i dati di checkout sul carrello
