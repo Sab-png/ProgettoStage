@@ -14,6 +14,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,13 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import static it.spindox.stagelab.magazzino.entities.SXFatturaStatus.determine;
+import it.spindox.stagelab.magazzino.entities.Fattura;
+import it.spindox.stagelab.magazzino.entities.Prodotto;
+import it.spindox.stagelab.magazzino.entities.SXFatturaJobexecution;
+import it.spindox.stagelab.magazzino.entities.SXFatturaJobexecutionErrorType;
+import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
+import it.spindox.stagelab.magazzino.entities.FatturaWorkExecution;
+
 
 
 
@@ -39,9 +46,32 @@ public class FatturaServiceImpl implements FatturaService {
     private final FatturaMapper fatturaMapper;
     private final FatturaWorkExecutionRepository fatturaWorkExecutionRepository;
 
+    // configuration properties
+    @Value("${fatture.default-username:system}")
+    private String defaultUsername;
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    // Helpers
+
+    private String resolveUsername(String maybeUsername) {
+        return (maybeUsername != null && !maybeUsername.isBlank())
+                ? maybeUsername
+                : defaultUsername;
+    }
+
+    private SXFatturaStatus determine(BigDecimal importo, BigDecimal pagato, LocalDate dataScadenza) {
+        // Implementazione
+        if (importo != null && pagato != null && pagato.compareTo(importo) >= 0) {
+            return SXFatturaStatus.PAGATA;
+        }
+        if (dataScadenza != null && LocalDate.now().isAfter(dataScadenza)) {
+            return SXFatturaStatus.SCADUTA;
+        }
+        return SXFatturaStatus.EMESSA;
+    }
+
 
     // SEARCH
 
@@ -56,9 +86,7 @@ public class FatturaServiceImpl implements FatturaService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
 
-
-        //  ExampleMatcher
-
+        // Probe
         Fattura probe = new Fattura();
 
         if (request.getNumero() != null && !request.getNumero().isBlank()) {
@@ -71,60 +99,44 @@ public class FatturaServiceImpl implements FatturaService {
             probe.setProdotto(p);
         }
 
-        // filtro per username
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
             probe.setUsername(request.getUsername());
         }
 
-
-        // MATCHER
-
+        // Matcher
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
                 .withIgnoreCase()
                 .withMatcher("numero", ExampleMatcher.GenericPropertyMatchers.contains())
                 .withMatcher("username", ExampleMatcher.GenericPropertyMatchers.exact());
 
-
-        // QUERY BASE
-
+        // Query base
         Page<Fattura> basePage =
                 fatturaRepository.findAll(Example.of(probe, matcher), pageable);
 
-
-        // FILTRI EXTRA
-        // - dataFrom / dataTo
-        // - importoMin / importoMax
-
+        // Filtri extra in memoria
         List<Fattura> filtered = basePage.getContent().stream()
 
                 // DATA FROM
-
                 .filter(f -> request.getDataFrom() == null ||
                         (f.getDataFattura() != null &&
                                 !f.getDataFattura().isBefore(request.getDataFrom())))
 
                 // DATA TO
-
                 .filter(f -> request.getDataTo() == null ||
                         (f.getDataFattura() != null &&
                                 !f.getDataFattura().isAfter(request.getDataTo())))
 
                 // IMPORTO MIN
-
                 .filter(f -> request.getImportoMin() == null ||
                         (f.getImporto() != null &&
                                 f.getImporto().compareTo(request.getImportoMin()) >= 0))
 
                 // IMPORTO MAX
-
                 .filter(f -> request.getImportoMax() == null ||
                         (f.getImporto() != null &&
                                 f.getImporto().compareTo(request.getImportoMax()) <= 0))
 
                 .toList();
-
-
-        // RETURN PAGE MAPPATA
 
         return new PageImpl<>(
                 filtered.stream().map(fatturaMapper::toResponse).toList(),
@@ -132,17 +144,16 @@ public class FatturaServiceImpl implements FatturaService {
                 filtered.size()
         );
     }
+
     private static @NonNull Fattura getFattura(FatturaSearchRequest request) {
         Fattura probe = new Fattura();
 
         // Filtro per numero
-
         if (request.getNumero() != null && !request.getNumero().isBlank()) {
             probe.setNumero(request.getNumero());
         }
 
         // Filtro per prodotto
-
         if (request.getIdProdotto() != null) {
             Prodotto p = new Prodotto();
             p.setId(request.getIdProdotto());
@@ -150,7 +161,6 @@ public class FatturaServiceImpl implements FatturaService {
         }
 
         // Filtro per username
-
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
             probe.setUsername(request.getUsername());
         }
@@ -158,7 +168,6 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
     // SEARCH SOLO ID
-
 
     @Override
     @Transactional(readOnly = true)
@@ -168,8 +177,7 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
 
-    // GET ALL PAGED : ordine ASC
-
+    // GET ALL PAGED
 
     @Override
     @Transactional(readOnly = true)
@@ -186,23 +194,20 @@ public class FatturaServiceImpl implements FatturaService {
 
     // GET BY STATUS
 
-
     @Override
     @Transactional(readOnly = true)
     public Page<FatturaResponse> getByStatus(SXFatturaStatus status, int page, int size) {
-
         Pageable pageable = PageRequest.of(
                 Math.max(page, 0),
                 Math.max(size, 1),
                 Sort.by("id").ascending()
         );
-
         Page<Fattura> result = fatturaRepository.findAllByStatus(status, pageable);
-
         return result.map(fatturaMapper::toResponse);
     }
 
-    // reindirizzo con override ai mock di sotto
+
+    // MOCK HELPERS
 
     @Override
     public FatturaResponse createMockEmessa(Long idProdotto) {
@@ -243,8 +248,6 @@ public class FatturaServiceImpl implements FatturaService {
     @Override
     public FatturaResponse createMockEmessa(FatturaRequest req) {
 
-        // 1) CREA FATTURA COMPLETA
-
         Fattura f = new Fattura();
         f.setNumero("FAT-" + System.currentTimeMillis());
         f.setDataFattura(req.getDataFattura());
@@ -254,19 +257,13 @@ public class FatturaServiceImpl implements FatturaService {
         f.setPagato(BigDecimal.ZERO);
         f.setStatus(SXFatturaStatus.EMESSA);
 
-        // FIX: usa ResourceNotFoundException
-
         f.setProdotto(prodottoRepository.findById(req.getIdProdotto())
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato")));
 
-        //  forza “system” se non viene passato
-
-        f.setUsername(req.getUsername() != null && !req.getUsername().isBlank() ? req.getUsername() : "system");
+        // usa default da properties
+        f.setUsername(resolveUsername(req.getUsername()));
 
         fatturaRepository.save(f);
-
-        // 2) CREA WORKEXECUTION: SUCCESS, NESSUN ERRORE
-        //  crea e salva la fattura f
 
         FatturaWorkExecution exec = new FatturaWorkExecution();
         exec.setFatturaId(f.getId());
@@ -274,8 +271,6 @@ public class FatturaServiceImpl implements FatturaService {
         exec.setStartTime(OffsetDateTime.now(ZoneOffset.UTC));
         exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
-
-//  Mappa la fattura e poi aggiunge il workExecutionId
 
         FatturaResponse res = fatturaMapper.toResponse(f);
         res.setWorkExecutionId(exec.getId());
@@ -285,7 +280,6 @@ public class FatturaServiceImpl implements FatturaService {
     @Override
     public FatturaResponse createMockScaduta(FatturaRequest req) {
 
-        // 1) CREA FATTURA SCADUTA
         Fattura f = new Fattura();
         f.setNumero("FAT-" + System.currentTimeMillis());
         f.setDataFattura(req.getDataFattura());
@@ -295,17 +289,13 @@ public class FatturaServiceImpl implements FatturaService {
         f.setPagato(BigDecimal.ZERO);
         f.setStatus(SXFatturaStatus.SCADUTA);
 
-        //  FIX: usa ResourceNotFoundException
         f.setProdotto(prodottoRepository.findById(req.getIdProdotto())
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato")));
 
-        // forza “system” se non viene passato
-        f.setUsername(req.getUsername() != null && !req.getUsername().isBlank() ? req.getUsername() : "system");
+        // usa default da properties
+        f.setUsername(resolveUsername(req.getUsername()));
 
         fatturaRepository.save(f);
-
-        // 2) CREA WORKEXECUTION: SUCCESS + BUSINESS_WARNING
-        // crea e salva la fattura f
 
         FatturaWorkExecution exec = new FatturaWorkExecution();
         exec.setFatturaId(f.getId());
@@ -316,18 +306,13 @@ public class FatturaServiceImpl implements FatturaService {
         exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
 
-//  Aggiunge l'id dell'exec nella response
-
         FatturaResponse res = fatturaMapper.toResponse(f);
         res.setWorkExecutionId(exec.getId());
         return res;
     }
 
-
     @Override
     public FatturaResponse createMockPagata(FatturaRequest req) {
-
-        // 1) CREA FATTURA PAGATA
 
         Fattura f = new Fattura();
         f.setNumero("FAT-" + System.currentTimeMillis());
@@ -338,17 +323,13 @@ public class FatturaServiceImpl implements FatturaService {
         f.setPagato(req.getImporto());
         f.setStatus(SXFatturaStatus.PAGATA);
 
-        //  FIX: usa ResourceNotFoundException
         f.setProdotto(prodottoRepository.findById(req.getIdProdotto())
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato")));
 
-        //  forza “system” se non viene passato
-        f.setUsername(req.getUsername() != null && !req.getUsername().isBlank() ? req.getUsername() : "system");
+        // usa default da properties
+        f.setUsername(resolveUsername(req.getUsername()));
 
         fatturaRepository.save(f);
-
-        // 2) CREA WORKEXECUTION SENZA ERRORI
-        // crea e salva la fattura f
 
         FatturaWorkExecution exec = new FatturaWorkExecution();
         exec.setFatturaId(f.getId());
@@ -357,12 +338,11 @@ public class FatturaServiceImpl implements FatturaService {
         exec.setEndTime(OffsetDateTime.now(ZoneOffset.UTC));
         fatturaWorkExecutionRepository.save(exec);
 
-//  Aggiungi l'id dell'exec nella response
-
         FatturaResponse res = fatturaMapper.toResponse(f);
         res.setWorkExecutionId(exec.getId());
         return res;
     }
+
 
     // CRUD
 
@@ -385,24 +365,18 @@ public class FatturaServiceImpl implements FatturaService {
                 .findById(request.getIdProdotto())
                 .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato"));
 
-        //  CREA ENTITY DALLA REQUEST
+        // CREA ENTITY DALLA REQUEST
         Fattura entity = fatturaMapper.toEntity(request, prodotto);
 
-        //  fallback dello username
-
-        if (entity.getUsername() == null || entity.getUsername().isBlank()) {
-            entity.setUsername("system");
-        }
+        // fallback dello username via property
+        entity.setUsername(resolveUsername(entity.getUsername()));
 
         // GENERA NUMERO FATTURA
-
         Long seq = fatturaRepository.nextNumeroSeq();
         entity.setNumero("FAT-" + seq);
 
         // IMPOSTAZIONI DI DEFAULT
-
         entity.setPagato(BigDecimal.ZERO);
-
         entity.setStatus(determine(
                 entity.getImporto(),
                 entity.getPagato(),
@@ -447,10 +421,7 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
 
-
     // GET BY ID
-
-
 
     @Override
     @Transactional(readOnly = true)
