@@ -10,7 +10,6 @@ public class AddToCartRequest {
     @NotNull(message = "Id prodotto obbligatorio")
     private Long prodottoId;
 
-    @NotNull(message = "Id magazzino obbligatorio")
     private Long magazzinoId;
 
     @NotNull(message = "Quantità obbligatoria")
