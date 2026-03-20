@@ -53,7 +53,7 @@ public class FatturaServiceImpl implements FatturaService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    // Helpers
+    // Helpers HH
 
     private String resolveUsername(String maybeUsername) {
         return (maybeUsername != null && !maybeUsername.isBlank())
