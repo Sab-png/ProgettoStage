@@ -36,6 +36,7 @@ public class CartController {
             @PathVariable Long magazzinoId,
             @RequestParam("cartId") String cartId,
             @Valid @RequestBody AddToCartRequest request) {
+        request.setMagazzinoId(magazzinoId);
         return ResponseEntity.ok(service.addToCart(cartId, request));
     }
 
