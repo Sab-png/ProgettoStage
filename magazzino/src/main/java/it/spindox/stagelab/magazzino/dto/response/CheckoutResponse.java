@@ -8,4 +8,5 @@ public class CheckoutResponse {
     private String orderId;
     private String message;
     private Double totalAmount;
+    private PlaceholderUserResponse user;
 }

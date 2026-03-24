@@ -14,6 +14,8 @@ import it.spindox.stagelab.magazzino.repositories.CartRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
+import it.spindox.stagelab.magazzino.clients.UserClient;
+import it.spindox.stagelab.magazzino.dto.response.PlaceholderUserResponse;
 import jakarta.persistence.EntityNotFoundException;
 //import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,7 @@ public class CartServiceImpl implements CartService {
     private final ProdottoRepository prodottoRepository;
     private final ProdottoMagazzinoRepository prodottoMagazzinoRepository;
     private final MagazzinoRepository magazzinoRepository;
+    private final UserClient userClient;
 
     @Value("${cart.reservation.minutes:20}")
     private Integer reservationMinutes;
@@ -44,12 +47,14 @@ public class CartServiceImpl implements CartService {
                            CartRepository cartRepository,
                            ProdottoRepository prodottoRepository,
                            ProdottoMagazzinoRepository prodottoMagazzinoRepository,
-                           MagazzinoRepository magazzinoRepository) {
+                           MagazzinoRepository magazzinoRepository,
+                           UserClient userClient) {
         this.cartItemRepository = cartItemRepository;
         this.cartRepository = cartRepository;
         this.prodottoRepository = prodottoRepository;
         this.prodottoMagazzinoRepository = prodottoMagazzinoRepository;
         this.magazzinoRepository = magazzinoRepository;
+        this.userClient = userClient;
     }
 
     @Override
@@ -390,6 +395,10 @@ public class CartServiceImpl implements CartService {
         response.setOrderId(orderId);
         response.setMessage("Ordine completato con successo");
         response.setTotalAmount(total);
+
+        // Cerca utente sul placeholder per email di spedizione
+        userClient.findByEmail(request.getShippingEmail())
+                .ifPresent(response::setUser);
 
         return response;
     }
