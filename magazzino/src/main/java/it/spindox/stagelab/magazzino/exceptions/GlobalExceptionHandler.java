@@ -13,12 +13,15 @@ import java.time.OffsetDateTime;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 
 
 @RestControllerAdvice
+
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -105,13 +108,14 @@ public class GlobalExceptionHandler {
     }
 
 
-
     // Gestore centralizzato per le eccezioni del dominio FatturaWorkExecution
 
 //  - BUSINESS_ERROR :  400 (BAD_REQUEST)
 //  - BUSINESS_WARNING : 200 (OK)
 //  - SYSTEM_ERROR :  500 (INTERNAL_SERVER_ERROR)
 //  - UNKNOWN : 500 (INTERNAL_SERVER_ERROR)
+//  - ERRORI SULLA PARTE DEL WEBCLIENT
+
 
     @ExceptionHandler(FatturaWorkExecutionException.class)
     public ProblemDetail handleFatturaWorkExecution(FatturaWorkExecutionException ex,
@@ -135,13 +139,13 @@ public class GlobalExceptionHandler {
         // VARI DATI INERENTI ALLA FATTURA
 
         pd.setProperty("fatturaErrorType", ex.getFatturaErrorType().name());                 // es: BUSINESS_WARNING
-        pd.setProperty("fatturaId",        ex.getFatturaId());                               // id fattura
-        pd.setProperty("workExecutionId",  ex.getWorkExecutionId());                         // id work-exec
-        pd.setProperty("executionStatus",  ex.getExecutionStatus() != null ? ex.getExecutionStatus().name() : null); // SUCCESS/ERROR/FAILED
-        pd.setProperty("details",          ex.getDetails());                                  // es: "dataScadenza=2026-01-31"
-        pd.setProperty("occurredAt",       ex.getOccurredAt().toString());                    // timestamp errore/warning
-        pd.setProperty("path",             request.getRequestURI());
-        pd.setProperty("timestamp",        java.time.OffsetDateTime.now().toString());
+        pd.setProperty("fatturaId", ex.getFatturaId());                               // id fattura
+        pd.setProperty("workExecutionId", ex.getWorkExecutionId());                         // id work-exec
+        pd.setProperty("executionStatus", ex.getExecutionStatus() != null ? ex.getExecutionStatus().name() : null); // SUCCESS/ERROR/FAILED
+        pd.setProperty("details", ex.getDetails());                                  // es: "dataScadenza=2026-01-31"
+        pd.setProperty("occurredAt", ex.getOccurredAt().toString());                    // timestamp errore/warning
+        pd.setProperty("path", request.getRequestURI());
+        pd.setProperty("timestamp", java.time.OffsetDateTime.now().toString());
 
         return pd;
     }
@@ -182,6 +186,39 @@ public class GlobalExceptionHandler {
 
         pd.setProperty(PATH, request.getRequestURI());
         pd.setProperty(TIMESTAMP, OffsetDateTime.now().toString());
+        return pd;
+    }
+
+    // WEBCLIENT ERROR TIPOLOGIE ERRORI PER API ESTERNO : USERS
+
+    @ExceptionHandler(WebClientResponseException.class)
+    public ProblemDetail handleWebClientError(
+            WebClientResponseException ex,
+            HttpServletRequest request) {
+
+        log.error("Errore WebClient su path {}: {}", request.getRequestURI(), ex.getMessage());
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                ex.getStatusCode(),
+                "Errore nella chiamata al servizio utenti: " + ex.getMessage()
+        );
+
+        pd.setProperty("path", request.getRequestURI());
+        pd.setProperty("timestamp", OffsetDateTime.now().toString());
+        pd.setProperty("service", "userClient");
+
+        // Se l'endpoint contiene 'user-by-name' lo segnalo
+
+        if (request.getRequestURI().contains("user-by-name")) {
+            pd.setProperty("lookupType", "NAME");
+        }
+
+        // Se l'endpoint contiene 'user' classico lo segnalo
+
+        if (request.getRequestURI().contains("user-by-username")) {
+            pd.setProperty("lookupType", "USERNAME");
+        }
+
         return pd;
     }
 }

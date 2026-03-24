@@ -246,3 +246,5 @@ public class FatturaController {
         return ResponseEntity.noContent().build();
     }
 }
+
+

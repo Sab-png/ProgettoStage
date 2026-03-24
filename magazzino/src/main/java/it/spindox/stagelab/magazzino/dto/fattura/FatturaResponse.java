@@ -1,5 +1,6 @@
 
 package it.spindox.stagelab.magazzino.dto.fattura;
+import it.spindox.stagelab.magazzino.dto.WebClient.UserResponse;
 import it.spindox.stagelab.magazzino.entities.SXFatturaStatus;
 import lombok.*;
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import lombok.Data;
 @Builder
 public class FatturaResponse {
 
+    private String name;
     private String username;
     private Long id;
     private String numero;
@@ -39,5 +41,9 @@ public class FatturaResponse {
     // Opzionali per la visualizzazione
 
     private String statusDescription;
+
+    // User Response
+
+    private UserResponse userDetails;
 
 }

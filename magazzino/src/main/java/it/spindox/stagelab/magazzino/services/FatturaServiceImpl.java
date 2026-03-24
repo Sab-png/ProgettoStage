@@ -1,4 +1,6 @@
 package it.spindox.stagelab.magazzino.services;
+import it.spindox.stagelab.magazzino.client.users.UserClient;
+import it.spindox.stagelab.magazzino.dto.WebClient.UserResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
@@ -11,6 +13,7 @@ import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import it.spindox.stagelab.magazzino.repositories.FatturaWorkExecutionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -45,6 +48,8 @@ public class FatturaServiceImpl implements FatturaService {
     private final ProdottoRepository prodottoRepository;
     private final FatturaMapper fatturaMapper;
     private final FatturaWorkExecutionRepository fatturaWorkExecutionRepository;
+    @Getter
+    private final UserClient userClient; // userclient
 
     // configuration properties
     @Value("${fatture.default-username:system}")
@@ -109,7 +114,7 @@ public class FatturaServiceImpl implements FatturaService {
                 .withMatcher("numero", ExampleMatcher.GenericPropertyMatchers.contains())
                 .withMatcher("username", ExampleMatcher.GenericPropertyMatchers.exact());
 
-        // Query base
+        // Query
         Page<Fattura> basePage =
                 fatturaRepository.findAll(Example.of(probe, matcher), pageable);
 
@@ -421,15 +426,88 @@ public class FatturaServiceImpl implements FatturaService {
     }
 
 
-    // GET BY ID
+    // GET BY ID : USERNAME
 
     @Override
     @Transactional(readOnly = true)
+
     public FatturaResponse getById(Long id) {
+
         Fattura entity = fatturaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
-        return fatturaMapper.toResponse(entity);
+
+        // mappa la fattura in response
+
+        FatturaResponse response = fatturaMapper.toResponse(entity);
+
+        // se esiste un username :  prova a recuperare i dati dal servizio utenti
+
+        if (entity.getUsername() != null && !entity.getUsername().isBlank()) {
+
+            UserResponse user = userClient.getUserByUsername(entity.getUsername());
+
+
+            if (user != null) {
+                response.setUserDetails(user); // aggiunge i dati dell' utente
+
+            } else {
+                response.setUserDetails(null);  //  explicit null
+            }
+        }
+
+        log.info("DEBUG - Username fattura {} = '{}'", id, entity.getUsername());
+        UserResponse user = null;
+
+        try {
+            user = userClient.getUserByUsername(entity.getUsername());
+
+        } catch (Exception e) {
+            log.error("Errore nella chiamata WebClient in getById", e);
+        }
+
+        log.info("DEBUG - Risultato WebClient = {}", user);
+
+        return response;
     }
+
+// GET BY ID NAME
+
+    @Transactional(readOnly = true)
+    public FatturaResponse getByIdByName(Long id) {
+
+        Fattura entity = fatturaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Fattura non trovata"));
+
+        FatturaResponse response = fatturaMapper.toResponse(entity);
+
+        if (entity.getUsername() != null && !entity.getUsername().isBlank()) {
+
+            try {
+                // RICERCA PER NAME
+
+                UserResponse user = userClient.getUserByName(entity.getUsername());
+                response.setUserDetails(user); // può essere null
+            } catch (Exception e) {
+                log.error("Errore WebClient [NAME] in getByIdByName", e);
+                response.setUserDetails(null);
+            }
+        }
+
+        return response;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // GET BY PRODOTTO
@@ -468,4 +546,5 @@ public class FatturaServiceImpl implements FatturaService {
 
         fatturaRepository.delete(entity);
     }
+
 }
