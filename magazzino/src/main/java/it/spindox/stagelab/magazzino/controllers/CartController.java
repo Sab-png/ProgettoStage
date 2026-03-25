@@ -8,8 +8,6 @@ import it.spindox.stagelab.magazzino.dto.response.CartResponse;
 import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
 import it.spindox.stagelab.magazzino.services.CartService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,11 +21,13 @@ public class CartController {
         this.service = service;
     }
 
-    //POST createCart
+    // POST createCart
+    // email opzionale: se fornita viene salvata sul carrello e usata per recuperare i dati utente
     @PostMapping
     public ResponseEntity<CartResponse> createCart(
-            @PathVariable Long magazzinoId) {
-        return ResponseEntity.ok(service.createCart(magazzinoId));
+            @PathVariable Long magazzinoId,
+            @RequestParam(value = "email", required = false) String email) {
+        return ResponseEntity.ok(service.createCart(magazzinoId, email));
     }
 
     // POST addToCart
@@ -64,8 +64,7 @@ public class CartController {
             @PathVariable Long magazzinoId,
             @RequestParam("cartId") String cartId,
             @PathVariable Long itemId) {
-        CartResponse updatedCart = service.removeFromCart(cartId, itemId);
-        return ResponseEntity.ok(updatedCart);
+        return ResponseEntity.ok(service.removeFromCart(cartId, itemId));
     }
 
     // POST checkout
@@ -76,5 +75,4 @@ public class CartController {
             @Valid @RequestBody CheckoutRequest request) {
         return ResponseEntity.ok(service.checkout(cartId, request));
     }
-
 }

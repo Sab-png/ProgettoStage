@@ -2,6 +2,8 @@ package it.spindox.stagelab.magazzino.mappers;
 
 import it.spindox.stagelab.magazzino.dto.response.CartItemResponse;
 import it.spindox.stagelab.magazzino.dto.response.CartResponse;
+import it.spindox.stagelab.magazzino.dto.response.PlaceholderUserResponse;
+import it.spindox.stagelab.magazzino.entities.Cart;
 import it.spindox.stagelab.magazzino.entities.CartItem;
 
 import java.time.Duration;
@@ -15,8 +17,7 @@ public class CartMapper {
         response.setId(item.getId());
         response.setProdottoId(item.getProdotto().getId());
         response.setProdottoNome(item.getProdotto().getNome());
-        // Assumendo che Prodotto abbia un campo immagine
-        //response.setProdottoImmagine(item.getProdotto().getImmagine());
+        // response.setProdottoImmagine(item.getProdotto().getImmagine());
         response.setPrezzoProdotto(item.getProdotto().getPrezzo());
         if (item.getMagazzino() != null) {
             response.setMagazzinoId(item.getMagazzino().getId());
@@ -27,13 +28,13 @@ public class CartMapper {
         response.setExpiresAt(item.getExpiresAt());
         response.setStatus(item.getStatus().name());
 
-        // Calcola secondi rimanenti
         long seconds = Duration.between(LocalDateTime.now(), item.getExpiresAt()).getSeconds();
         response.setSecondsRemaining(Math.max(0, seconds));
 
         return response;
     }
 
+    // Overload base: solo items (usato internamente e da removeFromCart)
     public static CartResponse toCartResponse(List<CartItem> items) {
         CartResponse response = new CartResponse();
 
@@ -51,7 +52,6 @@ public class CartMapper {
                 .sum();
         response.setTotalPrice(total);
 
-        // Trova la scadenza più vicina
         Long minSeconds = itemResponses.stream()
                 .map(CartItemResponse::getSecondsRemaining)
                 .min(Long::compareTo)
@@ -63,11 +63,18 @@ public class CartMapper {
         return response;
     }
 
-    public static CartResponse toCartResponse(it.spindox.stagelab.magazzino.entities.Cart cart, List<CartItem> items) {
+    // Overload con Cart e user: usato da getCart e createCart
+    public static CartResponse toCartResponse(Cart cart, List<CartItem> items, PlaceholderUserResponse user) {
         CartResponse response = toCartResponse(items);
         if (cart != null && cart.getMagazzino() != null) {
             response.setMagazzinoId(cart.getMagazzino().getId());
         }
+        response.setUser(user);
         return response;
+    }
+
+    // Overload con Cart senza user: usato da removeFromCart
+    public static CartResponse toCartResponse(Cart cart, List<CartItem> items) {
+        return toCartResponse(cart, items, null);
     }
 }

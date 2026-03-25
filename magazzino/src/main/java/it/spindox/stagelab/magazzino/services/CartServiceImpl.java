@@ -6,6 +6,7 @@ import it.spindox.stagelab.magazzino.dto.request.UpdateCartItemRequest;
 import it.spindox.stagelab.magazzino.dto.response.CartItemResponse;
 import it.spindox.stagelab.magazzino.dto.response.CartResponse;
 import it.spindox.stagelab.magazzino.dto.response.CheckoutResponse;
+import it.spindox.stagelab.magazzino.dto.response.PlaceholderUserResponse;
 import it.spindox.stagelab.magazzino.entities.*;
 import it.spindox.stagelab.magazzino.exceptions.*;
 import it.spindox.stagelab.magazzino.mappers.CartMapper;
@@ -15,14 +16,11 @@ import it.spindox.stagelab.magazzino.repositories.ProdottoRepository;
 import it.spindox.stagelab.magazzino.repositories.ProdottoMagazzinoRepository;
 import it.spindox.stagelab.magazzino.repositories.MagazzinoRepository;
 import it.spindox.stagelab.magazzino.clients.UserClient;
-import it.spindox.stagelab.magazzino.dto.response.PlaceholderUserResponse;
 import jakarta.persistence.EntityNotFoundException;
-//import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,7 +57,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public CartResponse createCart(Long magazzinoId) {
+    public CartResponse createCart(Long magazzinoId, String email) {
         String cartId = UUID.randomUUID().toString();
 
         Magazzino magazzino = magazzinoRepository.findById(magazzinoId)
@@ -72,37 +70,30 @@ public class CartServiceImpl implements CartService {
         cart.setMagazzino(magazzino);
         cart.setCreatedAt(LocalDateTime.now());
         cart.setStatus(ReservationStatus.RESERVED);
+        cart.setShippingEmail(email); // salvata subito per poterla usare nella GET
         cartRepository.save(cart);
 
-        return CartMapper.toCartResponse(cart, List.of());
+        return CartMapper.toCartResponse(cart, List.of(), null);
     }
 
     @Override
     @Transactional
     public CartItemResponse addToCart(String cartId, AddToCartRequest request) {
-        //log.info("Aggiunta prodotto {} al carrello {}", request.getProdottoId(), cartId);
-
-        // Pulisce prenotazioni scadute
-        //cleanExpiredReservations();
-
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Carrello con ID " + cartId + " non trovato"
                 ));
 
-        // Recupera il prodotto con lock pessimistico per evitare race condition
         Prodotto prodotto = prodottoRepository.findByIdWithLock(request.getProdottoId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Prodotto con ID " + request.getProdottoId() + " non trovato"
                 ));
 
-        // Recupera il magazzino del carrello e verifica coerenza con richiesta
         var magazzino = cart.getMagazzino();
         if (!magazzino.getId().equals(request.getMagazzinoId())) {
             throw new IllegalStateException("Il magazzino dell'item non coincide con il magazzino del carrello");
         }
 
-        // Verifica esistenza relazione prodotto-magazzino e quantità
         var prodottoMagazzino = prodottoMagazzinoRepository
                 .findByProdottoIdAndMagazzinoId(request.getProdottoId(), request.getMagazzinoId())
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -110,7 +101,6 @@ public class CartServiceImpl implements CartService {
                                 request.getProdottoId(), request.getMagazzinoId())
                 ));
 
-        // Verifica disponibilità stock globale
         if (prodotto.getAvailableStock() < request.getQuantity()) {
             throw new InsufficientStockException(
                     String.format("Stock insufficiente per '%s'. Disponibili: %d, Richiesti: %d",
@@ -120,7 +110,6 @@ public class CartServiceImpl implements CartService {
             );
         }
 
-        // Verifica disponibilità stock nel magazzino specifico
         if (prodottoMagazzino.getQuantita() < request.getQuantity()) {
             throw new InsufficientStockException(
                     String.format("Stock insufficiente nel magazzino selezionato. " +
@@ -130,7 +119,6 @@ public class CartServiceImpl implements CartService {
             );
         }
 
-        // Verifica se l'utente ha già questo prodotto nel carrello
         Optional<CartItem> existingItem = cartItemRepository
                 .findByCartIdAndProdottoIdAndStatus(
                         cartId,
@@ -141,7 +129,6 @@ public class CartServiceImpl implements CartService {
         CartItem cartItem;
 
         if (existingItem.isPresent()) {
-            // Aggiorna quantità esistente
             cartItem = existingItem.get();
             int newQuantity = cartItem.getQuantity() + request.getQuantity();
 
@@ -160,10 +147,7 @@ public class CartServiceImpl implements CartService {
             cartItem.setQuantity(newQuantity);
             cartItem.setExpiresAt(LocalDateTime.now().plusMinutes(reservationMinutes));
             prodotto.setAvailableStock(prodotto.getAvailableStock() - request.getQuantity());
-
-            //log.info("Aggiornato carrello esistente {} con nuova quantità {}", cartItem.getId(), newQuantity);
         } else {
-            // Crea nuova prenotazione
             cartItem = new CartItem();
             cartItem.setCartId(cartId);
             cartItem.setProdotto(prodotto);
@@ -174,9 +158,6 @@ public class CartServiceImpl implements CartService {
             cartItem.setStatus(ReservationStatus.RESERVED);
 
             prodotto.setAvailableStock(prodotto.getAvailableStock() - request.getQuantity());
-
-            //log.info("Creato nuovo elemento carrello per prodotto {} con quantità {}",
-            //prodotto.getId(), request.getQuantity(););
         }
 
         prodottoRepository.save(prodotto);
@@ -188,8 +169,6 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional(readOnly = true)
     public CartResponse getCart(String cartId) {
-        //log.info("Recupero carrello {}", cartId);
-
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Carrello con ID " + cartId + " non trovato"
@@ -197,21 +176,24 @@ public class CartServiceImpl implements CartService {
 
         List<CartItem> items = cartItemRepository.findByCartId(cartId);
 
-        return CartMapper.toCartResponse(cart, items);
+        // Recupera i dati utente dal placeholder se l'email è presente sul carrello
+        PlaceholderUserResponse user = null;
+        if (cart.getShippingEmail() != null) {
+            user = userClient.findByEmail(cart.getShippingEmail()).orElse(null);
+        }
+
+        return CartMapper.toCartResponse(cart, items, user);
     }
 
     @Override
     @Transactional
     public CartItemResponse updateCartItem(String cartId, Long cartItemId,
                                            UpdateCartItemRequest request) {
-        //log.info("Aggiornamento elemento carrello {} per carrello {}", cartItemId, cartId);
-
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(
                         "Elemento carrello con ID " + cartItemId + " non trovato"
                 ));
 
-        // Verifica che l'item appartenga al carrello
         if (!cartItem.getCartId().equals(cartId)) {
             throw new UnauthorizedAccessException(
                     "Non autorizzato ad accedere a questo elemento"
@@ -239,7 +221,6 @@ public class CartServiceImpl implements CartService {
         int difference = request.getQuantity() - cartItem.getQuantity();
 
         if (difference > 0) {
-            // Aumento quantità - verifica disponibilità
             if (prodotto.getAvailableStock() < difference) {
                 throw new InsufficientStockException(
                         String.format("Stock insufficiente. Disponibili: %d",
@@ -257,7 +238,6 @@ public class CartServiceImpl implements CartService {
             }
             prodotto.setAvailableStock(prodotto.getAvailableStock() - difference);
         } else if (difference < 0) {
-            // Riduzione quantità - rilascia stock
             prodotto.setAvailableStock(prodotto.getAvailableStock() + Math.abs(difference));
         }
 
@@ -267,16 +247,12 @@ public class CartServiceImpl implements CartService {
         prodottoRepository.save(prodotto);
         CartItem saved = cartItemRepository.save(cartItem);
 
-        //log.info("Elemento carrello {} aggiornato a quantità {}", cartItemId, request.getQuantity());
-
         return CartMapper.toItemResponse(saved);
     }
 
     @Override
     @Transactional
     public CartResponse removeFromCart(String cartId, Long cartItemId) {
-        //log.info("Rimozione elemento carrello {} per carrello {}", cartItemId, cartId);
-
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(
                         "Elemento carrello con ID " + cartItemId + " non trovato"
@@ -289,20 +265,14 @@ public class CartServiceImpl implements CartService {
         }
 
         if (cartItem.getStatus() == ReservationStatus.RESERVED) {
-            // Rilascia lo stock
             Prodotto prodotto = cartItem.getProdotto();
             prodotto.setAvailableStock(prodotto.getAvailableStock() + cartItem.getQuantity());
             prodottoRepository.save(prodotto);
-
-            //log.info("Rilasciate {} unità del prodotto {} nello stock",
-            //cartItem.getQuantity(), prodotto.getId(););
         }
 
         cartItemRepository.delete(cartItem);
 
-        // Ritorna il carrello aggiornato
-        List<CartItem> items = cartItemRepository
-                .findByCartId(cartId);
+        List<CartItem> items = cartItemRepository.findByCartId(cartId);
 
         return CartMapper.toCartResponse(items);
     }
@@ -310,8 +280,6 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CheckoutResponse checkout(String cartId, CheckoutRequest request) {
-        //log.info("Elaborazione checkout per carrello {}", cartId);
-
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Carrello con ID " + cartId + " non trovato"
@@ -330,7 +298,6 @@ public class CartServiceImpl implements CartService {
             throw new EmptyCartException("Il carrello è vuoto");
         }
 
-        // Verifica che le prenotazioni non siano scadute
         LocalDateTime now = LocalDateTime.now();
         boolean hasExpired = items.stream()
                 .anyMatch(item -> item.getExpiresAt().isBefore(now));
@@ -342,25 +309,17 @@ public class CartServiceImpl implements CartService {
             );
         }
 
-        // Calcola totale
         double total = items.stream()
                 .mapToDouble(item -> item.getProdotto().getPrezzo() * item.getQuantity())
                 .sum();
 
-        // Aggiorna lo stock totale e marca gli item come COMPLETED
         for (CartItem item : items) {
             Prodotto prodotto = item.getProdotto();
 
-            // Decrementa totalStock sul prodotto
             prodotto.setTotalStock(prodotto.getTotalStock() - item.getQuantity());
-
-            // Riallinea availableStock (era già stato decrementato in addToCart,
-            // ora lo aggiorniamo per essere coerente col nuovo totalStock)
             prodotto.setAvailableStock(prodotto.getTotalStock());
-
             prodottoRepository.save(prodotto);
 
-            // Decrementa la quantità fisica nel magazzino specifico
             var prodottoMagazzino = prodottoMagazzinoRepository
                     .findByProdottoIdAndMagazzinoId(
                             prodotto.getId(),
@@ -377,7 +336,6 @@ public class CartServiceImpl implements CartService {
             cartItemRepository.save(item);
         }
 
-        // Persiste i dati di checkout sul carrello
         cart.setStatus(ReservationStatus.COMPLETED);
         cart.setShippingAddress(request.getShippingAddress());
         cart.setShippingEmail(request.getShippingEmail());
@@ -386,10 +344,7 @@ public class CartServiceImpl implements CartService {
         cart.setCheckedOutAt(now);
         cartRepository.save(cart);
 
-        // Genera ID ordine (qui dovresti creare l'entità Order se esiste)
         String orderId = "ORD-" + System.currentTimeMillis();
-
-        //log.info("Checkout completato con ID ordine {}", orderId);
 
         CheckoutResponse response = new CheckoutResponse();
         response.setOrderId(orderId);
@@ -414,15 +369,11 @@ public class CartServiceImpl implements CartService {
             return;
         }
 
-        //log.info("Trovati {} elementi carrello scaduti da pulire", expiredItems.size());
-
         for (CartItem item : expiredItems) {
-            // Rilascia lo stock
             Prodotto prodotto = item.getProdotto();
             prodotto.setAvailableStock(prodotto.getAvailableStock() + item.getQuantity());
             prodottoRepository.save(prodotto);
 
-            // Marca come scaduto ma non elimina il record
             item.setStatus(ReservationStatus.EXPIRED);
             cartItemRepository.save(item);
         }
