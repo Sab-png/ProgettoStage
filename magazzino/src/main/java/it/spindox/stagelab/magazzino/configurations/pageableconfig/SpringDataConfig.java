@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.configurations;
+package it.spindox.stagelab.magazzino.configurations.pageableconfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;

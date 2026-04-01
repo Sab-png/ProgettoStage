@@ -14,9 +14,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+
 
 
 
@@ -217,6 +218,34 @@ public class GlobalExceptionHandler {
 
         if (request.getRequestURI().contains("user-by-username")) {
             pd.setProperty("lookupType", "USERNAME");
+        }
+
+        return pd;
+    }
+
+// Gestione centralizzata ResponseStatusException (401 e 403)
+
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+
+    public ProblemDetail handleResponseStatusException(
+            org.springframework.web.server.ResponseStatusException ex,
+            HttpServletRequest request) {
+
+        HttpStatus status = (HttpStatus) ex.getStatusCode();
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, ex.getReason());
+
+        pd.setProperty("path", request.getRequestURI());
+        pd.setProperty("timestamp", OffsetDateTime.now().toString());
+// 401 error
+
+        if (status == HttpStatus.UNAUTHORIZED) {
+            log.warn("401 Unauthorized su path {}: {}", request.getRequestURI(), ex.getReason());
+        }
+// 403 error
+
+        if (status == HttpStatus.FORBIDDEN) {
+            log.warn("403 Forbidden su path {}: {}", request.getRequestURI(), ex.getReason());
         }
 
         return pd;

@@ -42,12 +42,6 @@ public class ProdottoMagazzino {
 
     @Column(name = "SCORTA_MIN_STATUS")
     private String scortaMinStatus;
-
-    public void setScortaMin(@Min(0) Integer scortaMin) {
-    }
-
-    public Integer getScortaMin() {
-        return 0;
-    }
 }
+
 

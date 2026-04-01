@@ -1,0 +1,1388 @@
+{
+  "info": {
+    "_postman_id": "e10806c0-7b19-4e79-8f89-0094f90911d4",
+    "name": "SpindoxMagazzino",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50738534",
+    "_collection_link": "https://go.postman.co/collection/50738534-e10806c0-7b19-4e79-8f89-0094f90911d4?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "FatturaController",
+      "item": [
+        {
+          "name": "Fattura Create tipologie",
+          "item": [
+            {
+              "name": "status emessa",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"username\": \"system\",\r\n  \"dataFattura\": \"2026-03-19\",\r\n  \"idProdotto\": 8,\r\n  \"quantita\": 67,\r\n  \"importo\": 70.00,\r\n  \"dataScadenza\": \"2026-04-18\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fatture/status/emessa?idProdotto=9",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fatture",
+                    "status",
+                    "emessa"
+                  ],
+                  "query": [
+                    {
+                      "key": "idProdotto",
+                      "value": "9"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "status scaduta",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"username\": \"system\",\r\n  \"dataFattura\": \"2026-03-19\",\r\n  \"idProdotto\": 1,\r\n  \"quantita\": 67,\r\n  \"importo\": 70.00,\r\n  \"dataScadenza\": \"2026-04-18\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fatture/status/scaduta?idProdotto=15",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fatture",
+                    "status",
+                    "scaduta"
+                  ],
+                  "query": [
+                    {
+                      "key": "idProdotto",
+                      "value": "15"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "status pagata",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"username\": \"system\",\r\n  \"dataFattura\": \"2026-03-19\",\r\n  \"idProdotto\": 1,\r\n  \"quantita\": 67,\r\n  \"importo\": 70.00,\r\n  \"dataScadenza\": \"2026-04-18\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fatture/status/pagata?idProdotto=3",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fatture",
+                    "status",
+                    "pagata"
+                  ],
+                  "query": [
+                    {
+                      "key": "idProdotto",
+                      "value": "3"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "/fatture/id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fatture/5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/fatture/list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fatture/list",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/fatture",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fatture",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/fatture/prodotto/id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fatture/prodotto/14",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture",
+                "prodotto",
+                "14"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/fatture(Crea Fatture)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"elia\",\r\n  \"dataFattura\": \"2026-03-18\",\r\n  \"idProdotto\": 4,\r\n  \"quantita\": 532,\r\n  \"importo\": 100.00,\r\n  \"dataScadenza\": \"2026-12-31\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/fatture",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/fatture(Modifica/patch fatture)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080//fatture/{id}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "",
+                "fatture",
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/fatture(Search fatture)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"numero\": \"FAT-\",\r\n  \"idProdotto\": 3,\r\n  \"dataFrom\": \"2026-02-01\",\r\n  \"dataTo\": \"2026-02-28\",\r\n  \"importoMin\": 50.00,\r\n  \"importoMax\": 200.00,\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/fatture/search",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/fatture(delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fatture/48",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture",
+                "48"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "add payment singola fattura",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fattureworkexecution/51/payment",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fattureworkexecution",
+                "51",
+                "payment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "payment check all",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fattureworkexecution/payment-check-all",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fattureworkexecution",
+                "payment-check-all"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "HomeController",
+      "item": [
+        {
+          "name": "/home",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/home",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "home"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/home/info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/home/info",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "home",
+                "info"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/home/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/home/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "home",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "JobExecution",
+      "item": [
+        {
+          "name": "/jobs generico",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"numero\": \"FAT-\",\r\n  \"idProdotto\": 3,\r\n  \"dataFrom\": \"2026-02-01\",\r\n  \"dataTo\": \"2026-02-28\",\r\n  \"importoMin\": 50.00,\r\n  \"importoMax\": 200.00,\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/jobs?page=0&size=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/jobs/id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/jobs/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "jobs",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/jobs/list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/jobs/list",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "jobs",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/jobs/search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"stato\": \"SUCCESS\",\r\n  \"from\": \"2026-02-01T00:00:00\",\r\n  \"to\": \"2026-02-28T23:59:59\",\r\n  \"hasError\": false,\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/jobs/search",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "jobs",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/jobs/errorslast",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/jobs/errors/last",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "jobs",
+                "errors",
+                "last"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "MagazzinoController",
+      "item": [
+        {
+          "name": "/magazzino",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/magazzino",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "magazzino"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/magazzino/id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/magazzino/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "magazzino",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/magazzino/list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/magazzino/list",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "magazzino",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/magazzino(Create)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Magazzino Nord\",\r\n  \"indirizzo\": \"Via Torino 10\",\r\n  \"capacitaMin\": 100,\r\n  \"capacitaMax\": 500\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/magazzino",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "magazzino"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/magazzino/id(Patch aggiorna)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"capacitaMax\": 900\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/magazzino/id",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "magazzino",
+                "id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/magazzino/id (elimina)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/magazzino/id",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "magazzino",
+                "id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/magazzino/search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Mag\",\r\n  \"indirizzo\": \"Torino\",\r\n  \"capacitaMin\": 100,\r\n  \"capacitaMax\": 500,\r\n  \"page\": 0,\r\n  \"size\": 10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/magazzino/search",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "magazzino",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ProdottoController",
+      "item": [
+        {
+          "name": "/prodotti",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Mag\",\r\n  \"indirizzo\": \"Torino\",\r\n  \"capacitaMin\": 100,\r\n  \"capacitaMax\": 500,\r\n  \"page\": 0,\r\n  \"size\": 10\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/prodotti",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "prodotti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/prodotti/id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Mag\",\r\n  \"indirizzo\": \"Torino\",\r\n  \"capacitaMin\": 100,\r\n  \"capacitaMax\": 500,\r\n  \"page\": 0,\r\n  \"size\": 10\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/prodotti/17",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "prodotti",
+                "17"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/prodotti/list",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Mag\",\r\n  \"indirizzo\": \"Torino\",\r\n  \"capacitaMin\": 100,\r\n  \"capacitaMax\": 500,\r\n  \"page\": 0,\r\n  \"size\": 10\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/prodotti/list",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "prodotti",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/prodotti(Create)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Acqua Sant’Anna\",\r\n  \"descrizione\": \"Acqua naturale 1.5L\",\r\n  \"prezzo\": 0.35\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/prodotti",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "prodotti"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/prodotti/id(Patch aggiorna)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"prezzo\": 0.39\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/prodotti/id",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "prodotti",
+                "id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/prodotti/id(elimina)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/prodotti/id",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "prodotti",
+                "id"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/prodotti/search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"a\",\r\n  \"descrizione\": \"1.5L\",\r\n  \"prezzoMin\": 0.20,\r\n  \"prezzoMax\": 3.00,\r\n  \"page\": 0,\r\n  \"size\": 10\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/prodotti/search",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "prodotti",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "FatturaWorkExecution",
+      "item": [
+        {
+          "name": "Fattura search categories",
+          "item": [
+            {
+              "name": "payment check all casistiche testing",
+              "item": [
+                {
+                  "name": "Fattura emessa e scaduta",
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n\r\n  \"username\": \"system\",\r\n  \"dataFattura\": \"2026-03-01\",\r\n  \"idProdotto\": 13,\r\n  \"quantita\": 156,\r\n  \"importo\": 100.00,\r\n  \"dataScadenza\": \"2026-03-10\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:8080/fatture/status/emessa?idProdotto=13",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "8080",
+                      "path": [
+                        "fatture",
+                        "status",
+                        "emessa"
+                      ],
+                      "query": [
+                        {
+                          "key": "idProdotto",
+                          "value": "13"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Fattura emessa con import null",
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n  \"username\": \"system\",\r\n  \"dataFattura\": \"2026-03-10\",\r\n  \"idProdotto\": 8,\r\n  \"quantita\": 2,\r\n  \"importo\": null,\r\n  \"dataScadenza\": \"2026-03-15\"\r\n}\r\n",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:8080/fatture/status/emessa?idProdotto=8",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "8080",
+                      "path": [
+                        "fatture",
+                        "status",
+                        "emessa"
+                      ],
+                      "query": [
+                        {
+                          "key": "idProdotto",
+                          "value": "8"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Fattura emessa con scadenza futura",
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{  \r\n\"username\": \"system\",  \r\n\"dataFattura\": \"2026-03-19\",  \r\n\"idProdotto\": 32,  \r\n\"quantita\": 1,  \r\n\"importo\": 50.00,  \r\n\"dataScadenza\": \"2026-03-25\"  \r\n}  \r\n",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:8080/fatture/status/emessa?idProdotto=32",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "8080",
+                      "path": [
+                        "fatture",
+                        "status",
+                        "emessa"
+                      ],
+                      "query": [
+                        {
+                          "key": "idProdotto",
+                          "value": "32"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "/search-stato+page",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fattureworkexecution/search?status=SUCCESS&page=2&size=2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fattureworkexecution",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "SUCCESS"
+                    },
+                    {
+                      "key": "page",
+                      "value": "2"
+                    },
+                    {
+                      "key": "size",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/eventualierrori -fattura +id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/fattureworkexecution/search?hasError=true&fatturaId=65",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fattureworkexecution",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "hasError",
+                      "value": "true"
+                    },
+                    {
+                      "key": "fatturaId",
+                      "value": "65"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/startfrom-starttofattura(tempo)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/fattureworkexecution/search?startFrom=2026-03-01T00:00:00&startTo=2026-03-09T23:59:59",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fattureworkexecution",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "startFrom",
+                      "value": "2026-03-01T00:00:00"
+                    },
+                    {
+                      "key": "startTo",
+                      "value": "2026-03-09T23:59:59"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "/searchworkexecution(1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fattureworkexecution/search?page=0&size=20",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fattureworkexecution",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/addpayment singolafattura(2)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"pagatoDaAggiungere\": 65\r\n}\r\n"
+            },
+            "url": {
+              "raw": "http://localhost:8080/fattureworkexecution/62/payment",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fattureworkexecution",
+                "62",
+                "payment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "/payment-check-all",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/fatture/payment-check-all",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fatture",
+                "payment-check-all"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Webclient",
+      "item": [
+        {
+          "name": "TestWebClientController",
+          "item": [
+            {
+              "name": "testGetAllUsers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/test/webclient/users",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "test",
+                    "webclient",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "testGetUserByUsername",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/test/webclient/user?username=Moriah.Stanton",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "test",
+                    "webclient",
+                    "user"
+                  ],
+                  "query": [
+                    {
+                      "key": "username",
+                      "value": "Moriah.Stanton"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "controllo/test dati fattura /id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/fatture/67",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fatture",
+                    "67"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "test by name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/test/webclient/user-by-name?name=Glenna Reichert",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "test",
+                    "webclient",
+                    "user-by-name"
+                  ],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "Glenna Reichert"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

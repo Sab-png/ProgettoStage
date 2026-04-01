@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.configurations;
+package it.spindox.stagelab.magazzino.configurations.webclient.users;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.context.annotation.Configuration;

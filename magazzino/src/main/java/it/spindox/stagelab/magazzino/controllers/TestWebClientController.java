@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.controllers;
-import it.spindox.stagelab.magazzino.client.users.UserClient;
+import it.spindox.stagelab.magazzino.configurations.webclient.users.UserClient;
 import it.spindox.stagelab.magazzino.dto.WebClient.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

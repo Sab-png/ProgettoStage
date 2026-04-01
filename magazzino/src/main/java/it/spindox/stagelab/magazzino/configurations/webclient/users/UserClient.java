@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.client.users;
+package it.spindox.stagelab.magazzino.configurations.webclient.users;
 import it.spindox.stagelab.magazzino.dto.WebClient.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

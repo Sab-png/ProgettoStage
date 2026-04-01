@@ -1,10 +1,9 @@
 package it.spindox.stagelab.magazzino.services;
-import it.spindox.stagelab.magazzino.client.users.UserClient;
+import it.spindox.stagelab.magazzino.configurations.webclient.users.UserClient;
 import it.spindox.stagelab.magazzino.dto.WebClient.UserResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaRequest;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaResponse;
 import it.spindox.stagelab.magazzino.dto.fattura.FatturaSearchRequest;
-import it.spindox.stagelab.magazzino.entities.*;
 import it.spindox.stagelab.magazzino.exceptions.ResourceNotFoundException;
 import it.spindox.stagelab.magazzino.exceptions.jobsexceptions.InvalidFatturaException;
 import it.spindox.stagelab.magazzino.mappers.FatturaMapper;
@@ -470,9 +469,11 @@ public class FatturaServiceImpl implements FatturaService {
         return response;
     }
 
+
 // GET BY ID NAME
 
     @Transactional(readOnly = true)
+
     public FatturaResponse getByIdByName(Long id) {
 
         Fattura entity = fatturaRepository.findById(id)
@@ -495,19 +496,6 @@ public class FatturaServiceImpl implements FatturaService {
 
         return response;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     // GET BY PRODOTTO

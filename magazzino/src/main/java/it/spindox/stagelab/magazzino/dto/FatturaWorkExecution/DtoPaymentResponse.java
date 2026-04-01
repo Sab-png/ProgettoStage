@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 
 @Data
 @Builder
+
 public class DtoPaymentResponse {
 
     private Long workexecutionid;

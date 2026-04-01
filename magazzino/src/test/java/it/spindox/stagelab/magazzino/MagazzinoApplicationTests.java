@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 class MagazzinoApplicationTests {
 
+	@Test
+
 	public static void main(String[] args) {
 		SpringApplication.run(MagazzinoApplication.class, args);
 		System.out.println("Magazzino Test is Running");
