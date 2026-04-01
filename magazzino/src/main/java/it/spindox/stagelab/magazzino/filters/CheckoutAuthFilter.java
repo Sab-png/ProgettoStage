@@ -1,5 +1,6 @@
 package it.spindox.stagelab.magazzino.filters;
 
+import it.spindox.stagelab.magazzino.repositories.UserRepository;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,15 +8,19 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Base64;
 
-@Component
 public class CheckoutAuthFilter implements Filter {
 
     private static final String CHECKOUT_PATH = "/cart/checkout";
+
+    private final UserRepository userRepository;
+
+    public CheckoutAuthFilter(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -24,14 +29,41 @@ public class CheckoutAuthFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // Applica il controllo solo sulle chiamate al checkout
         if (httpRequest.getRequestURI().contains(CHECKOUT_PATH)) {
             String authHeader = httpRequest.getHeader("Authorization");
 
-            if (authHeader == null || !isValidBasicToken(authHeader)) {
-                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                httpResponse.setContentType("application/json");
-                httpResponse.getWriter().write("{\"error\": \"Accesso negato: token mancante o non valido\"}");
+            if (authHeader == null || !authHeader.startsWith("Basic ")) {
+                sendForbidden(httpResponse, "Token mancante o non valido");
+                return;
+            }
+
+            try {
+                // Decodifica il token Base64
+                String token = authHeader.substring(6);
+                String decoded = new String(Base64.getDecoder().decode(token));
+
+                // Formato atteso: "username:password"
+                if (!decoded.contains(":")) {
+                    sendForbidden(httpResponse, "Formato token non valido");
+                    return;
+                }
+
+                String[] parts = decoded.split(":", 2);
+                String username = parts[0];
+                String password = parts[1];
+
+                // Verifica esistenza utente a DB
+                boolean exists = userRepository
+                        .findByUsernameAndPassword(username, password)
+                        .isPresent();
+
+                if (!exists) {
+                    sendForbidden(httpResponse, "Utente non trovato o credenziali errate");
+                    return;
+                }
+
+            } catch (IllegalArgumentException e) {
+                sendForbidden(httpResponse, "Token non decodificabile");
                 return;
             }
         }
@@ -39,18 +71,9 @@ public class CheckoutAuthFilter implements Filter {
         chain.doFilter(request, response);
     }
 
-    private boolean isValidBasicToken(String authHeader) {
-        if (!authHeader.startsWith("Basic ")) {
-            return false;
-        }
-        try {
-            // Verifica che il token sia decodificabile in Base64
-            String token = authHeader.substring(6);
-            String decoded = new String(Base64.getDecoder().decode(token));
-            // Formato atteso: "username:password"
-            return decoded.contains(":");
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+    private void sendForbidden(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }
