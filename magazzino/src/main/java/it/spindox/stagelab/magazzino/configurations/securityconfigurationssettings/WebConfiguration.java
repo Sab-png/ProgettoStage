@@ -1,5 +1,5 @@
 package it.spindox.stagelab.magazzino.configurations.securityconfigurationssettings;
-import jakarta.servlet.Filter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -9,35 +9,35 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
+
+
 @Configuration
 @EnableWebSecurity
-
+@RequiredArgsConstructor
 public class WebConfiguration {
-    private Filter CustomAuthorizationFilter;
 
-    //Configura la Security Filter Chain per l’applicazione
+
+    private final CustomAuthorizationFilter customAuthorizationFilter;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // Disabilita protezione CSRF (consigliato per API REST)
-
+                // per l' uso e per il testing delle API il CSRF deve essere disabilitato
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Permette liberamente qualsiasi request (nessuna autenticazione richiesta)
-
+                //  le request sono senza filtro  (il filtri in seguito  decideranno quale bloccare)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                // addfilter addpaymentid
 
-                // IL FILTRO CUSTOM AUTHORIZZAZION FILTER
-
+                // Filtro authorizzazion
+                //
                 .addFilterBefore(
-                        CustomAuthorizationFilter,
+                        customAuthorizationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
 
-                // Disabilita form login
+                // Disabilita tutti i meccanismi di login form default
                 .formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();
