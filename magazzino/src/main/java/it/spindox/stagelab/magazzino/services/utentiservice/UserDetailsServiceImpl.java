@@ -8,19 +8,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
+
 // Per i role di utenti : ADMIN O USERS
 
 @Service
 @RequiredArgsConstructor
-
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UtentiRepository utentiRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
 
-        Utenti user = utentiRepository.findByUsername(username);// Utenti REPOSITORY DB
+        Utenti user = utentiRepository.findByUsername(username);
 
         if (user == null) {
             throw new UsernameNotFoundException("Utente non trovato");
@@ -28,8 +29,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
-                .password("{noop}" + user.getPassword()) // la password non va codificata
-                .roles(user.getRuolo())
+                .password("{noop}" + user.getPassword()) // password in chiaro
+                .roles(user.getRuolo())                  // ADMIN o USER
                 .build();
     }
 }

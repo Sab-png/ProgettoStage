@@ -30,7 +30,7 @@ public class UserCreateServiceImpl implements UserCreateService {
         nuovo.setUsername(username);
         nuovo.setPassword(password);
         nuovo.setRuolo("USER");
-       //  nuovo.setRuolo(ruolo); // USERS O ADMIN A SECONDA DEL RUOLO
+       //  nuovo.setRuolo(ruolo); // USERS
 
         return utentiRepository.save(nuovo);
     }
