@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.services;
+package it.spindox.stagelab.magazzino.services.utentiservice;
 import it.spindox.stagelab.magazzino.entities.Utenti;
 import it.spindox.stagelab.magazzino.repositories.UtentiRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,16 +7,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 
-// USERS SERVICE
+// Classe per le inf sugli admin
 
 @Service
 @RequiredArgsConstructor
-public class UserCreateServiceImpl implements UserCreateService {
+
+
+public class AdminCreateServiceImpl implements AdminCreateService {
 
     private final UtentiRepository utentiRepository;
 
     @Override
-    public Utenti createUser(String username, String password) {
+    public Utenti createAdmin(String username, String password) {
 
         if (utentiRepository.existsByUsername(username)) {
             throw new ResponseStatusException(
@@ -25,10 +27,11 @@ public class UserCreateServiceImpl implements UserCreateService {
             );
         }
 
-        Utenti nuovo = new Utenti();
-        nuovo.setUsername(username);
-        nuovo.setPassword(password);
+        Utenti admin = new Utenti();
+        admin.setUsername(username);
+        admin.setPassword(password);
+        admin.setRuolo("ADMIN"); // ruolo admin
 
-        return utentiRepository.save(nuovo);
+        return utentiRepository.save(admin);
     }
 }

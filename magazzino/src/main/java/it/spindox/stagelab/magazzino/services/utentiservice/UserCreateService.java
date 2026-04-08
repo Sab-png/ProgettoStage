@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.services;
+package it.spindox.stagelab.magazzino.services.utentiservice;
 
 import it.spindox.stagelab.magazzino.entities.Utenti;
 

@@ -272,7 +272,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"numero\": \"FAT-\",\r\n  \"idProdotto\": 3,\r\n  \"dataFrom\": \"2026-02-01\",\r\n  \"dataTo\": \"2026-02-28\",\r\n  \"importoMin\": 50.00,\r\n  \"importoMax\": 200.00,\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}",
+              "raw": "{\r\n{\r\n  \"numero\": \"FAT-\",\r\n  \"idProdotto\": 4,\r\n  \"dataFrom\": \"2026-01-01\",\r\n  \"dataTo\": \"2026-01-31\",\r\n  \"importoMin\": 0,\r\n  \"importoMax\": 100,\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1381,6 +1381,444 @@
               "response": []
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Security/Authentication",
+      "item": [
+        {
+          "name": "403 ERRORS",
+          "item": [
+            {
+              "name": "noauthorizzazion nell header",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"pagatoDaAggiungere\": 95.00,\r\n  \"dataPagamento\": \"2026-03-31\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fattureworkexecution/22/payment",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fattureworkexecution",
+                    "22",
+                    "payment"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Basic scrittomale",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basik UG9zZWlkb25lOk1hcmVhNzg=",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"pagatoDaAggiungere\": 95.00,\r\n  \"dataPagamento\": \"2026-03-31\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fattureworkexecution/22/payment",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fattureworkexecution",
+                    "22",
+                    "payment"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "token(base64) sbagliato",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"pagatoDaAggiungere\": 95.00,\r\n  \"dataPagamento\": \"2026-03-31\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fattureworkexecution/22/payment",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fattureworkexecution",
+                    "22",
+                    "payment"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "credenziali sbagliate",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic UG9zZWlkb25lOk1hcmVhNgdgrg=",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8080/fattureworkexecution/22/payment",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fattureworkexecution",
+                    "22",
+                    "payment"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "fatture/addpaymentsecurity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic WmlvIEVmZXN0bzpmb3JuYWNlNQ==",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"importo\": 50.00,\r\n  \"metodoPagamento\": \"BONIFICO\",\r\n  \"dataPagamento\": \"2026-03-31\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/fattureworkexecution/68/payment",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "fattureworkexecution",
+                "68",
+                "payment"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user test",
+      "item": [
+        {
+          "name": "fatturasearchtest",
+          "item": [
+            {
+              "name": "admintest/fatturasearch",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic YWRtaW46QnRzOTc=",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fatture/search",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fatture",
+                    "search"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "usertest/fatturasearch",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Basic WmlvIEVmZXN0bzpmb3JuYWNlNQ==",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"dataFrom\": \"2025-01-01\",\r\n  \"dataTo\": \"2026-12-31\",\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fatture/search",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fatture",
+                    "search"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "accesso/fatturasearch senza token(401)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"numero\": \"FAT-\",\r\n  \"page\": 0,\r\n  \"size\": 20\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/fatture/search",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "fatture",
+                    "search"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "users/createtestdemo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/users/createtestdemo",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "users",
+                "createtestdemo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "users/create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"elia_login\",\r\n  \"password\": \"Scienziato4\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/users/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "users",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"elia_login\",\r\n  \"password\": \"Scienziato4\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "admin/create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"swim\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/users/create-admin",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "users",
+                "create-admin"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }

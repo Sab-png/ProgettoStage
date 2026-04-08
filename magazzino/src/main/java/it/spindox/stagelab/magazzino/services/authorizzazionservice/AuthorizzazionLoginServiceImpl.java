@@ -1,4 +1,4 @@
-package it.spindox.stagelab.magazzino.services;
+package it.spindox.stagelab.magazzino.services.authorizzazionservice;
 import it.spindox.stagelab.magazzino.dto.login.LoginRequestDto;
 import it.spindox.stagelab.magazzino.dto.login.LoginResponseDto;
 import it.spindox.stagelab.magazzino.entities.Utenti;
@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
+
 public class AuthorizzazionLoginServiceImpl implements AuthorizzazionLoginService {
 
     private final UtentiRepository utentiRepository;

@@ -25,4 +25,6 @@ public class Utenti {
     private Long id;
     private String username;
     private String password;
+    private String ruolo; // per role ( ADMIN O USER)
+
 }

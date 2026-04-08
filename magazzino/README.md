@@ -1,6 +1,7 @@
-# 🏭 Magazzino - Sistema di Gestione Inventario
+# 🏭 Magazzino — Sistema di Gestione Inventario
 
-> REST API con **Spring Boot 4.0.1**, **Java 21** e **Oracle XE 21c** per gestione di prodotti, magazzini, fatture, giacenze, job schedulati e integrazione utenti via WebClient.
+> **Applicazione REST API Enterprise-Grade** con **Spring Boot 4.0.1**, **Java 21** e **Oracle XE 21c**
+> Gestione completa di prodotti, magazzini, fatture, giacenze, job schedulati e integrazione con sistemi remoti via WebClient.
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.1-6DB33F?style=flat-square&logo=spring)
@@ -9,67 +10,249 @@
 ![Docker](https://img.shields.io/badge/Docker-Latest-2496ED?style=flat-square&logo=docker)
 ![Files](https://img.shields.io/badge/Project%20Files-109-blue?style=flat-square)
 ![Java Files](https://img.shields.io/badge/Java%20Files-88-blueviolet?style=flat-square)
- 
+![Tests](https://img.shields.io/badge/Tests-✅-brightgreen?style=flat-square)
+![License](https://img.shields.io/badge/License-Spindox%20StageLab-blue?style=flat-square)
+
 ---
 
 ## 📑 Indice
 
-- [Panoramica](#panoramica)
-- [Stack Tecnologico](#stack-tecnologico)
-- [Struttura Progetto](#struttura-progetto)
-- [Componenti](#componenti)
-- [Endpoints API](#endpoints-api)
-- [Docker](#docker)
-- [Database](#database)
-- [Configurazione](#configurazione)
-- [Testing](#testing)
-- [Riepilogo Finale](#riepilogo-finale)
+1. [Panoramica Generale](#-panoramica-generale)
+2. [Caratteristiche Principali](#-caratteristiche-principali)
+3. [Requisiti di Sistema](#-requisiti-di-sistema)
+4. [Quick Start](#-quick-start)
+5. [Stack Tecnologico](#-stack-tecnologico)
+6. [Architettura](#-architettura)
+7. [Struttura Progetto](#-struttura-progetto)
+8. [Componenti Dettagliati](#-componenti-dettagliati)
+9. [Endpoints API](#-endpoints-api)
+10. [Docker & Containerizzazione](#-docker--containerizzazione)
+11. [Database](#-database)
+12. [Configurazione](#-configurazione)
+13. [Sicurezza](#-sicurezza)
+14. [Testing](#-testing)
+15. [Riepilogo Finale](#-riepilogo-finale)
 
 ---
 
-## Panoramica
+## 🎯 Panoramica Generale
 
-Il progetto e organizzato a layer:
+**Magazzino** è una soluzione completa per la gestione di inventario, magazzini e fatturazione, costruita seguendo un'architettura a layer chiaramente separati:
 
-```text
-HTTP -> Controller -> Service -> Repository -> Oracle
-                   -> Mapper -> DTO
+```
+┌─────────────────────────────────────┐
+│         HTTP Request (REST)         │
+├─────────────────────────────────────┤
+│      @RestController (6 classi)     │  ← Controllers REST
+├─────────────────────────────────────┤
+│      @Service (12 classi)           │  ← Business Logic Layer
+│   + @Transactional                  │
+│   + Validazione & Orchestrazione    │
+├─────────────────────────────────────┤
+│      @Repository (6 interfacce)     │  ← Data Access JPA
+│   + Custom @Query                   │
+│   + Paginazione, Filtri             │
+├─────────────────────────────────────┤
+│      Mappers (12 impl)              │  ← DTO ↔ Entity Conversion
+├─────────────────────────────────────┤
+│      Oracle XE 21c Database         │  ← Persistenza
+│   + Sequence Generator              │
+│   + Foreign Keys & Indexes          │
+├─────────────────────────────────────┤
+│    Response DTO Serialization       │  ← JSON Output
+└─────────────────────────────────────┘
 ```
 
-Aree funzionali presenti:
+### Aree Funzionali
 
-- Prodotti
-- Magazzini
-- Fatture
-- Giacenze prodotto-magazzino
-- Job execution e scheduler
-- Work execution pagamenti fatture
-- Integrazione utenti remoti via WebClient
-
----
-
-## Stack Tecnologico
-
-| Layer | Tecnologia | Versione |
+| Area | Descrizione | Componenti principali |
 |---|---|---|
-| Runtime | Java | 21 |
-| Framework | Spring Boot | 4.0.1 |
-| Web MVC | `spring-boot-starter-webmvc` | 4.0.1 |
-| WebClient | `spring-boot-starter-webflux` | 4.0.1 |
-| Data | `spring-boot-starter-data-jpa` | 4.0.1 |
-| Security | `spring-boot-starter-security` | 4.0.1 |
-| Validation | `spring-boot-starter-validation` | 4.0.1 |
-| Database | Oracle XE | 21c |
-| Driver | `ojdbc11` | runtime |
-| Utility | Lombok | 1.18.32 |
-| Test | `spring-boot-starter-test` | 4.0.1 |
-| Build | Maven | 3.9.x |
- 
+| 📦 Catalogo Prodotti | Gestione SKU, prezzi, categorie | `ProdottoService`, `ProdottoController`, `Prodotto` |
+| 🏢 Magazzini | Multi-warehouse, capacità, stato | `MagazzinoService`, `StockStatusMagazzino` |
+| 📄 Fatturazione | Ordini, fatture, workflow stato | `FatturaService`, `SXFatturaStatus` |
+| 🔄 Giacenze | Stock tracking, scorte minime | `ProdottoMagazzinoService`, `ScortaMinPMStatus` |
+| ⏰ Job Schedulati | Automazione batch, scheduling | `InventoryScheduler`, `FatturaScheduler` |
+| 💳 Pagamenti | Esecuzione pagamenti, tracking | `FatturaWorkExecutionService`, `CustomAuthorizationFilter` |
+| 🔌 Integrazioni | WebClient, API Remote | `UserClient`, `WebClientConfigurations` |
+
 ---
 
-## Struttura Progetto
+## ✨ Caratteristiche Principali
 
-```text
+- ✅ **API REST completa** — 37+ endpoint documentati e versionati
+- ✅ **Autenticazione & Autorizzazione** — Spring Security + Custom Filter per Basic Auth
+- ✅ **Gestione Transazioni** — `@Transactional` con rollback automatico
+- ✅ **Paginazione avanzata** — `Page<T>`, `Pageable`, custom `VIA_DTO`
+- ✅ **Validazione input** — `@Valid`, `@Constraint` custom, Bean Validation
+- ✅ **Exception Handling Centralizzato** — `GlobalExceptionHandler`, custom exceptions
+- ✅ **Mapping DTO** — isolamento Entity dalle Response, protezione da lazy-loading
+- ✅ **Job Scheduling** — `@Scheduled` con tracking e logging
+- ✅ **WebClient integrato** — chiamate REST a servizi remoti (jsonplaceholder)
+- ✅ **Docker-ready** — `docker-compose` con Oracle XE incluso
+- ✅ **Timezone-aware** — gestione timezone `Europe/Rome` su app e DB
+- ✅ **Logging completo** — `@Slf4j` su service e componenti
+
+---
+
+## 📋 Requisiti di Sistema
+
+### Ambiente di Sviluppo
+
+```
+✓ Java Development Kit (JDK) 21+
+✓ Apache Maven 3.9.x  (o wrapper mvnw incluso)
+✓ Git 2.30+
+✓ Docker & Docker Compose
+✓ IDE: IntelliJ IDEA / VS Code / Eclipse
+```
+
+### Hardware Minimo
+
+```
+CPU:   2 core (4 consigliati)
+RAM:   8 GB  (Oracle XE ~2 GB, app ~2 GB, sistema ~4 GB)
+Disco: 15 GB liberi
+```
+
+### Porte Richieste
+
+```
+8080  → Spring Boot Application
+1521  → Oracle Database
+5500  → Oracle EM Express (opzionale)
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone & Build
+
+```bash
+git clone <repo-url>
+cd magazzino
+```
+
+**Windows:**
+```powershell
+.\mvnw.cmd clean package -DskipTests
+```
+
+**Linux / macOS:**
+```bash
+./mvnw clean package -DskipTests
+```
+
+### 2. Avvio con Docker (consigliato)
+
+```bash
+# Build e avvio stack completo (app + Oracle)
+docker-compose up --build -d
+
+# Verifica stato container
+docker-compose ps
+
+# Log in tempo reale
+docker-compose logs -f spindox-magazzino
+
+# Stop
+docker-compose down
+```
+
+**Accesso:**
+- App → http://localhost:8080
+- Oracle DB → `localhost:1521` (credenziali: `magazzino` / `magazzino_pwd`)
+
+### 3. Avvio Locale (solo Oracle in Docker)
+
+```bash
+docker-compose up -d oracle-db
+sleep 60
+
+# Windows
+.\mvnw.cmd spring-boot:run
+
+# Linux / macOS
+./mvnw spring-boot:run
+```
+
+### 4. Verifica
+
+```bash
+curl http://localhost:8080/home/health
+curl "http://localhost:8080/prodotti?page=0&size=10"
+```
+
+---
+
+## 📦 Stack Tecnologico
+
+| Layer | Componente        | Versione | Utilizzo                                  |
+|---|-------------------|---|-------------------------------------------|
+| Runtime | Java JDK          | 21 LTS | Linguaggio base                           |
+| Framework | Spring Boot       | 4.0.1 | Web framework, auto-config                |
+| Web | Spring Web MVC    | 4.0.1 | `@RestController`, `@RequestMapping`      |
+| Data | Spring Data JPA   | 4.0.1 | `@Repository`, interfacce repository      |
+| ORM | Hibernate         | 6.4.x | Entity mapping, lazy/eager loading        |
+| Security | Spring Security   | 4.0.1 | `SecurityFilterChain`, autenticazione     |
+| Validation | Spring Validation | 4.0.1 | `@Valid`, JSR-380                         |
+| Database | Oracle XE         | 21c | Persistenza dati                          |
+| JDBC Driver | ojdbc11           | 23.x | Connessione DB, HikariCP                  |
+| Utility | Lombok            | 1.18.32 | `@Data`, `@Slf4j`, `@Builder`             |
+| Async | Spring WebFlux    | 4.0.1 | `WebClient` per chiamate HTTP async       |
+| Testing | Postman           | 5.10.x | `Postman (principalmente)+Springboottest  |
+| Build | Maven             | 3.9.x | Dependency management, compilazione       |
+| Container | Docker            | Latest | Image building, `docker-compose`          |
+
+---
+
+## 🏗️ Architettura
+
+### Design Pattern Utilizzati
+
+#### Layered Architecture
+Separazione in layer: Controller → Service → Repository. Garantisce separazione dei concerns, testabilità e manutenibilità.
+
+#### Repository Pattern
+Astrazione dal tipo di DB tramite Spring Data JPA; query riutilizzabili con `@Query` custom.
+
+#### Service / Business Logic Pattern
+Logica di business centralizzata in classi `@Service` con gestione transazionale `@Transactional`.
+
+#### DTO Pattern
+Isolamento delle entity dalle response JSON. I Mapper convertono `Entity ↔ DTO` evitando la serializzazione di proxy lazy.
+
+#### Mapper Pattern
+Interfaccia + implementazione `@Component` per conversione standardizzata tra Entity e DTO.
+
+#### Security Filter Chain
+`SecurityFilterChain` bean per autenticazione/autorizzazione centralizzata con filtro custom `CustomAuthorizationFilter`.
+
+#### Scheduled Task Pattern
+`@Scheduled` con espressioni cron/rate esternalizzate in `application.properties`.
+
+#### Exception Handling Pattern
+`@RestControllerAdvice` con `@ExceptionHandler` per risposta di errore standardizzata.
+
+#### WebClient Pattern
+Client HTTP non-bloccante per chiamate a servizi REST remoti, con tipi di ritorno `Mono<T>`.
+
+### Flusso Request → Response
+
+```
+1. HTTP Request  →  @RestController riceve e valida input (@Valid)
+2. Controller    →  @Service.method() in contesto @Transactional
+3. Service       →  Validazione business + mapping DTO → Entity
+4. Repository    →  SQL eseguito su Oracle XE (commit o rollback)
+5. Entity        →  Mapper converte Entity → DTO Response
+6. Response      →  JSON serializzato e restituito al client (200/201)
+```
+
+---
+
+## 📂 Struttura Progetto
+
+```
 magazzino/
 ├── pom.xml
 ├── Dockerfile
@@ -78,173 +261,148 @@ magazzino/
 ├── README.md
 ├── runner.sh
 ├── documentationsystem/
+│   └── system architettura schema/
 ├── initdb/
+│   ├── 1_init-db.sql
+│   ├── 2_schema-ddl.sql
+│   ├── 3_sql-content.sql
+│   ├── Script-4-Aggiunta dati per popolamento.sql
+│   └── schema logico DB/
 ├── src/
-│   ├── main/java/it/spindox/stagelab/magazzino/
-│   │   ├── MagazzinoApplication.java
-│   │   ├── README.MD
-│   │   ├── client/users/UserClient.java
-│   │   ├── configurations/
-│   │   ├── controllers/
-│   │   ├── converter/
-│   │   ├── dto/
-│   │   ├── entities/
-│   │   ├── exceptions/
-│   │   ├── mappers/
-│   │   ├── repositories/
-│   │   ├── services/
-│   │   └── sjobs/
-│   ├── main/resources/application.properties
+│   ├── main/
+│   │   ├── java/it/spindox/stagelab/magazzino/
+│   │   │   ├── MagazzinoApplication.java
+│   │   │   ├── controllers/          (7 classi)
+│   │   │   ├── services/             (12 classi: 6 interfacce + 6 impl)
+│   │   │   ├── repositories/         (7 interfacce JPA)
+│   │   │   ├── entities/             (6 entity + 8 enum)
+│   │   │   ├── dto/                  (20+ classi)
+│   │   │   ├── mappers/              (12 classi: 6 interfacce + 6 impl)
+│   │   │   ├── configurations/       (3 classi)
+│   │   │   ├── converter/            (2 classi)
+│   │   │   ├── exceptions/           (5 classi)
+│   │   │   └── sjobs/                (2 scheduler)
+│   │   └── resources/
+│   │       └── application.properties
 │   └── test/
-│       ├── java/it/spindox/stagelab/magazzino/
+│       ├── java/.../
+│       │   ├── MagazzinoApplicationTests.java
+│       │   └── services/jobTest.java
 │       └── resources/application-test.properties
 └── target/
+    └── magazzino-app.jar
 ```
 
-### Conteggi aggiornati
+### Statistiche Codebase
 
-```text
-File progetto:                  109
-Java main:                       86
-Java test:                        2
-Controller:                       7
-Service:                         12
-Repository:                       6
-Mapper:                          12
-DTO:                             19
-Configuration:                    3
-Converter:                        2
-Client esterno:                   1
-Scheduler:                        2
-Entity + enum:                   14
-Exception / handler:              7
-Endpoint REST:                   37
 ```
- 
+Java files totali:        88
+Controllers:               7
+Services (interfacce):     6
+Services (implementazioni):6
+Repositories:              7
+Entities:                  6
+Enums:                     8
+DTOs:                     20+
+Mappers:                  12
+Configurations:            3
+Converters:                2
+Exceptions:                5
+Scheduled Jobs:            2
+Test:                      2
+
+REST Endpoints:           37+
+Tabelle DB:                6
+Totale file progetto:    109
+```
+
 ---
 
-## Componenti
+## 📊 Componenti Dettagliati
 
 ### Controllers
 
-```text
-HomeController
-ProdottoController
-MagazzinoController
-FatturaController
-FatturaWorkExecutionController
-JobExecutionController
-TestWebClientController
+| Classe | Path base | Responsabilità |
+|---|---|---|
+| `HomeController` | `/home` | Health check, info applicazione |
+| `ProdottoController` | `/prodotti` | CRUD prodotti, ricerca paginata |
+| `MagazzinoController` | `/magazzino` | CRUD magazzini, ricerca paginata |
+| `FatturaController` | `/fatture` | CRUD fatture, cambio stato |
+| `FatturaWorkExecutionController` | `/fattureworkexecution` | Esecuzione pagamenti |
+| `JobExecutionController` | `/jobs` | Monitoraggio job schedulati |
+| `TestWebClientController` | `/test/webclient` | Test integrazione WebClient |
+
+### Services — Metodi principali
+
+| Service | Metodi principali |
+|---|---|
+| `ProdottoService` | `getById`, `create`, `update`, `search`, `delete`, `getAllPaged` |
+| `MagazzinoService` | `getById`, `create`, `update`, `delete`, `checkStockLevels`, `getAllPaged` |
+| `FatturaService` | `search`, `create`, `update`, `getByProdotto`, `delete`, `getByStatus` |
+| `ProdottoMagazzinoService` | `getById`, `create`, `update`, `delete`, `search`, `getAllPaged` |
+| `JobExecutionService` | `start`, `success`, `failed`, `findLast`, `findRunning`, `getAllPaged` |
+| `FatturaWorkExecutionService` | `paymentCheckFattura`, `paymentCheckAllFatture`, `fixNullFields` |
+
+### Repositories — Query principali
+
+| Repository | Query personalizzate |
+|---|---|
+| `ProdottoRepository` | `search`, `searchIds` |
+| `MagazzinoRepository` | `search`, `searchIds` |
+| `FatturaRepository` | `search`, `searchIds`, `nextNumeroSeq`, `findByProdottoId`, `findAllByStatus` |
+| `ProdottoMagazzinoRepository` | `existsByProdottoIdAndMagazzinoId`, `sumQuantitaInMagazzino`, `search` |
+| `JobExecutionRepository` | `findFirstByOrderByStartTimeDesc`, `findFirstByStatus`, `search` |
+| `FatturaWorkExecutionRepository` | `search`, `searchWorkExecutions` |
+
+### Entities ed Enum
+
+```
+Entities:   Prodotto · Magazzino · Fattura · ProdottoMagazzino · JobExecution · FatturaWorkExecution · Utenti
+
+Enums:      SXFatturaStatus          → BOZZA, CONFERMATA, PAGATA, ANNULLATA
+            StockStatusProdotto      → DISPONIBILE, SCARICO, ESAURITO
+            StockStatusMagazzino     → ATTIVO, MANUTENZIONE, CHIUSO
+            StatusJob                → PENDING, RUNNING, SUCCESS, FAILED, SYSTEM_ERROR
+            StatusJobErrorType       → categorie di errore job
+            ScortaMinPMStatus        → SOTTO_SCORTA, ENTRO_NORMA, ECCESSO
+            SXFatturaJobexecution    → stati esecuzione pagamento
+            SXFatturaJobexecutionErrorType → tipi errore pagamento
 ```
 
-### Services
+### Mapper, Configurazioni, Converter, Scheduler
 
-```text
-ProdottoService / ProdottoServiceImpl
-MagazzinoService / MagazzinoServiceImpl
-FatturaService / FatturaServiceImpl
-ProdottoMagazzinoService / ProdottoMagazzinoServiceImpl
-JobExecutionService / JobExecutionServiceImpl
-FatturaWorkExecutionService / FatturaWorkExecutionServiceImpl
 ```
+Mappers:         ProdottoMapper, MagazzinoMapper, FatturaMapper,
+                 ProdottoMagazzinoMapper, JobExecutionMapper, FatturaWorkExecutionMapper
+                 (+ relative implementazioni)
 
-Metodi chiave:
+Configurations:  SpringDataConfig     → VIA_DTO, paginazione one-indexed, maxPageSize=100
+                 WebConfiguration     → SecurityFilterChain, CSRF disabled, form login disabled
+                 WebClientConfigurations → userWebClient (base URL: jsonplaceholder.typicode.com)
 
-```text
-ProdottoService: getById, create, update, search, delete, searchIds, getAllPaged
-MagazzinoService: getById, create, update, search, delete, checkStockLevels, searchIds, getAllPaged
-FatturaService: search, create, update, getById, getByProdotto, delete, searchIds, getAllPaged, getByStatus, createMock*
-ProdottoMagazzinoService: getById, create, update, delete, getAllPaged, searchIds, search
-JobExecutionService: getById, search, start, success, failed, findLast, findRunning, searchIds, getAllPaged
-FatturaWorkExecutionService: paymentCheckFattura, paymentCheckAllFatture, fixNullFields, search, getLastUpdatedCount
+Converters:      StockStatusConverter, SXFatturaStatusConverter
+
+Schedulers:      InventoryScheduler   → property: inventory.check.rate
+                 FatturaScheduler     → property: fatture.check.cron
+
+Client:          UserClient           → chiamate HTTP async con WebClient
 ```
-
-### Repositories
-
-```text
-ProdottoRepository
-MagazzinoRepository
-FatturaRepository
-ProdottoMagazzinoRepository
-JobExecutionRepository
-FatturaWorkExecutionRepository
-```
-
-Query principali:
-
-```text
-ProdottoRepository: search, searchIds
-MagazzinoRepository: search, searchIds
-FatturaRepository: search, searchIds, nextNumeroSeq, findByProdottoId, findAllByStatus
-ProdottoMagazzinoRepository: existsByProdottoIdAndMagazzinoId, sumQuantitaInMagazzino, search, searchIds
-JobExecutionRepository: search, searchIds, findFirstByOrderByStartTimeDesc, findFirstByStatus
-FatturaWorkExecutionRepository: search, searchIds, searchWorkExecutions
-```
-
-### Entities ed enum
-
-```text
-Prodotto
-Magazzino
-Fattura
-ProdottoMagazzino
-JobExecution
-FatturaWorkExecution
-ScortaMinPMStatus
-StatusJob
-StatusJobErrorType
-StockStatusMagazzino
-StockStatusProdotto
-SXFatturaJobexecution
-SXFatturaJobexecutionErrorType
-SXFatturaStatus
-```
-
-### DTO
-
-```text
-dto/prodotto: ProdottoRequest, ProdottoResponse, ProdottoSearchRequest
-dto/magazzino: MagazzinoRequest, MagazzinoResponse, MagazzinoSearchRequest
-dto/fattura: FatturaRequest, FatturaResponse, FatturaSearchRequest
-dto/prodottomagazzino: ProdottoMagazzinoRequest, ProdottoMagazzinoResponse, ProdottoMagazzinoSearchRequest
-dto/jobExecution: DtoJobRequest, DtoJobResponse, DtoJobSearchRequest
-dto/FatturaWorkExecution: DtoPaymentRequest, DtoPaymentResponse, DtoSearch
-dto/WebClient: UserResponse
-```
-
-### Mapper, configurazioni, converter, scheduler
-
-```text
-Mapper: ProdottoMapper, MagazzinoMapper, FatturaMapper, ProdottoMagazzinoMapper, JobExecutionMapper, FatturaWorkExecutionMapper (+ relative Impl)
-Configurations: SpringDataConfig, WebConfiguration, WebClientConfigurations
-Converter: StockStatusConverter, SXFatturaStatusConverter
-Scheduler: InventoryScheduler, FatturaScheduler
-Client: UserClient
-```
-
-### Note tecniche importanti
-
-- `SpringDataConfig` abilita `VIA_DTO`, paginazione one-indexed e `maxPageSize=100`
-- `WebConfiguration` disabilita CSRF, permette tutte le richieste e disabilita form login
-- `WebClientConfigurations` crea `userWebClient` con base URL `https://jsonplaceholder.typicode.com`
-- `InventoryScheduler` usa `inventory.check.rate`
-- `FatturaScheduler` usa `fatture.check.cron`
 
 ---
 
-## Endpoints API
+## 🔗 Endpoints API
 
 ### Home
 
-```text
-GET /home
-GET /home/health
-GET /home/info
+```
+GET  /home
+GET  /home/health
+GET  /home/info
 ```
 
 ### Prodotti
 
-```text
+```
 GET    /prodotti
 GET    /prodotti/list
 GET    /prodotti/{id}
@@ -256,7 +414,7 @@ POST   /prodotti/search
 
 ### Magazzini
 
-```text
+```
 GET    /magazzino
 GET    /magazzino/list
 GET    /magazzino/{id}
@@ -268,7 +426,7 @@ POST   /magazzino/search
 
 ### Fatture
 
-```text
+```
 GET    /fatture
 GET    /fatture/list
 GET    /fatture/{id}
@@ -286,15 +444,15 @@ DELETE /fatture/{id}
 
 ### Fattura Work Execution
 
-```text
+```
 GET    /fattureworkexecution/search
-PATCH  /fattureworkexecution/{id}/payment
+PATCH  /fattureworkexecution/{id}/payment       ← richiede Basic Auth
 POST   /fattureworkexecution/payment-check-all
 ```
 
 ### Job Execution
 
-```text
+```
 GET  /jobs
 GET  /jobs/{id}
 GET  /jobs/list
@@ -302,80 +460,77 @@ POST /jobs/search
 GET  /jobs/errors/last
 ```
 
-### WebClient test
+### WebClient Test
 
-```text
+```
 GET /test/webclient/users
 GET /test/webclient/user
 GET /test/webclient/user-by-name
 ```
 
-Filtri principali supportati:
+### Filtri di Ricerca Supportati
 
-- `/prodotti`: `nome`, `descrizione`, `prezzoMin`, `prezzoMax`, `page`, `size`
-- `/magazzino`: `nome`, `indirizzo`, `capacitaMin`, `capacitaMax`, `page`, `size`
-- `/fatture`: `numero`, `idProdotto`, `dataFrom`, `dataTo`, `importoMin`, `importoMax`, `page`, `size`
-- `/jobs`: `nomeJob`, `stato`, `from`, `to`, `page`, `size`
+| Endpoint | Parametri |
+|---|---|
+| `/prodotti` | `nome`, `descrizione`, `prezzoMin`, `prezzoMax`, `page`, `size` |
+| `/magazzino` | `nome`, `indirizzo`, `capacitaMin`, `capacitaMax`, `page`, `size` |
+| `/fatture` | `numero`, `idProdotto`, `dataFrom`, `dataTo`, `importoMin`, `importoMax`, `page`, `size` |
+| `/jobs` | `nomeJob`, `stato`, `from`, `to`, `page`, `size` |
 
 ---
 
-## Docker
+## 🐳 Docker & Containerizzazione
 
-### `docker-compose.yml`
+### docker-compose.yml
 
-Servizi:
+Servizi: `spindox-magazzino`, `oracle-db`
 
-- `spindox-magazzino`
-- `oracle-db`
-
-Dettagli:
-
-```text
-App: porta 8080
-Oracle: porte 1521 e 5500
-Datasource app in compose: jdbc:oracle:thin:@host.docker.internal:1521/XE
-Username: magazzino
-Password: magazzino_pwd
-Image Oracle: gvenzl/oracle-xe:21-slim
-Volume: oracle_data
-Init scripts: ./initdb -> /container-entrypoint-initdb.d
+```
+App:           porta 8080
+Oracle:        porte 1521 e 5500
+Datasource:    jdbc:oracle:thin:@host.docker.internal:1521/XE
+Username:      magazzino
+Password:      magazzino_pwd
+Image Oracle:  gvenzl/oracle-xe:21-slim
+Volume:        oracle_data
+Init scripts:  ./initdb → /container-entrypoint-initdb.d
 ```
 
-### `Dockerfile`
+### Dockerfile
 
-```text
-Base image: eclipse-temurin:21-jdk
-Jar copiato: /target/magazzino-app.jar -> /app.jar
-Entrypoint: java -agentlib:jdwp=...address=0.0.0.0:5900 -jar app.jar
+```
+Base image:  eclipse-temurin:21-jdk
+Jar:         /target/magazzino-app.jar → /app.jar
+Entrypoint:  java -agentlib:jdwp=...address=0.0.0.0:5900 -jar app.jar
 ```
 
-Comandi utili:
+### Comandi Utili
 
 ```bash
-docker-compose up --build -d
-docker-compose ps
-docker-compose logs -f spindox-magazzino
-docker-compose logs -f oracle-db
-docker-compose down
+docker-compose up --build -d          # Build e avvio
+docker-compose ps                     # Stato container
+docker-compose logs -f spindox-magazzino  # Log app
+docker-compose logs -f oracle-db      # Log database
+docker-compose down                   # Stop e rimozione
 ```
- 
+
 ---
 
-## Database
+## 💾 Database
 
-Script presenti:
+### Script di Inizializzazione
 
-```text
-initdb/1_init-db.sql
-initdb/2_schema-ddl.sql
-initdb/3_sql-content.sql
-initdb/Script-4-Aggiunta dati per popolamento.sql
-initdb/schema logico DB/schema_logico.sql
+```
+initdb/1_init-db.sql                              → Crea utente schema
+initdb/2_schema-ddl.sql                           → Crea tabelle + constraints
+initdb/3_sql-content.sql                          → Insert dati iniziali
+initdb/Script-4-Aggiunta dati per popolamento.sql → Dati aggiuntivi
+initdb/schema logico DB/schema_logico.sql         → Schema logico completo
 ```
 
-Tabelle principali:
+### Tabelle Principali
 
-```text
+```
 T_PRODOTTI
 T_MAGAZZINI
 T_PRODOTTO_MAGAZZINO
@@ -383,86 +538,147 @@ T_FATTURE
 T_JOB_EXECUTION
 T_FATTURA_WORK_EXECUTION
 ```
- 
+
 ---
 
-## Configurazione
+## ⚙️ Configurazione
 
-Proprieta principali in `application.properties`:
+Proprietà principali in `application.properties`:
 
 ```properties
 spring.application.name=magazzino
+
+# Datasource
 spring.datasource.url=jdbc:oracle:thin:@//oracle-service:1521/XE?oracle.jdbc.timezoneAsRegion=true&sessionTimeZone=Europe/Rome
 spring.datasource.username=${SPRING_DATASOURCE_USERNAME:magazzino}
 spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:magazzino_pdw}
 spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
- 
+
+# JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.jdbc.time_zone=Europe/Rome
+spring.jackson.time-zone=Europe/Rome
+
+# Scheduler fatture (ogni 10 minuti)
 fatture.check.enabled=true
 fatture.check.cron=0 */10 * * * *
+
+# Scheduler inventario (ogni 5 minuti)
 jobs.inventory.enabled=true
 inventory.check.rate=300000
 inventory.min.threshold=5
- 
-spring.jpa.properties.hibernate.jdbc.time_zone=Europe/Rome
-spring.jackson.time-zone=Europe/Rome
-spring.jpa.hibernate.ddl-auto=update
- 
+
+# Business
 fatture.default-username=system
 ```
 
-Comportamenti rilevanti:
+---
 
-- scheduler fatture ogni 10 minuti
-- scheduler inventario ogni 300000 ms
-- timezone applicativa `Europe/Rome`
-- username default fatture `system`
+## 🔐 Sicurezza
+
+### Componenti Coinvolti
+
+```
+configurations/securityconfigurationssettings/
+├── WebConfiguration.java          → SecurityFilterChain bean
+└── CustomAuthorizationFilter.java → OncePerRequestFilter custom
+
+services/utentiservice/
+└── UserDetailsServiceImpl.java    → Caricamento utenti dal DB
+
+entities/Utenti.java               → Entity utenti
+repositories/UtentiRepository.java → Repository utenti
+```
+
+### Configurazione Globale (WebConfiguration)
+
+- **CSRF disabilitato** — API-only, nessun form HTML
+- **HTTP Basic abilitato** — per endpoint protetti
+- **Form login disabilitato** — `.formLogin(AbstractHttpConfigurer::disable)`
+- **UserDetailsService custom** — carica utenti da DB Oracle
+- **Filtro custom** — inserito prima di `UsernamePasswordAuthenticationFilter`
+
+### Regole di Autorizzazione
+
+| Endpoint | Metodo | Protezione |
+|---|---|---|
+| `/fatture/search` | POST | Ruolo `ADMIN` |
+| `/fattureworkexecution/{id}/payment` | PATCH | Basic Auth custom (`CustomAuthorizationFilter`) |
+| Tutti gli altri | Vari | Accesso pubblico (`permitAll`) |
+
+### CustomAuthorizationFilter — Comportamento
+
+Il filtro intercetta esclusivamente `PATCH /fattureworkexecution/{id}/payment`:
+
+1. Controlla header `Authorization` (deve iniziare con `Basic `)
+2. Decodifica Base64 → `username:password`
+3. Verifica credenziali tramite `UtentiRepository.findByUsername()`
+4. Se valido → prosegue la catena filtri
+5. Se non valido → risponde con **HTTP 403 Forbidden**
+
+### Entity Utenti
+
+```
+Campi:    id (Long) · username (String) · password (String) · ruolo (String: ADMIN | USER)
+
+Metodi Repository:
+  findByUsername(String username)
+  findByUsernameAndPassword(String username, String password)
+  existsByUsername(String username)
+  Page<Utenti> search(String username, Pageable pageable)
+```
+
+> **Nota:** Le password sono attualmente gestite come plain-text (`{noop}` prefix).
 
 ---
 
-## Testing
+## 🧪 Testing
 
-File presenti:
+### File Presenti
 
-```text
-src/test/java/it/spindox/stagelab/magazzino/MagazzinoApplicationTests.java
-src/test/java/it/spindox/stagelab/magazzino/services/jobTest.java
-src/test/resources/application-test.properties
 ```
+src/test/java/.../MagazzinoApplicationTests.java  → @SpringBootTest integration test
+src/test/java/.../services/jobTest.java           → Unit test servizi job
+src/test/resources/application-test.properties   → Configurazione test
+``` 
+ piu' Postman ( esportato per i test )
 
-Esecuzione:
+### Esecuzione
 
+**Windows:**
 ```powershell
 .\mvnw.cmd test
 .\mvnw.cmd clean package
 ```
 
+**Linux / macOS:**
 ```bash
 ./mvnw test
 ./mvnw clean package
 ```
- 
+
 ---
 
-## Riepilogo Finale
+## 📈 Riepilogo Finale
 
-```text
-Project files:                  109
-Java files complessivi:          88
-Controller REST:                  7
-Repository JPA:                   6
-Service class/interface:         12
-Mapper:                          12
-DTO:                             19
-Configuration Spring:             3
-Converter custom:                 2
-Entity + enum:                   14
-Scheduler:                        2
-Client esterno:                   1
-Endpoint REST documentati:       37
+```
+Project files totali:            109
+Java files complessivi:           88
+Controller REST:                   7
+Repository JPA:                    6
+Service (classe + interfaccia):   12
+Mapper:                           12
+DTO:                              20+
+Configuration Spring:              3
+Converter custom:                  2
+Entity + enum:                    14
+Scheduler:                         2
+Client esterno:                    1
+Endpoint REST documentati:        37+
 ```
 
-**Ultimo aggiornamento:** 24 Marzo 2026  
-**Versione documento:** 1.3  
-**Stato:** allineato alla struttura reale del progetto
- 
- 
+---
+
+**Ultimo aggiornamento:** Aprile 2026
+**Versione documento:** 2.0
+**progetto stage Spindox 2026

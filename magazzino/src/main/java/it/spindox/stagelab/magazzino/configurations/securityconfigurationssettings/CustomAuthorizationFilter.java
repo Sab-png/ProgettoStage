@@ -14,6 +14,7 @@ import java.util.Base64;
 
 
 
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
 
         //passa tutto ad eccezzione di  fattureworkexecutionpayment
+
         if (!(
                 "PATCH".equals(method) &&
                         path.matches("^/fattureworkexecution/\\d+/payment$")
