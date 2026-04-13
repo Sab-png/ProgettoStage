@@ -31,7 +31,7 @@ Progetto Custom per la gestione di magazzini per una catena di supermercati
 
 5. **Implementazione back-end**  
    5.1 Struttura dei package e responsabilità dei componenti (controller, service, repository, mapper)  
-   5.2 Controller REST e API esposte per la gestione del carrello  
+   5.2 Controller REST e API esposte per la gestione del carrello
    5.3 Service layer e logica di business (creazione carrello, add/update/remove item, checkout)  
    5.4 DTO, mapper e gestione centralizzata delle eccezioni in formato JSON  
 
@@ -44,7 +44,7 @@ Progetto Custom per la gestione di magazzini per una catena di supermercati
 7. **Flussi applicativi e testing**  
    7.1 Flussi principali: creazione carrello, popolamento, aggiornamento, rimozione, checkout  
    7.2 Gestione dei casi di errore e degli scenari limite (stock insufficiente, carrello vuoto, prenotazioni scadute)  
-   7.3 Test delle API REST con strumenti come Postman  
+   7.3 Test delle API REST con strumenti come Postman
    7.4 Verifica della consistenza dei dati su Oracle e del comportamento del job schedulato  
 
 8. **Analisi critica e conclusioni**  

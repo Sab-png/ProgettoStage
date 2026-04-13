@@ -99,9 +99,11 @@ Utenti di esempio (tabella `USER_ACCOUNT`):
 
 ### Auth
 
-- `POST /api/auth/login`
+#### Login
 
-Body esempio:
+- Chiamata: `POST`
+- Indirizzo: `http://localhost:8080/api/auth/login`
+- Body esempio:
 
 ```json
 {
@@ -110,7 +112,13 @@ Body esempio:
 }
 ```
 
-Risposta: `accessToken` nel formato `Basic <base64(username:password)>`.
+- Risposta:
+
+```json
+{
+  "accessToken": "Basic YWRtaW46YWRtaW4xMjM="
+}
+```
 
 ### Magazzini
 
@@ -138,12 +146,210 @@ Risposta: `accessToken` nel formato `Basic <base64(username:password)>`.
 
 Base path: `/api/magazzino/{magazzinoId}/cart`
 
-- `POST /` (create cart, query param opzionale `email`)
-- `POST /add` (query param `cartId`)
-- `GET /` (query param `cartId`)
-- `PATCH /items/{itemId}` (query param `cartId`)
-- `DELETE /items/{itemId}` (query param `cartId`)
-- `POST /checkout` (query param `cartId`)
+#### Create cart
+
+- Chiamata: `POST`
+- Indirizzo: `http://localhost:8080/api/magazzino/{magazzinoId}/cart?email=cliente@example.com`
+- Body esempio: nessun body
+- Risposta:
+
+```json
+{
+  "items": [],
+  "totalItems": 0,
+  "totalPrice": 0.0,
+  "secondsRemaining": 1200,
+  "cartActive": true,
+  "magazzinoId": 1,
+  "user": null
+}
+```
+
+#### Add to cart
+
+- Chiamata: `POST`
+- Indirizzo: `http://localhost:8080/api/magazzino/{magazzinoId}/cart/add?cartId={{cartId}}`
+- Body esempio:
+
+```json
+{
+  "prodottoId": 1,
+  "quantity": 2
+}
+```
+
+- Risposta:
+
+```json
+{
+  "id": 10,
+  "prodottoId": 1,
+  "prodottoNome": "Prodotto demo",
+  "prodottoImmagine": null,
+  "prezzoProdotto": 12.5,
+  "magazzinoId": 1,
+  "quantity": 2,
+  "subtotale": 25.0,
+  "reservedAt": "2026-04-01T09:00:00",
+  "expiresAt": "2026-04-01T09:20:00",
+  "status": "RESERVED",
+  "secondsRemaining": 1200
+}
+```
+
+#### Visualize cart
+
+- Chiamata: `GET`
+- Indirizzo: `http://localhost:8080/api/magazzino/{magazzinoId}/cart?cartId={{cartId}}`
+- Body esempio: nessun body
+- Risposta:
+
+```json
+{
+  "items": [
+    {
+      "id": 10,
+      "prodottoId": 1,
+      "prodottoNome": "Prodotto demo",
+      "prodottoImmagine": null,
+      "prezzoProdotto": 12.5,
+      "magazzinoId": 1,
+      "quantity": 2,
+      "subtotale": 25.0,
+      "reservedAt": "2026-04-01T09:00:00",
+      "expiresAt": "2026-04-01T09:20:00",
+      "status": "RESERVED",
+      "secondsRemaining": 1200
+    }
+  ],
+  "totalItems": 2,
+  "totalPrice": 25.0,
+  "secondsRemaining": 1200,
+  "cartActive": true,
+  "magazzinoId": 1,
+  "user": {
+    "id": 1,
+    "name": "Cliente Demo",
+    "username": "cliente.demo",
+    "email": "cliente@example.com",
+    "address": {
+      "street": "Via Roma",
+      "suite": "1",
+      "city": "Milano",
+      "zipcode": "20100",
+      "geo": {
+        "lat": "45.4642",
+        "lng": "9.1900"
+      }
+    },
+    "phone": "0000000000",
+    "website": "example.com",
+    "company": {
+      "name": "Spindox",
+      "catchPhrase": "Logistica smart",
+      "bs": "warehouse-platform"
+    }
+  }
+}
+```
+
+#### Update cart item
+
+- Chiamata: `PATCH`
+- Indirizzo: `http://localhost:8080/api/magazzino/{magazzinoId}/cart/items/{itemId}?cartId={{cartId}}`
+- Body esempio:
+
+```json
+{
+  "quantity": 3
+}
+```
+
+- Risposta:
+
+```json
+{
+  "id": 10,
+  "prodottoId": 1,
+  "prodottoNome": "Prodotto demo",
+  "prodottoImmagine": null,
+  "prezzoProdotto": 12.5,
+  "magazzinoId": 1,
+  "quantity": 3,
+  "subtotale": 37.5,
+  "reservedAt": "2026-04-01T09:00:00",
+  "expiresAt": "2026-04-01T09:20:00",
+  "status": "RESERVED",
+  "secondsRemaining": 1180
+}
+```
+
+#### Remove cart item
+
+- Chiamata: `DELETE`
+- Indirizzo: `http://localhost:8080/api/magazzino/{magazzinoId}/cart/items/{itemId}?cartId={{cartId}}`
+- Body esempio: nessun body
+- Risposta:
+
+```json
+{
+  "items": [],
+  "totalItems": 0,
+  "totalPrice": 0.0,
+  "secondsRemaining": 1200,
+  "cartActive": true,
+  "magazzinoId": 1,
+  "user": null
+}
+```
+
+#### Checkout
+
+- Chiamata: `POST`
+- Indirizzo: `http://localhost:8080/api/magazzino/{magazzinoId}/cart/checkout?cartId={{cartId}}`
+- Body esempio:
+
+```json
+{
+  "shippingAddress": "Via Roma 1, Milano",
+  "shippingEmail": "cliente@example.com",
+  "deliveryTimeSlot": "09:00-12:00",
+  "deliveryDate": "2026-04-01"
+}
+```
+
+- Risposta:
+
+```json
+{
+  "orderId": "ORD-20260401-0001",
+  "message": "Checkout completato con successo",
+  "totalAmount": 37.5,
+  "user": {
+    "id": 1,
+    "name": "Cliente Demo",
+    "username": "cliente.demo",
+    "email": "cliente@example.com",
+    "address": {
+      "street": "Via Roma",
+      "suite": "1",
+      "city": "Milano",
+      "zipcode": "20100",
+      "geo": {
+        "lat": "45.4642",
+        "lng": "9.1900"
+      }
+    },
+    "phone": "0000000000",
+    "website": "example.com",
+    "company": {
+      "name": "Spindox",
+      "catchPhrase": "Logistica smart",
+      "bs": "warehouse-platform"
+    }
+  }
+}
+```
 
 Nota: il checkout e filtrato da `CheckoutAuthFilter` e richiede header `Authorization` in formato `Basic ...`.
 
